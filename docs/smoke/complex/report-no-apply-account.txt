@@ -34,7 +34,7 @@ terraform: target account unresolved (alias: default) (source: unresolved)
     -/+ terraform_data.db  (replace, 2 known after apply)
         triggers_replace: "a" -> "b"  [forces replacement]
     ~ terraform_data.lb  (update, 2 known after apply)
-        input[1]: "0cff85ab-e640-e762-a901-d6d1547ae631" -> "1ec80cef-2389-37df-40c7-ae292c743a5a"
+        input[1]: "27871885-f987-8896-261e-b9147829d900" -> "9b7d9973-ea4e-858d-4401-dd8f5ec98859"
     x terraform_data.legacy  (removed from state only)
     - terraform_data.subnet["b"]  (delete)
     + terraform_data.subnet["d"]  (create, 2 known after apply)
