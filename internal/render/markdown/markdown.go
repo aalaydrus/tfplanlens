@@ -60,6 +60,8 @@ func Render(out io.Writer, a *analyze.Analysis) error {
 	drift(w, a)
 	byAccount(w, a)
 	byModule(w, a)
+	waves(w, a)
+	parents(w, a)
 	if w.truncated {
 		fmt.Fprintf(&w.b, "\n> **Report truncated** at %d characters (GitHub comments are limited to 65,536); %d item(s) not shown. Use `--format html` or `--format json` for the full report.\n", MaxChars, w.omitted)
 	}
@@ -375,3 +377,78 @@ func countsLine(c analyze.ActionCounts) string {
 var htmlReplacer = strings.NewReplacer("&", "&amp;", "<", "&lt;", ">", "&gt;", `"`, "&quot;")
 
 func htmlEscape(s string) string { return htmlReplacer.Replace(s) }
+
+func waves(w *writer, a *analyze.Analysis) {
+	if len(a.Cycles) > 0 {
+		w.line("### Dependency cycles")
+		w.line("")
+		for _, cy := range a.Cycles {
+			parts := make([]string, len(cy.Resources))
+			for i, r := range cy.Resources {
+				parts[i] = code(r)
+			}
+			if !w.line("- **cycle:** %s", strings.Join(parts, " &rarr; ")) {
+				return
+			}
+		}
+		w.line("")
+	}
+	if len(a.Waves) == 0 {
+		return
+	}
+	w.line("### Waves")
+	w.line("")
+	w.line("Terraform applies in parallel: this shows possible parallelism, not a strict order.")
+	w.line("")
+	for _, wv := range a.Waves {
+		if !w.line("<details><summary><b>%s wave %d</b> &mdash; %d resource(s)</summary>", wv.Phase, wv.Number, len(wv.Resources)) {
+			return
+		}
+		w.line("")
+		for i, r := range wv.Resources {
+			extra := ""
+			if r.Instances > 1 {
+				extra = fmt.Sprintf(" (%d instances)", r.Instances)
+			}
+			if r.NoConfiguration {
+				extra += " (no configuration: order unknown)"
+			}
+			if !w.line("- %s %s%s", cell(r.Action), code(r.Address), extra) {
+				w.omitted += len(wv.Resources) - i
+				break
+			}
+		}
+		w.closeDetails()
+		if w.truncated {
+			return
+		}
+	}
+	for _, n := range a.WaveNotes {
+		w.line("")
+		w.line("> %s", cell(n))
+	}
+}
+
+func parents(w *writer, a *analyze.Analysis) {
+	if len(a.Parents) == 0 {
+		return
+	}
+	w.line("### Resources with multiple instances")
+	w.line("")
+	for _, p := range a.Parents {
+		if !w.line("<details><summary>%s (%s) &mdash; %d instance(s)</summary>", htmlEscape(p.Address), p.Kind, len(p.Instances)) {
+			return
+		}
+		w.line("")
+		for i, in := range p.Instances {
+			if !w.line("- %s %s", cell(in.Action), codeCell(in.Key)) {
+				w.omitted += len(p.Instances) - i
+				break
+			}
+		}
+		w.closeDetails()
+		if w.truncated {
+			return
+		}
+	}
+}

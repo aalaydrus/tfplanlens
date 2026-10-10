@@ -31,7 +31,9 @@
     },
     "known_after_apply": 0,
     "drift_count": 4,
-    "warnings": 0
+    "warnings": 0,
+    "apply_waves": 1,
+    "destroy_waves": 0
   },
   "findings": [
     {
@@ -157,7 +159,9 @@
           "forces_replacement": true
         }
       ],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "aws_instance.api",
@@ -181,7 +185,9 @@
           "after": "t3.small"
         }
       ],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "aws_instance.legacy",
@@ -198,7 +204,44 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "apply"
     }
-  ]
+  ],
+  "parents": [],
+  "waves": [
+    {
+      "phase": "apply",
+      "number": 1,
+      "resources": [
+        {
+          "address": "aws_instance.api",
+          "action": "update",
+          "actions": {
+            "update": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "aws_instance.legacy",
+          "action": "create",
+          "actions": {
+            "create": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "aws_security_group.web",
+          "action": "replace",
+          "actions": {
+            "replace": 1
+          },
+          "instances": 1
+        }
+      ]
+    }
+  ],
+  "wave_notes": [],
+  "cycles": []
 }

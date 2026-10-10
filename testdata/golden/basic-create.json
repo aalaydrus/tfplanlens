@@ -33,7 +33,9 @@
     },
     "known_after_apply": 4,
     "drift_count": 0,
-    "warnings": 0
+    "warnings": 0,
+    "apply_waves": 1,
+    "destroy_waves": 0
   },
   "findings": [],
   "drift": [],
@@ -81,7 +83,9 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 2
+      "known_after_apply": 2,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "aws_instance.web",
@@ -98,7 +102,9 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 2
+      "known_after_apply": 2,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "aws_instance.api",
@@ -122,7 +128,9 @@
           "after": "t3.small"
         }
       ],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "aws_security_group.web",
@@ -145,7 +153,9 @@
           "after": "2"
         }
       ],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "data.aws_caller_identity.current",
@@ -162,7 +172,9 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "aws_vpc.main",
@@ -181,5 +193,56 @@
       "attrs": [],
       "known_after_apply": 0
     }
-  ]
+  ],
+  "parents": [],
+  "waves": [
+    {
+      "phase": "apply",
+      "number": 1,
+      "resources": [
+        {
+          "address": "aws_instance.api",
+          "action": "update",
+          "actions": {
+            "update": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "aws_instance.web",
+          "action": "create",
+          "actions": {
+            "create": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "aws_s3_bucket.logs",
+          "action": "create",
+          "actions": {
+            "create": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "aws_security_group.web",
+          "action": "update",
+          "actions": {
+            "update": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "data.aws_caller_identity.current",
+          "action": "read",
+          "actions": {
+            "read": 1
+          },
+          "instances": 1
+        }
+      ]
+    }
+  ],
+  "wave_notes": [],
+  "cycles": []
 }

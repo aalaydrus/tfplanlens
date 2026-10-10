@@ -35,3 +35,10 @@ aws: target account unresolved (alias: default) (source: unresolved)
 
 == Changes by module ==
 root: create 1, update 1, replace 1
+
+== Waves ==
+Terraform applies in parallel: this shows possible parallelism, not a strict order.
+apply wave 1:
+  update aws_instance.api
+  create aws_instance.legacy
+  replace aws_security_group.web

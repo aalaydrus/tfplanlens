@@ -70,3 +70,24 @@
 
 </details>
 
+### Waves
+
+Terraform applies in parallel: this shows possible parallelism, not a strict order.
+
+<details><summary><b>apply wave 1</b> &mdash; 6 resource(s)</summary>
+
+- update `aws_iam_role.deployer`
+- replace `aws_instance.web`
+- create `aws_s3_bucket.artifacts`
+- update `aws_sns_topic.alerts`
+- create `aws_sqs_queue.jobs`
+- update `aws_ssm_parameter.config`
+
+</details>
+
+<details><summary><b>destroy wave 1</b> &mdash; 1 resource(s)</summary>
+
+- delete `aws_db_instance.prod`
+
+</details>
+

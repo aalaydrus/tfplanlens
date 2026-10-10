@@ -27,3 +27,9 @@ aws: target account unresolved (alias: default) (source: unresolved)
 == Changes by module ==
 module.net: update 1
 root: update 1, forget 1, no-op 2
+
+== Waves ==
+Terraform applies in parallel: this shows possible parallelism, not a strict order.
+apply wave 1:
+  update aws_instance.imported_update
+  update module.net.aws_vpc.main

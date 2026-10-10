@@ -48,3 +48,17 @@ No deletes or replacements.
 
 </details>
 
+### Waves
+
+Terraform applies in parallel: this shows possible parallelism, not a strict order.
+
+<details><summary><b>apply wave 1</b> &mdash; 5 resource(s)</summary>
+
+- update `aws_instance.api`
+- create `aws_instance.web`
+- create `aws_s3_bucket.logs`
+- update `aws_security_group.web`
+- read `data.aws_caller_identity.current`
+
+</details>
+

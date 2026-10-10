@@ -84,3 +84,33 @@
 
 </details>
 
+### Waves
+
+Terraform applies in parallel: this shows possible parallelism, not a strict order.
+
+<details><summary><b>apply wave 1</b> &mdash; 6 resource(s)</summary>
+
+- replace `aws_db_instance.main`
+- replace `aws_ebs_volume.requested`
+- replace `aws_eip.mystery`
+- replace `aws_instance.create_before_destroy`
+- replace `aws_instance.tainted`
+- replace `aws_lb.triggered`
+
+</details>
+
+<details><summary><b>destroy wave 1</b> &mdash; 6 resource(s)</summary>
+
+- delete `aws_iam_user.keyed` (no configuration: order unknown)
+- delete `aws_instance.counted` (no configuration: order unknown)
+- delete `aws_lambda_function.orphan` (no configuration: order unknown)
+- delete `aws_sns_topic.switched` (no configuration: order unknown)
+- delete `aws_sqs_queue.removed` (no configuration: order unknown)
+- delete `module.gone.aws_s3_bucket.data` (no configuration: order unknown)
+
+</details>
+
+
+> replace_triggered_by is not part of the plan JSON: a resource replaced by a trigger is not ordered after the resource that triggered it.
+
+> Resources removed from the configuration have no dependency information in the plan; their destroy order is unknown and they are shown in wave 1.

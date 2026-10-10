@@ -19,7 +19,21 @@ type realAnalysis struct {
 		Actions map[string]int
 		Known   int `json:"known_after_apply"`
 	} `json:"summary"`
-	Notices  []string `json:"notices"`
+	Notices []string `json:"notices"`
+	Waves   []struct {
+		Phase     string
+		Number    int
+		Resources []struct {
+			Address         string
+			NoConfiguration bool `json:"no_configuration"`
+		}
+	} `json:"waves"`
+	WaveNotes []string `json:"wave_notes"`
+	Parents   []struct {
+		Address   string
+		Kind      string
+		Instances []struct{ Key, Action string }
+	} `json:"parents"`
 	Findings []struct {
 		Address, Action, Reason string
 		ReasonText              string   `json:"reason_text"`
@@ -440,7 +454,8 @@ func TestRealModuleProviderPlan(t *testing.T) {
 func TestJSONArraysAreNeverNull(t *testing.T) {
 	t.Setenv(envApplyAccount, "")
 	arrayKeys := map[string]bool{"notices": true, "findings": true, "drift": true, "groups": true, "changes": true,
-		"attrs": true, "warnings": true, "addresses": true}
+		"attrs": true, "warnings": true, "addresses": true, "parents": true, "waves": true, "wave_notes": true,
+		"cycles": true, "resources": true, "instances": true, "actions": true}
 	var walk func(path string, v any)
 	walk = func(path string, v any) {
 		switch x := v.(type) {
@@ -593,5 +608,61 @@ func TestRealAWSAssumeRolePlan(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+// waveOf returns the "phase N" a configuration address is in, or "".
+func (a realAnalysis) waveOf(addr string) string {
+	for _, w := range a.Waves {
+		for _, r := range w.Resources {
+			if r.Address == addr {
+				return fmt.Sprintf("%s %d", w.Phase, w.Number)
+			}
+		}
+	}
+	return ""
+}
+
+func TestRealWavesFromConfiguration(t *testing.T) {
+	for _, f := range realPlans(t, "complex") {
+		a, outs := analyzeReal(t, f)
+		for addr, want := range map[string]string{
+			"terraform_data.db":     "apply 1",
+			"terraform_data.app":    "apply 2",
+			"terraform_data.lb":     "apply 2",
+			"terraform_data.worker": "destroy 1",
+		} {
+			if got := a.waveOf(addr); got != want {
+				t.Errorf("%s: wave %q, want %q", addr, got, want)
+			}
+		}
+		found := false
+		for _, p := range a.Parents {
+			if p.Address == "terraform_data.worker" && p.Kind == "count" && len(p.Instances) == 4 {
+				found = true
+			}
+		}
+		if !found {
+			t.Errorf("no count parent for terraform_data.worker: %+v", a.Parents)
+		}
+		for _, format := range []string{"text", "markdown", "html"} {
+			if !strings.Contains(outs[format], "apply wave 2") {
+				t.Errorf("%s output has no apply wave 2", format)
+			}
+		}
+	}
+	for _, f := range realPlans(t, "reasons") {
+		a, _ := analyzeReal(t, f)
+		none := 0
+		for _, w := range a.Waves {
+			for _, r := range w.Resources {
+				if r.NoConfiguration {
+					none++
+				}
+			}
+		}
+		if none == 0 {
+			t.Errorf("reasons: expected a destroyed resource removed from configuration")
+		}
 	}
 }

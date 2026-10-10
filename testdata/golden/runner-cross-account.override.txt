@@ -47,3 +47,15 @@ aws.staging: target account 222222222222 (source: role_arn_variable) [DIFFERENT 
 
 == Changes by module ==
 root: create 2, update 3, replace 1, delete 1
+
+== Waves ==
+Terraform applies in parallel: this shows possible parallelism, not a strict order.
+apply wave 1:
+  update aws_iam_role.deployer
+  replace aws_instance.web
+  create aws_s3_bucket.artifacts
+  update aws_sns_topic.alerts
+  create aws_sqs_queue.jobs
+  update aws_ssm_parameter.config
+destroy wave 1:
+  delete aws_db_instance.prod

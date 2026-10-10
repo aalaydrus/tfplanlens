@@ -89,6 +89,18 @@ The markdown report is built for PR comments: a summary table, the Danger sectio
 
 </details>
 
+## Waves and instance groups
+
+Every report ends with apply and destroy **waves** worked out from the
+configuration's references and `depends_on`: wave 1 has no dependency on another
+changing resource, wave 2 depends only on wave 1, and so on (destroys run in
+reverse). Terraform applies in parallel, so this shows possible parallelism, not a
+strict order, and it is a lower bound because `local.*` references and
+`replace_triggered_by` are not in the plan JSON (the report says so when it
+applies). A dependency cycle is flagged prominently. `count` and `for_each`
+resources are listed once with their keys, and the HTML report can group the table
+by resource.
+
 ## Accounts: where it runs vs where resources land
 
 Plans are often applied from a runner in an automation account that assumes roles into target accounts. The report shows both:

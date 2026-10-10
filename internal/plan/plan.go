@@ -47,6 +47,8 @@ type Plan struct {
 	Drift            []Change
 	// Providers is keyed by provider config key, e.g. "aws" or "aws.prod".
 	Providers map[string]Provider
+	// Graph is the dependency graph recovered from the configuration.
+	Graph *DepGraph
 }
 
 // Role ARN sources recorded on Provider.RoleARNVia.
@@ -77,7 +79,10 @@ type Provider struct {
 
 // Change is one resource instance change.
 type Change struct {
-	Address         string
+	Address string
+	// ConfigAddress is Address without instance keys: the resource's block in
+	// the configuration, e.g. "module.net.aws_vpc.main".
+	ConfigAddress   string
 	ModuleAddress   string
 	Mode            string // "managed" or "data"
 	Type            string
@@ -139,6 +144,7 @@ func Load(r io.Reader) (*Plan, error) {
 	}
 	cfgKeys := resourceProviderKeys(&tp)
 	p.Providers = providers(&tp, cfgKeys)
+	p.Graph = buildDeps(tp.Config)
 	if extra.Applyable != nil {
 		p.Applyable = *extra.Applyable
 	}
@@ -168,6 +174,7 @@ func normalize(rc *tfjson.ResourceChange, cfgKeys map[string]string) Change {
 	c := Change{
 		Address:         rc.Address,
 		ModuleAddress:   rc.ModuleAddress,
+		ConfigAddress:   configAddress(rc),
 		Mode:            string(rc.Mode),
 		Type:            rc.Type,
 		Name:            rc.Name,

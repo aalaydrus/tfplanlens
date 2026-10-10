@@ -3,6 +3,7 @@ package plan_test
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -72,4 +73,22 @@ func TestAllowedAccountIDsAndVariables(t *testing.T) {
 			}
 		})
 	}
+}
+
+func loadRealForDeps(t *testing.T, scenario string) *plan.Plan {
+	t.Helper()
+	files, _ := filepath.Glob(plansDir + "/real/" + scenario + "-tf*.json")
+	if len(files) == 0 {
+		t.Skipf("no real %s plan", scenario)
+	}
+	f, err := os.Open(files[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	p, err := plan.Load(f)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return p
 }

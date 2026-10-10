@@ -35,7 +35,9 @@
     },
     "known_after_apply": 4,
     "drift_count": 0,
-    "warnings": 3
+    "warnings": 3,
+    "apply_waves": 1,
+    "destroy_waves": 1
   },
   "findings": [
     {
@@ -177,7 +179,9 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 2
+      "known_after_apply": 2,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "aws_iam_role.deployer",
@@ -207,7 +211,9 @@
           "after": 7200
         }
       ],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "aws_db_instance.prod",
@@ -232,7 +238,9 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "destroy"
     },
     {
       "address": "aws_instance.web",
@@ -262,7 +270,9 @@
           "forces_replacement": true
         }
       ],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "aws_ssm_parameter.config",
@@ -292,7 +302,9 @@
           "after": "new"
         }
       ],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "aws_sqs_queue.jobs",
@@ -309,7 +321,9 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 2
+      "known_after_apply": 2,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "aws_sns_topic.alerts",
@@ -332,7 +346,82 @@
           "after": "sre"
         }
       ],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "apply"
     }
-  ]
+  ],
+  "parents": [],
+  "waves": [
+    {
+      "phase": "apply",
+      "number": 1,
+      "resources": [
+        {
+          "address": "aws_iam_role.deployer",
+          "action": "update",
+          "actions": {
+            "update": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "aws_instance.web",
+          "action": "replace",
+          "actions": {
+            "replace": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "aws_s3_bucket.artifacts",
+          "action": "create",
+          "actions": {
+            "create": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "aws_sns_topic.alerts",
+          "action": "update",
+          "actions": {
+            "update": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "aws_sqs_queue.jobs",
+          "action": "create",
+          "actions": {
+            "create": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "aws_ssm_parameter.config",
+          "action": "update",
+          "actions": {
+            "update": 1
+          },
+          "instances": 1
+        }
+      ]
+    },
+    {
+      "phase": "destroy",
+      "number": 1,
+      "resources": [
+        {
+          "address": "aws_db_instance.prod",
+          "action": "delete",
+          "actions": {
+            "delete": 1
+          },
+          "instances": 1
+        }
+      ]
+    }
+  ],
+  "wave_notes": [],
+  "cycles": []
 }

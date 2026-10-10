@@ -82,3 +82,10 @@ aws: target account unresolved (alias: default) (source: unresolved)
 
 == Changes by module ==
 root: update 3
+
+== Waves ==
+Terraform applies in parallel: this shows possible parallelism, not a strict order.
+apply wave 1:
+  update aws_instance.app
+  update aws_instance.plain
+  update aws_launch_template.gz
