@@ -1,5 +1,7 @@
 == Summary ==
 Plan: normal | applyable: yes | errored: no
+Executed from (apply account): unresolved
+NOTICE: Apply account unresolved (set --tfapply-account-id): cross-account flags are off.
 Actions: create 0, update 1, replace 0, delete 3, read 0, no-op 3, forget 0
 Known after apply: 0 attribute(s)
 By type: aws_instance 2, aws_iam_user 1, aws_s3_bucket 1
@@ -7,21 +9,21 @@ By module: root 4
 
 == Danger ==
 ! DELETE aws_iam_user.team["carol"]
-    type: aws_iam_user | account: unresolved (alias: default)
+    type: aws_iam_user | target account: unresolved (alias: default) (source: unresolved)
     why: for_each key removed: carol
 ! DELETE aws_instance.fleet[2]
-    type: aws_instance | account: unresolved (alias: default)
+    type: aws_instance | target account: unresolved (alias: default) (source: unresolved)
     why: count shrank; index 2 no longer exists
     WARNING: likely count/for_each index shift: sibling instances also changing (aws_instance.fleet[1])
 ! DELETE aws_s3_bucket.shards[1] [STATEFUL]
-    type: aws_s3_bucket | account: unresolved (alias: default)
+    type: aws_s3_bucket | target account: unresolved (alias: default) (source: unresolved)
     why: count shrank; index 1 no longer exists
 
 == Drift ==
 No changes made outside Terraform.
 
 == Changes by account ==
-aws: unresolved (alias: default)
+aws: target account unresolved (alias: default) (source: unresolved)
     update 1, delete 3, no-op 3
     - aws_iam_user.team["carol"]  (delete)
     ~ aws_instance.fleet[1]  (update)

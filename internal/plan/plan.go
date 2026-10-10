@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -48,14 +49,30 @@ type Plan struct {
 	Providers map[string]Provider
 }
 
+// Role ARN sources recorded on Provider.RoleARNVia.
+const (
+	ViaLiteral  = "literal"
+	ViaVariable = "variable"
+)
+
 // Provider is a provider configuration from the plan's configuration block.
 type Provider struct {
 	Key   string
 	Name  string // "aws"
 	Alias string // "" for the default configuration
-	// AssumeRoleARN is the literal assume_role.role_arn, or "" if absent or
-	// not a literal.
+	// AssumeRole is true if the provider has an assume_role block (or
+	// assume_role_with_web_identity), whether or not its ARN is known.
+	AssumeRole bool
+	// AssumeRoleARN is assume_role.role_arn when it is a literal or resolves
+	// through the plan's variables; "" otherwise. RoleARNVia says which.
 	AssumeRoleARN string
+	RoleARNVia    string
+	// AllowedAccountIDs is allowed_account_ids when it is a literal or
+	// resolves through the plan's variables.
+	AllowedAccountIDs []string
+	// CallerIdentityIDs are the distinct account_id values of
+	// aws_caller_identity data sources in prior_state that use this provider.
+	CallerIdentityIDs []string
 }
 
 // Change is one resource instance change.
@@ -119,12 +136,12 @@ func Load(r io.Reader) (*Plan, error) {
 		TerraformVersion: tp.TerraformVersion,
 		Applyable:        true,
 		Errored:          extra.Errored,
-		Providers:        providers(&tp),
 	}
+	cfgKeys := resourceProviderKeys(&tp)
+	p.Providers = providers(&tp, cfgKeys)
 	if extra.Applyable != nil {
 		p.Applyable = *extra.Applyable
 	}
-	cfgKeys := resourceProviderKeys(&tp)
 
 	replacePaths := map[string][]string{}
 	for _, c := range extra.Changes {
@@ -301,30 +318,133 @@ func resourceProviderKeys(tp *tfjson.Plan) map[string]string {
 	return m
 }
 
-func providers(tp *tfjson.Plan) map[string]Provider {
+func providers(tp *tfjson.Plan, cfgKeys map[string]string) map[string]Provider {
 	out := map[string]Provider{}
 	if tp.Config == nil {
 		return out
 	}
+	vars := map[string]any{}
+	for name, v := range tp.Variables {
+		if v != nil {
+			vars[name] = v.Value
+		}
+	}
 	for key, pc := range tp.Config.ProviderConfigs {
-		out[key] = Provider{Key: key, Name: pc.Name, Alias: pc.Alias, AssumeRoleARN: literalRoleARN(pc)}
+		pr := Provider{Key: key, Name: pc.Name, Alias: pc.Alias}
+		for _, blockName := range []string{"assume_role", "assume_role_with_web_identity"} {
+			ar := pc.Expressions[blockName]
+			if ar == nil || ar.ExpressionData == nil {
+				continue
+			}
+			pr.AssumeRole = true
+			for _, blk := range ar.NestedBlocks {
+				if e := blk["role_arn"]; e != nil && pr.AssumeRoleARN == "" {
+					if v, via, ok := resolve(e, vars); ok {
+						if s, isStr := v.(string); isStr {
+							pr.AssumeRoleARN, pr.RoleARNVia = s, via
+						}
+					}
+				}
+			}
+		}
+		if e := pc.Expressions["allowed_account_ids"]; e != nil {
+			if v, _, ok := resolve(e, vars); ok {
+				if list, isList := v.([]any); isList {
+					for _, x := range list {
+						if s, isStr := x.(string); isStr {
+							pr.AllowedAccountIDs = append(pr.AllowedAccountIDs, s)
+						}
+					}
+				}
+			}
+		}
+		out[key] = pr
+	}
+	for key, ids := range callerIdentities(tp, cfgKeys) {
+		if pr, ok := out[key]; ok {
+			pr.CallerIdentityIDs = ids
+			out[key] = pr
+		} else {
+			out[key] = Provider{Key: key, Name: defaultProviderKey(key), CallerIdentityIDs: ids}
+		}
 	}
 	return out
 }
 
-func literalRoleARN(pc *tfjson.ProviderConfig) string {
-	ar := pc.Expressions["assume_role"]
-	if ar == nil || ar.ExpressionData == nil {
-		return ""
+// resolve returns an expression's value if it is a constant or a plain
+// variable reference (var.x) whose value is in the plan.
+func resolve(e *tfjson.Expression, vars map[string]any) (value any, via string, ok bool) {
+	if e == nil || e.ExpressionData == nil {
+		return nil, "", false
 	}
-	for _, blk := range ar.NestedBlocks {
-		if e := blk["role_arn"]; e != nil && e.ExpressionData != nil {
-			if s, ok := e.ConstantValue.(string); ok {
-				return s
+	// terraform-json stores a sentinel in ConstantValue whenever an expression
+	// has references, so references must be checked first.
+	if len(e.References) == 0 {
+		if e.ConstantValue == nil {
+			return nil, "", false
+		}
+		return e.ConstantValue, ViaLiteral, true
+	}
+	// Terraform lists both "var.x" and its attribute paths; accept only
+	// references that all point at one variable.
+	name := ""
+	for _, ref := range e.References {
+		base, ok := strings.CutPrefix(ref, "var.")
+		if !ok {
+			return nil, "", false
+		}
+		base, _, _ = strings.Cut(base, ".")
+		base, _, _ = strings.Cut(base, "[")
+		if name != "" && base != name {
+			return nil, "", false
+		}
+		name = base
+	}
+	if name == "" {
+		return nil, "", false
+	}
+	v, found := vars[name]
+	if !found || v == nil {
+		return nil, "", false
+	}
+	return v, ViaVariable, true
+}
+
+// callerIdentities maps provider config key to the account IDs reported by
+// aws_caller_identity data sources in prior_state. Resource-to-provider
+// links come from configuration, because prior_state carries no alias.
+func callerIdentities(tp *tfjson.Plan, cfgKeys map[string]string) map[string][]string {
+	out := map[string][]string{}
+	if tp.PriorState == nil || tp.PriorState.Values == nil {
+		return out
+	}
+	var walk func(m *tfjson.StateModule)
+	walk = func(m *tfjson.StateModule) {
+		if m == nil {
+			return
+		}
+		for _, r := range m.Resources {
+			if r.Mode != tfjson.DataResourceMode || r.Type != "aws_caller_identity" {
+				continue
+			}
+			id, _ := r.AttributeValues["account_id"].(string)
+			if id == "" {
+				continue
+			}
+			key := cfgKeys[stripIndexes(r.Address)]
+			if key == "" {
+				key = defaultProviderKey(r.ProviderName)
+			}
+			if !slices.Contains(out[key], id) {
+				out[key] = append(out[key], id)
 			}
 		}
+		for _, c := range m.ChildModules {
+			walk(c)
+		}
 	}
-	return ""
+	walk(tp.PriorState.Values.RootModule)
+	return out
 }
 
 func formatPath(p []any) string {

@@ -1,5 +1,12 @@
 {
   "schema_version": 1,
+  "apply_account": {
+    "source": "unresolved",
+    "resolved": false
+  },
+  "notices": [
+    "Apply account unresolved (set --tfapply-account-id): cross-account flags are off."
+  ],
   "summary": {
     "mode": "normal",
     "applyable": true,
@@ -23,7 +30,8 @@
       "root": 2
     },
     "known_after_apply": 0,
-    "drift_count": 0
+    "drift_count": 0,
+    "warnings": 0
   },
   "findings": [],
   "drift": [],
@@ -33,7 +41,7 @@
       "provider": "aws",
       "account": "unresolved (alias: default)",
       "resolved": false,
-      "source": "none",
+      "source": "unresolved",
       "default": true,
       "cross_account": false,
       "counts": {
@@ -60,7 +68,9 @@
       "action": "update",
       "provider": "aws",
       "account": "unresolved (alias: default)",
+      "account_source": "unresolved",
       "cross_account": false,
+      "warnings": [],
       "stateful": false,
       "import": false,
       "removed_from_state_only": false,
@@ -101,7 +111,9 @@
       "action": "update",
       "provider": "aws",
       "account": "unresolved (alias: default)",
+      "account_source": "unresolved",
       "cross_account": false,
+      "warnings": [],
       "stateful": false,
       "import": false,
       "removed_from_state_only": false,

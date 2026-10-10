@@ -1,5 +1,7 @@
 == Summary ==
 Plan: normal | applyable: yes | errored: no
+Executed from (apply account): unresolved
+NOTICE: Apply account unresolved (set --tfapply-account-id): cross-account flags are off.
 Actions: create 3, update 1, replace 0, delete 1, read 0, no-op 0, forget 0
 Known after apply: 0 attribute(s)
 By type: aws_s3_bucket 3, aws_db_instance 1, aws_sqs_queue 1
@@ -7,27 +9,27 @@ By module: root 5
 
 == Danger ==
 ! DELETE aws_db_instance.prod [STATEFUL]
-    type: aws_db_instance | account: 111111111111
+    type: aws_db_instance | target account: 111111111111 (source: role_arn)
     why: Removed from config
 
 == Drift ==
 No changes made outside Terraform.
 
 == Changes by account ==
-aws: unresolved (alias: default)
+aws: target account unresolved (alias: default) (source: unresolved)
     create 1
     + aws_s3_bucket.default [STATEFUL]  (create)
 
-aws.mystery: unresolved (alias: mystery) [DIFFERENT ACCOUNT than default provider]
+aws.mystery: target account unresolved (alias: mystery) (source: unresolved)
     create 1
     + aws_sqs_queue.eu  (create)
 
-aws.prod: 111111111111 [DIFFERENT ACCOUNT than default provider]
+aws.prod: target account 111111111111 (source: role_arn)
     create 1, delete 1
     + aws_s3_bucket.prod [STATEFUL]  (create)
     - aws_db_instance.prod [STATEFUL]  (delete)
 
-aws.shared: 222222222222 [DIFFERENT ACCOUNT than default provider]
+aws.shared: target account 222222222222 (source: role_arn)
     update 1
     ~ aws_s3_bucket.shared [STATEFUL]  (update)
         tags.x: (absent) -> "y"

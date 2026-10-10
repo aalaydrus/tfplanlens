@@ -1,5 +1,7 @@
 == Summary ==
 Plan: normal | applyable: yes | errored: no
+Executed from (apply account): unresolved
+NOTICE: Apply account unresolved (set --tfapply-account-id): cross-account flags are off.
 Actions: create 0, update 2, replace 0, delete 0, read 0, no-op 2, forget 1
 Known after apply: 0 attribute(s)
 By type: aws_db_instance 1, aws_iam_role 1, aws_instance 1, aws_s3_bucket 1, aws_vpc 1
@@ -12,7 +14,7 @@ No deletes or replacements.
 No changes made outside Terraform.
 
 == Changes by account ==
-aws: unresolved (alias: default)
+aws: target account unresolved (alias: default) (source: unresolved)
     update 2, forget 1, no-op 2
     = aws_s3_bucket.new_name [STATEFUL]  (moved from aws_s3_bucket.old_name)
     ~ module.net.aws_vpc.main  (update, moved from aws_vpc.main)

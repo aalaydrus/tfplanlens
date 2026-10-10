@@ -1,5 +1,12 @@
 {
   "schema_version": 1,
+  "apply_account": {
+    "source": "unresolved",
+    "resolved": false
+  },
+  "notices": [
+    "Apply account unresolved (set --tfapply-account-id): cross-account flags are off."
+  ],
   "summary": {
     "mode": "normal",
     "applyable": true,
@@ -24,7 +31,8 @@
       "root": 5
     },
     "known_after_apply": 0,
-    "drift_count": 0
+    "drift_count": 0,
+    "warnings": 0
   },
   "findings": [
     {
@@ -33,6 +41,7 @@
       "action": "delete",
       "provider": "aws.prod",
       "account": "111111111111",
+      "account_source": "role_arn",
       "stateful": true,
       "reason": "delete_because_no_resource_config",
       "reason_text": "Removed from config",
@@ -47,7 +56,7 @@
       "provider": "aws",
       "account": "unresolved (alias: default)",
       "resolved": false,
-      "source": "none",
+      "source": "unresolved",
       "default": true,
       "cross_account": false,
       "counts": {
@@ -69,9 +78,9 @@
       "alias": "mystery",
       "account": "unresolved (alias: mystery)",
       "resolved": false,
-      "source": "none",
+      "source": "unresolved",
       "default": false,
-      "cross_account": true,
+      "cross_account": false,
       "counts": {
         "create": 1,
         "update": 0,
@@ -93,7 +102,7 @@
       "resolved": true,
       "source": "role_arn",
       "default": false,
-      "cross_account": true,
+      "cross_account": false,
       "counts": {
         "create": 1,
         "update": 0,
@@ -116,7 +125,7 @@
       "resolved": true,
       "source": "role_arn",
       "default": false,
-      "cross_account": true,
+      "cross_account": false,
       "counts": {
         "create": 0,
         "update": 1,
@@ -140,7 +149,9 @@
       "action": "create",
       "provider": "aws",
       "account": "unresolved (alias: default)",
+      "account_source": "unresolved",
       "cross_account": false,
+      "warnings": [],
       "stateful": true,
       "import": false,
       "removed_from_state_only": false,
@@ -155,7 +166,9 @@
       "action": "create",
       "provider": "aws.prod",
       "account": "111111111111",
-      "cross_account": true,
+      "account_source": "role_arn",
+      "cross_account": false,
+      "warnings": null,
       "stateful": true,
       "import": false,
       "removed_from_state_only": false,
@@ -170,7 +183,9 @@
       "action": "update",
       "provider": "aws.shared",
       "account": "222222222222",
-      "cross_account": true,
+      "account_source": "role_arn",
+      "cross_account": false,
+      "warnings": null,
       "stateful": true,
       "import": false,
       "removed_from_state_only": false,
@@ -191,7 +206,9 @@
       "action": "delete",
       "provider": "aws.prod",
       "account": "111111111111",
-      "cross_account": true,
+      "account_source": "role_arn",
+      "cross_account": false,
+      "warnings": null,
       "stateful": true,
       "reason": "delete_because_no_resource_config",
       "reason_text": "Removed from config",
@@ -208,7 +225,9 @@
       "action": "create",
       "provider": "aws.mystery",
       "account": "unresolved (alias: mystery)",
-      "cross_account": true,
+      "account_source": "unresolved",
+      "cross_account": false,
+      "warnings": [],
       "stateful": false,
       "import": false,
       "removed_from_state_only": false,

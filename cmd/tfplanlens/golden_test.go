@@ -17,29 +17,51 @@ var update = flag.Bool("update", false, "rewrite golden files in testdata/golden
 // Formats covered by golden files (SPEC section 7); html has its own checks.
 var goldenFormats = map[string]string{"text": "txt", "markdown": "md", "json": "json"}
 
-// TestGolden runs `report --format <f> --no-color` on every fixture and
-// compares stdout with testdata/golden/<fixture>.<ext>. While report is not
-// implemented the test skips; once it is, `go test -update ./cmd/...`
-// generates the golden files, which must be reviewed before committing.
-func TestGolden(t *testing.T) {
+type goldenCase struct {
+	name string   // golden file stem
+	plan string   // fixture name
+	args []string // extra report args
+}
+
+func goldenCases(t *testing.T) []goldenCase {
+	t.Helper()
 	plans, err := filepath.Glob("../../testdata/plans/*.json")
 	if err != nil || len(plans) == 0 {
 		t.Fatalf("no fixtures found: %v", err)
 	}
-	for _, plan := range plans {
-		name := strings.TrimSuffix(filepath.Base(plan), ".json")
+	var cases []goldenCase
+	for _, p := range plans {
+		n := strings.TrimSuffix(filepath.Base(p), ".json")
+		cases = append(cases, goldenCase{name: n, plan: n})
+	}
+	// The runner fixture also runs with the apply account known, and with a
+	// flag overriding a value the plan resolves by itself.
+	cases = append(cases,
+		goldenCase{"runner-cross-account.apply", "runner-cross-account", []string{"--tfapply-account-id", "999999999999"}},
+		goldenCase{"runner-cross-account.override", "runner-cross-account", []string{"--tfapply-account-id", "999999999999", "--account", "prod=444444444444"}},
+	)
+	return cases
+}
+
+// TestGolden runs `report --format <f> --no-color` on every fixture and
+// compares stdout with testdata/golden/<name>.<ext>. Regenerate with
+// `go test ./cmd/... -run TestGolden -update`, then review the diff.
+func TestGolden(t *testing.T) {
+	t.Setenv(envApplyAccount, "")
+	for _, gc := range goldenCases(t) {
 		for format, ext := range goldenFormats {
-			t.Run(name+"/"+format, func(t *testing.T) {
+			t.Run(gc.name+"/"+format, func(t *testing.T) {
 				var out, errb bytes.Buffer
 				root := newRootCmd(strings.NewReader(""), &out, &errb)
-				root.SetArgs([]string{"report", plan, "--format", format, "--no-color"})
+				args := []string{"report", "../../testdata/plans/" + gc.plan + ".json", "--format", format, "--no-color"}
+				root.SetArgs(append(args, gc.args...))
 				if err := root.Execute(); err != nil {
 					if errors.Is(err, errNotImplemented) {
-						t.Skip("report not implemented yet")
+						t.Skip("format not implemented yet")
 					}
 					t.Fatalf("%v\n%s", err, errb.String())
 				}
-				golden := filepath.Join("../../testdata/golden", name+"."+ext)
+				golden := filepath.Join("../../testdata/golden", gc.name+"."+ext)
 				if *update {
 					if err := os.WriteFile(golden, out.Bytes(), 0o644); err != nil {
 						t.Fatal(err)
@@ -148,14 +170,14 @@ func TestStdinAndErrors(t *testing.T) {
 }
 
 func TestSensitiveValuesNeverPrinted(t *testing.T) {
-	for _, f := range []string{"text", "json"} {
+	for _, f := range []string{"text", "json", "markdown", "html"} {
 		_, out, _ := runCLI("report", plans+"sensitive.json", "--no-color", "--format", f)
 		for _, secret := range []string{"old-secret-pw", "new-secret-pw", "s3cr3t-value"} {
 			if strings.Contains(out, secret) {
 				t.Errorf("%s output leaks %q", f, secret)
 			}
 		}
-		if !strings.Contains(out, "sensitive") {
+		if !strings.Contains(out, "sensitive") { // the marker, never the value
 			t.Errorf("%s output has no sensitive marker", f)
 		}
 	}
@@ -189,7 +211,7 @@ func TestLargePlanPerformance(t *testing.T) {
 	}
 	sb.WriteString(`]}`)
 
-	for _, format := range []string{"text", "json"} {
+	for _, format := range []string{"text", "json", "markdown", "html"} {
 		start := time.Now()
 		var out, errb bytes.Buffer
 		code := run([]string{"report", "-", "--no-color", "--format", format}, strings.NewReader(sb.String()), &out, &errb)
@@ -198,6 +220,9 @@ func TestLargePlanPerformance(t *testing.T) {
 		}
 		if d := time.Since(start); d > 2*time.Second {
 			t.Errorf("%s took %v, want < 2s", format, d)
+		}
+		if format == "markdown" && out.Len() > 60000 {
+			t.Errorf("markdown is %d bytes, want <= 60000", out.Len())
 		}
 	}
 }

@@ -52,6 +52,10 @@ Flags for `report`:
 - `--fail-on <rules>` comma-separated, e.g. `delete,replace,drift,replace:aws_db_instance`
 - `--max-line <n>` truncation width for terminal output (default 120)
 - `--no-color`
+- `--tfapply-account-id <id>`: the 12-digit account terraform apply runs from (see 5.5)
+- `--account <alias>=<id>` (repeatable): target account for a provider alias; beats every other source (see 5.5)
+- `--no-prompt`: never ask interactively for the apply account
+- `--require-apply-account`: exit `2` instead of continuing when the apply account is unresolved (for CI)
 
 Exit codes: `0` ok, `1` a `--fail-on` rule matched, `2` error (bad input, unsupported format).
 
@@ -92,12 +96,37 @@ For any string attribute longer than 200 characters, or any known long-value key
 5. Never print the full value in the terminal or markdown output. The HTML report has an "expand full value" toggle.
 
 ### 5.5 Account / provider grouping
-- Group `resource_changes` by `provider_config_key` (provider and alias).
-- Resolve alias to account ID in this order:
-  1. A literal `assume_role.role_arn` in the plan's `configuration.provider_config` (parse the account ID from the ARN).
-  2. The `accounts:` mapping in `.tfplanlens.yaml`.
-  3. Otherwise label as `unresolved (alias: <name>)`.
-- Show per-account counts and highlight any resource that targets a different account than the plan's default provider.
+Plans are often run from a runner in an automation account that assumes roles into target accounts, so two different accounts matter and the report shows both:
+
+- **Apply account** ("executed from"): where `terraform apply` runs.
+- **Target account**: where a resource lands, resolved per provider config key (provider and alias).
+
+Group `resource_changes` by `provider_config_key`. Show per-group counts, and flag every resource whose target account differs from the apply account.
+
+**Apply account** precedence, highest first:
+1. `--tfapply-account-id <12-digit id>`
+2. env var `TFPLANLENS_TFAPPLY_ACCOUNT_ID`
+3. `tfapply_account_id` in `.tfplanlens.yaml`
+4. Interactive prompt: "Which account ID does terraform apply run from?", validated as 12 digits, with an offer to save the answer to the config file. Only when stdin and stdout are both terminals and `--no-prompt` is not set. The question goes to stderr, never into the report.
+5. Unresolved: print a warning on stderr and continue. Cross-account flags are off and providers without `assume_role` stay unresolved. With `--require-apply-account`, exit `2` instead.
+
+An invalid value (not 12 digits) from the flag, env var or config is an error (exit `2`). The source used is recorded and shown (`flag`, `env`, `config`, `prompt`, `unresolved`).
+
+**Target account** is resolved per provider config key, first match wins, and the source is recorded and shown in every report format:
+
+| | Source | Recorded as |
+|---|---|---|
+| a | `--account <alias>=<id>` (repeatable; matches the alias or the full key such as `aws.prod`; `default` matches the unaliased provider) | `flag` |
+| b | `accounts:` mapping in `.tfplanlens.yaml` (same keys) | `config` |
+| c | `assume_role.role_arn`, literal, or a plain variable reference resolved through the plan's `variables`; the account ID is parsed from the ARN | `role_arn`, `role_arn_variable` |
+| d | `allowed_account_ids`, when it holds exactly one value (literal or resolved through `variables`) | `allowed_account_ids` |
+| e | `account_id` of an `aws_caller_identity` data source in `prior_state` that uses this provider, when exactly one distinct value | `caller_identity` |
+| f | A provider with **no** `assume_role` runs as the apply account | `apply_account` |
+| g | Otherwise label it `unresolved (alias: <name>)` | `unresolved` |
+
+A provider that has `assume_role` but whose role ARN cannot be resolved never falls back to (f); it is unresolved.
+
+**Warnings.** When an ARN-typed attribute of a resource (`arn`, or a name ending in `_arn` / `_arns`) contains an account ID that differs from its provider's resolved target account, show a warning naming the attribute, the ARN's account, the target account, and the source. Sensitive and unknown values are skipped, and so are resources that are not changing.
 
 ### 5.6 Moves, imports, removals
 - Resources with `previous_address` display as **moved** (not delete and create).
@@ -115,7 +144,8 @@ For any string attribute longer than 200 characters, or any known long-value key
 
 ### 5.9 Config file `.tfplanlens.yaml`
 ```yaml
-accounts:
+tfapply_account_id: "999999999999"   # account terraform apply runs from (5.5)
+accounts:                # provider alias (or key such as aws.prod) -> target account
   prod-alias: "111111111111"
   shared-alias: "222222222222"
 stateful_types:         # added to the built-in list

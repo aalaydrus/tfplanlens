@@ -1,0 +1,81 @@
+<!-- tfplanlens-report -->
+## tfplanlens plan report
+
+| | |
+|---|---|
+| Plan | normal, applyable: yes, errored: no |
+| Executed from (apply account) | **unresolved** |
+| create | 0 |
+| update | 2 |
+| replace | 0 |
+| delete | 0 |
+| Drift | 0 |
+| Known after apply | 0 attribute(s) |
+
+> **Notice:** Apply account unresolved (set --tfapply-account-id): cross-account flags are off.
+
+### Danger
+
+No deletes or replacements.
+
+### Changes by account
+
+<details><summary><b>aws</b> &mdash; target account unresolved (alias: default) (source: unresolved) &mdash; update 2</summary>
+
+- `aws_iam_role.app` (update)
+  - `assume_role_policy: 5 lines changed of 15 (+4 -1)`
+    ```diff
+    @@ -5,5 +5,8 @@
+           "Effect": "Allow",
+           "Principal": {
+    -        "Service": "ec2.amazonaws.com"
+    +        "Service": [
+    +          "ec2.amazonaws.com",
+    +          "lambda.amazonaws.com"
+    +        ]
+           }
+         }
+    statements:
+    -Allow sts:AssumeRole -> principal Service=ec2.amazonaws.com
+    +Allow sts:AssumeRole -> principal Service=ec2.amazonaws.com|lambda.amazonaws.com
+    ```
+- `aws_iam_policy.data` (update)
+  - `policy: 7 lines changed of 22 (+4 -3)`
+    ```diff
+    @@ -4,4 +4,5 @@
+           "Action": [
+             "s3:GetObject",
+    +        "s3:PutObject",
+             "s3:ListBucket"
+           ],
+    @@ -13,7 +14,7 @@
+         },
+         {
+    -      "Action": "s3:DeleteObject",
+    -      "Effect": "Deny",
+    -      "Resource": "*"
+    +      "Action": "kms:Decrypt",
+    +      "Effect": "Allow",
+    +      "Resource": "arn:aws:kms:us-east-1:111111111111:key/abcd"
+         }
+       ],
+    statements:
+    -Allow s3:GetObject,s3:ListBucket -> arn:aws:s3:::acme-data,arn:aws:s3:::acme-data/*
+    -Deny s3:DeleteObject -> *
+    +Allow s3:GetObject,s3:ListBucket,s3:PutObject -> arn:aws:s3:::acme-data,arn:aws:s3:::acme-data/*
+    +Allow kms:Decrypt -> arn:aws:kms:us-east-1:111111111111:key/abcd
+    ```
+
+</details>
+
+### Changes by module
+
+<details><summary><b>root</b> &mdash; 2 change(s)</summary>
+
+| Action | Resource | Target account |
+|---|---|---|
+| update | `aws_iam_role.app` | `unresolved (alias: default)` (unresolved) |
+| update | `aws_iam_policy.data` | `unresolved (alias: default)` (unresolved) |
+
+</details>
+
