@@ -31,7 +31,8 @@ terraform init -input=false -no-color
 terraform plan -input=false -no-color -out=plan.bin
 terraform show -json plan.bin > plan.json
 
-version=$(terraform version | head -1 | sed 's/^Terraform v//')
+# sed (not head) reads all of the output: with pipefail, head closing the pipe early kills terraform with SIGPIPE.
+version=$(terraform version | sed -n '1s/^Terraform v//p')
 mkdir -p "$root/testdata/plans/real"
 cp plan.json "$root/testdata/plans/real/$scenario-tf$version.json"
 echo "wrote testdata/plans/real/$scenario-tf$version.json"
