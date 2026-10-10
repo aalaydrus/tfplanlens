@@ -33,3 +33,32 @@ jobs:
           go-version-file: go.mod
       - run: go install honnef.co/go/tools/cmd/staticcheck@2025.1.1
       - run: staticcheck ./...
+
+  goreleaser:
+    name: goreleaser (check + snapshot build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: "~> v2"
+          args: check
+      - uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: "~> v2"
+          args: release --snapshot --clean --skip=publish
+      - name: Built binary reports its version
+        run: |
+          set -eu
+          ls dist
+          bin=$(find dist -type f -path '*linux_amd64*' -name tfplanlens | head -1)
+          "$bin" version
+          test -f dist/checksums.txt
+          ls dist/*.tar.gz dist/*.zip
