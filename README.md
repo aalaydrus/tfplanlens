@@ -194,8 +194,9 @@ There are no published releases. `.goreleaser.yaml` and `.github/workflows/relea
 | `drift` | resources deleted or tampered with outside Terraform, then planned |
 | `refresh-only` | `plan -refresh-only` (no `resource_changes` at all) |
 | `module-provider` | a module handed `providers = { local = local.alt }` |
+| `aws-assume-role` | the real AWS provider with `assume_role` (a literal and a variable-based role ARN), an alias without `assume_role`, an alias pinned with `allowed_account_ids`, a module handed an aliased provider, `aws_caller_identity` in `prior_state`, and a genuinely cross-account ARN. Runs against [floci](https://floci.io/floci/), a local AWS emulator, so it needs no AWS credentials. |
 
-Most scenarios use only the built-in `terraform_data` resource; `drift`, `refresh-only` and `module-provider` also use the credential-free `hashicorp/local` provider. To run one locally you need Terraform >= 1.7:
+Most scenarios use only the built-in `terraform_data` resource; `drift`, `refresh-only` and `module-provider` also use the credential-free `hashicorp/local` provider. `aws-assume-role` uses the real AWS provider against floci (`docker run -p 4566:4566 floci/floci`); `scripts/smoke-plan.sh` seeds the IAM roles it assumes (`scripts/floci-seed.sh`) and skips the scenario with a message if floci is not running. Floci keeps state, so restart it between local runs of that scenario. To run one locally you need Terraform >= 1.7:
 
 ```sh
 go build -o tfplanlens ./cmd/tfplanlens

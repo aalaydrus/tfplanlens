@@ -13,17 +13,39 @@
 #               $SCENARIO_DIR points at the scenario directory.
 #   plan-args   extra arguments for `terraform plan`, e.g. -destroy,
 #               -refresh-only or -replace=terraform_data.x
+#   env         KEY=VALUE lines exported for every terraform call
+#   requires-floci
+#               marker: the scenario needs floci (a local AWS emulator on
+#               :4566). The script seeds its IAM roles first, and skips the
+#               scenario with a message if floci is not running.
 #
 # Needs terraform >= 1.7. Most scenarios use only the built-in terraform_data
-# resource (no providers, no credentials); `drift` and `refresh-only` also use
-# the credential-free hashicorp/local provider. Set SMOKE_PLUGIN_DIR to a
-# provider mirror directory to install providers offline.
+# resource (no providers, no credentials); some also use the credential-free
+# hashicorp/local provider, and `aws-assume-role` uses the real AWS provider
+# against floci, never real AWS. Set SMOKE_PLUGIN_DIR to a provider mirror
+# directory to install providers offline.
 set -euo pipefail
 
 scenario=${1:?usage: smoke-plan.sh <scenario> [work-root]}
 root=$(cd "$(dirname "$0")/.." && pwd)
 dir="$root/testdata/real/$scenario"
 work="${2:-$root/work}/$scenario"
+
+if [ -f "$dir/env" ]; then
+  set -a
+  # shellcheck disable=SC1091
+  . "$dir/env"
+  set +a
+fi
+if [ -f "$dir/requires-floci" ]; then
+  endpoint=${AWS_ENDPOINT_URL:-http://localhost:4566}
+  hostport=${endpoint#*://}
+  if ! (exec 3<>"/dev/tcp/${hostport%%:*}/${hostport##*:}") 2>/dev/null; then
+    echo "skipping $scenario: floci is not running on $endpoint (docker run -p 4566:4566 floci/floci)"
+    exit 0
+  fi
+  "$root/scripts/floci-seed.sh" "$endpoint"
+fi
 
 init_args=()
 if [ -n "${SMOKE_PLUGIN_DIR:-}" ]; then

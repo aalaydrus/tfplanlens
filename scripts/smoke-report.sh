@@ -22,11 +22,12 @@ for spec in text:txt html:html markdown:md json:json; do
 done
 
 # No apply account given: nothing is asked and nothing is written to stderr.
-# These scenarios say nothing about the runner's account, so the report must
-# finish (exit 0) and explain that the apply account is unknown.
+# The report must finish (exit 0) and say where the apply account came from:
+# inferred from the default provider when the plan allows it (aws-assume-role),
+# otherwise a notice that it is unknown.
 timeout 60 "$bin" report "$plan" --format text --no-color \
   --out "$out/report-no-apply-account.txt" </dev/null 2> "$out/stderr.tmp"
 test ! -s "$out/stderr.tmp"
 rm -f "$out/stderr.tmp"
-grep -q "Apply account unknown" "$out/report-no-apply-account.txt"
+grep -qE "Apply account unknown|source: inferred from the default provider" "$out/report-no-apply-account.txt"
 echo "wrote $out"

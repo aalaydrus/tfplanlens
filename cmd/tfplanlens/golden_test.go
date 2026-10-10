@@ -269,3 +269,37 @@ func TestLargePlanPerformance(t *testing.T) {
 		}
 	}
 }
+
+// SPEC 9, criterion 4: deletes and replaces appear in the Danger section
+// before any change listing, in text, markdown and html.
+func TestDangerBeforeAnyChangeListing(t *testing.T) {
+	t.Setenv(envApplyAccount, "")
+	var plansWithDanger []string
+	for _, pattern := range []string{"../../testdata/plans/*.json", "../../testdata/plans/real/*.json"} {
+		m, _ := filepath.Glob(pattern)
+		plansWithDanger = append(plansWithDanger, m...)
+	}
+	markers := map[string]struct{ danger, listing string }{
+		"text":     {"== Danger ==", "== Changes by account =="},
+		"markdown": {"### Danger", "### Changes by account"},
+		"html":     {`id="danger"`, `id="rows"`},
+	}
+	checked := 0
+	for _, plan := range plansWithDanger {
+		_, jsonOut, _ := runCLI("report", plan, "-f", "json")
+		if !strings.Contains(jsonOut, `"findings": [`+"\n"+`    {`) {
+			continue // no deletes or replaces: nothing to order
+		}
+		checked++
+		for format, m := range markers {
+			_, out, _ := runCLI("report", plan, "-f", format, "--no-color")
+			d, l := strings.Index(out, m.danger), strings.Index(out, m.listing)
+			if d < 0 || l < 0 || d > l {
+				t.Errorf("%s --format %s: danger at %d, change listing at %d", filepath.Base(plan), format, d, l)
+			}
+		}
+	}
+	if checked < 8 {
+		t.Errorf("only %d plans with findings checked", checked)
+	}
+}

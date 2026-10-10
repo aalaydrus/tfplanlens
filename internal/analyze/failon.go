@@ -75,7 +75,10 @@ func CheckFailOn(p *plan.Plan, a *Analysis, rules []Rule) []Match {
 		}
 		list := p.Changes
 		if r.Kind == "drift" {
-			list = p.Drift
+			list = nil
+			for _, rd := range meaningfulDrift(p, nil) {
+				list = append(list, rd.change)
+			}
 		}
 		for _, c := range list {
 			if r.Type != "" && c.Type != r.Type {

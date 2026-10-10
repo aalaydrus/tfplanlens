@@ -450,3 +450,49 @@ func TestForEachRenameWarningIsNotCalledAnIndexShift(t *testing.T) {
 		}
 	}
 }
+
+// Found by the real AWS plan: the provider reads back "{}" where state had
+// null for tags, so every resource showed up as drifted (and a replaced one as
+// "high risk"). Terraform's own plan output does not report it.
+func TestNullVersusEmptyCollectionIsNotDrift(t *testing.T) {
+	mk := func(addr string, action plan.Action, before, after any) plan.Change {
+		return plan.Change{Address: addr, Type: "aws_sqs_queue", Mode: "managed", Action: action, Before: before, After: after}
+	}
+	p := &plan.Plan{
+		Changes: []plan.Change{mk("aws_sqs_queue.q", plan.ActionDelete, map[string]any{"name": "q"}, nil)},
+		Drift: []plan.Change{
+			mk("aws_sqs_queue.noise", plan.ActionUpdate, map[string]any{"tags": nil, "list": []any{}}, map[string]any{"tags": map[string]any{}, "list": nil}),
+			mk("aws_sqs_queue.q", plan.ActionUpdate, map[string]any{"tags": nil}, map[string]any{"tags": map[string]any{}}), // also being deleted by the plan
+			mk("aws_sqs_queue.real", plan.ActionUpdate, map[string]any{"visibility": 30.0, "tags": nil}, map[string]any{"visibility": 60.0, "tags": map[string]any{}}),
+			mk("aws_sqs_queue.gone", plan.ActionDelete, map[string]any{"name": "gone"}, nil),
+		},
+	}
+	a := Analyze(p, nil, nil)
+	got := map[string][]string{}
+	for _, d := range a.Drift {
+		for _, at := range d.Attrs {
+			got[d.Address] = append(got[d.Address], at.Path)
+		}
+		if _, ok := got[d.Address]; !ok {
+			got[d.Address] = nil
+		}
+	}
+	if len(a.Drift) != 2 || got["aws_sqs_queue.real"] == nil || len(got["aws_sqs_queue.real"]) != 1 || got["aws_sqs_queue.real"][0] != "visibility" {
+		t.Errorf("drift = %v, want only 'real' (visibility) and 'gone'", got)
+	}
+	if _, ok := got["aws_sqs_queue.gone"]; !ok {
+		t.Error("a delete is always real drift")
+	}
+	// The null-vs-empty entry must not mark the deleted resource high risk.
+	if a.Findings[0].DriftAlso {
+		t.Error("finding flagged as drifted because of null-vs-empty noise")
+	}
+	// ...and --fail-on drift sees only real drift.
+	noiseOnly := &plan.Plan{Drift: p.Drift[:2]}
+	if m := CheckFailOn(noiseOnly, Analyze(noiseOnly, nil, nil), []Rule{{Kind: "drift"}}); len(m) != 0 {
+		t.Errorf("--fail-on drift matched noise: %v", m)
+	}
+	if m := CheckFailOn(p, a, []Rule{{Kind: "drift"}}); len(m) != 2 {
+		t.Errorf("--fail-on drift matches = %v, want real + gone", m)
+	}
+}

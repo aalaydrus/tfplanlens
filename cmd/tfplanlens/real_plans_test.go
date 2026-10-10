@@ -474,3 +474,124 @@ func TestJSONArraysAreNeverNull(t *testing.T) {
 		walk(filepath.Base(plan), doc)
 	}
 }
+
+// Real AWS provider plan, produced against floci (a local AWS emulator) so
+// that no real credentials are involved. This is the first real plan with
+// assume_role: a literal role ARN, a variable-based one, an alias without
+// assume_role, an alias pinned with allowed_account_ids, a module handed an
+// aliased provider, and aws_caller_identity data sources in prior_state.
+func TestRealAWSAssumeRolePlan(t *testing.T) {
+	for _, plan := range realPlans(t, "aws-assume-role") {
+		t.Run(filepath.Base(plan), func(t *testing.T) {
+			t.Setenv(envApplyAccount, "")
+			code, out, errs := runCLI("report", plan, "-f", "json")
+			if code != exitOK || errs != "" {
+				t.Fatalf("exit %d: %s", code, errs)
+			}
+			var a struct {
+				ApplyAccount struct {
+					ID, Source, Via string
+				} `json:"apply_account"`
+				Summary struct {
+					Warnings int
+				}
+				Groups []struct {
+					Key, Account, Source string
+					Cross                bool `json:"cross_account"`
+					Addresses            []string
+				}
+				Findings []struct {
+					Address   string
+					DriftAlso bool `json:"drift_also"`
+				}
+				Drift   []struct{ Address string }
+				Changes []struct {
+					Address  string
+					Warnings []struct{ Kind, Path, Message string }
+					Attrs    []struct {
+						Path, Kind    string
+						Before, After json.RawMessage
+					}
+				}
+			}
+			if err := json.Unmarshal([]byte(out), &a); err != nil {
+				t.Fatal(err)
+			}
+
+			// The apply account is inferred from the default provider's
+			// aws_caller_identity in prior_state.
+			if a.ApplyAccount.ID != "999999999999" || a.ApplyAccount.Source != "inferred" || a.ApplyAccount.Via != "caller_identity" {
+				t.Errorf("apply account %+v", a.ApplyAccount)
+			}
+			want := map[string][3]any{ // key -> account, source, cross-account
+				"aws":         {"999999999999", "caller_identity", false},
+				"aws.audit":   {"999999999999", "allowed_account_ids", false},
+				"aws.prod":    {"111111111111", "role_arn", true}, // literal ARN wins over the prod caller identity
+				"aws.sandbox": {"999999999999", "apply_account", false},
+				"aws.staging": {"222222222222", "role_arn_variable", true},
+			}
+			groups := map[string][]string{}
+			for _, g := range a.Groups {
+				w, ok := want[g.Key]
+				if !ok {
+					t.Errorf("unexpected group %q", g.Key)
+					continue
+				}
+				if g.Account != w[0] || g.Source != w[1] || g.Cross != w[2] {
+					t.Errorf("%s: %s via %s cross=%v, want %v", g.Key, g.Account, g.Source, g.Cross, w)
+				}
+				groups[g.Key] = g.Addresses
+			}
+			if len(a.Groups) != len(want) {
+				t.Errorf("%d groups, want %d", len(a.Groups), len(want))
+			}
+			// A module handed providers = { aws = aws.prod } lands in aws.prod.
+			if !strings.Contains(strings.Join(groups["aws.prod"], " "), "module.net.aws_sqs_queue.inner") {
+				t.Errorf("module resource not in aws.prod: %v", groups)
+			}
+
+			// The one real cross-account reference: a subscription created by
+			// the runner pointing at a topic in the prod account.
+			var warned []string
+			for _, c := range a.Changes {
+				for _, w := range c.Warnings {
+					warned = append(warned, c.Address+" "+w.Path)
+					if !strings.Contains(w.Message, "111111111111") || !strings.Contains(w.Message, "999999999999") {
+						t.Errorf("warning message %q", w.Message)
+					}
+				}
+			}
+			if len(warned) != 1 || warned[0] != "aws_sns_topic_subscription.cross topic_arn" || a.Summary.Warnings != 1 {
+				t.Errorf("warnings = %v (count %d)", warned, a.Summary.Warnings)
+			}
+
+			// Only the module queue replacement is dangerous. The provider's
+			// null -> {} tags read-back is not drift.
+			if len(a.Findings) != 1 || a.Findings[0].Address != "module.net.aws_sqs_queue.inner" || a.Findings[0].DriftAlso {
+				t.Errorf("findings %+v", a.Findings)
+			}
+			if len(a.Drift) != 0 {
+				t.Errorf("drift %v: null vs empty tags must not count", a.Drift)
+			}
+			if code, _, _ := runCLI("report", plan, "--fail-on", "drift,unresolved"); code != exitOK {
+				t.Errorf("--fail-on drift,unresolved: exit %d, want 0", code)
+			}
+
+			// The SSM parameter value is sensitive in the AWS provider schema.
+			for _, c := range a.Changes {
+				if c.Address != "aws_ssm_parameter.sandbox" {
+					continue
+				}
+				var sawSensitive bool
+				for _, at := range c.Attrs {
+					if at.Path == "value" {
+						sawSensitive = at.Kind == "sensitive" && len(at.Before) == 0 && len(at.After) == 0
+					}
+				}
+				if !sawSensitive {
+					t.Errorf("ssm value not shown as sensitive: %+v", c.Attrs)
+				}
+			}
+		})
+	}
+}

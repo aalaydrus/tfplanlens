@@ -3,6 +3,7 @@
 package analyze
 
 import (
+	"encoding/json"
 	"fmt"
 	"sort"
 	"strings"
@@ -92,9 +93,13 @@ func Analyze(p *plan.Plan, cfg *config.Config, opts *Options) *Analysis {
 			replaced[c.Address] = true
 		}
 	}
+	// Drift whose only difference is null vs an empty collection is the
+	// provider reading back "{}" where state had null; Terraform's own plan
+	// output does not report it either.
+	realDrift := meaningfulDrift(p, cfg.LongValueKeys)
 	driftAddr := map[string]bool{}
-	for _, d := range p.Drift {
-		driftAddr[d.Address] = true
+	for _, d := range realDrift {
+		driftAddr[d.change.Address] = true
 	}
 
 	groups := map[string]*Group{}
@@ -174,18 +179,17 @@ func Analyze(p *plan.Plan, cfg *config.Config, opts *Options) *Analysis {
 		a.Groups = append(a.Groups, *groups[k])
 	}
 
-	for _, d := range p.Drift {
+	for _, rd := range realDrift {
+		d := rd.change
 		if ignored[d.Type] {
 			continue
 		}
 		item := DriftItem{
 			Address: d.Address, Type: d.Type, Action: string(d.Action),
-			Attrs: []Attr{}, HighRisk: replaced[d.Address],
+			Attrs: rd.attrs, HighRisk: replaced[d.Address],
 		}
 		if d.Action == plan.ActionDelete {
 			item.Note = "Deleted outside Terraform"
-		} else {
-			item.Attrs = diffAttrs(d.Before, d.After, d.BeforeSensitive, d.AfterSensitive, d.AfterUnknown, nil, cfg.LongValueKeys)
 		}
 		if item.HighRisk {
 			item.Note = strings.TrimSpace(item.Note + " Also being replaced or deleted by this plan.")
@@ -386,4 +390,42 @@ func inferApplyAccount(p *plan.Plan, cfg *config.Config, opts *Options) (id, via
 		}
 	}
 	return "", ""
+}
+
+type driftEntry struct {
+	change plan.Change
+	attrs  []Attr
+}
+
+// meaningfulDrift returns the plan's drift entries that a reviewer should care
+// about: deletes always, and updates with at least one difference that is not
+// merely null versus an empty map or list.
+func meaningfulDrift(p *plan.Plan, longKeys []string) []driftEntry {
+	var out []driftEntry
+	for _, d := range p.Drift {
+		if d.Action == plan.ActionDelete {
+			out = append(out, driftEntry{change: d, attrs: []Attr{}})
+			continue
+		}
+		attrs := []Attr{}
+		for _, at := range diffAttrs(d.Before, d.After, d.BeforeSensitive, d.AfterSensitive, d.AfterUnknown, nil, longKeys) {
+			if at.Kind == "value" && nullish(at.Before) && nullish(at.After) {
+				continue
+			}
+			attrs = append(attrs, at)
+		}
+		if len(attrs) > 0 {
+			out = append(out, driftEntry{change: d, attrs: attrs})
+		}
+	}
+	return out
+}
+
+// nullish: absent, null, {} or [].
+func nullish(raw json.RawMessage) bool {
+	switch strings.TrimSpace(string(raw)) {
+	case "", "null", "{}", "[]":
+		return true
+	}
+	return false
 }
