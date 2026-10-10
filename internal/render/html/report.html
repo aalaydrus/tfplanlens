@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<title>tfplanlens report</title>
+<style>{{.CSS}}</style>
+</head>
+<body>
+<header>
+  <h1>tfplanlens</h1>
+  <span class="chip">plan: {{.A.Summary.Mode}}</span>
+  <span class="chip">applyable: {{yesno .A.Summary.Applyable}}</span>
+  {{if .A.Summary.Errored}}<span class="chip bad">errored</span>{{end}}
+  {{if .A.ApplyAccount.Resolved}}<span class="chip" title="Where terraform apply runs">executed from: <span class="mono">{{.A.ApplyAccount.ID}}</span> ({{.A.ApplyAccount.Source}})</span>
+  {{else}}<span class="chip bad" title="Set --tfapply-account-id">executed from: unresolved</span>{{end}}
+  <span class="grow"></span>
+  <button id="theme" type="button">Theme: auto</button>
+</header>
+<main>
+{{range .A.Notices}}<p class="panel"><b>Notice:</b> {{.}}</p>{{end}}
+
+<section id="danger" class="panel {{if .A.Findings}}danger{{end}}" aria-labelledby="danger-h">
+  <h2 id="danger-h">Danger: {{len .A.Findings}} delete/replace</h2>
+  {{if not .A.Findings}}<p class="empty">No deletes or replacements.</p>{{end}}
+  {{range .A.Findings}}
+  <div class="finding">
+    <div><b class="a-{{.Action}}">{{upper .Action}}</b> <span class="mono">{{.Address}}</span>
+      {{if .Stateful}}<span class="badge stateful">STATEFUL</span>{{end}}
+      {{if .DriftAlso}}<span class="badge hi">HIGH RISK: also drifted</span>{{end}}</div>
+    <p class="why">{{.ReasonText}}</p>
+    {{if .IndexShift}}<p class="warnline"><b>WARNING:</b> {{.Warning}}</p>{{end}}
+    <div class="meta">{{.Type}} &middot; target account <span class="mono">{{.Account}}</span> (source: {{.AccountSource}})</div>
+  </div>
+  {{end}}
+</section>
+
+<section aria-label="Summary">
+  <div class="tiles">
+    {{range .Tiles}}<div class="tile"><b class="a-{{.Class}}">{{.Count}}</b><span>{{.Label}}</span></div>{{end}}
+  </div>
+</section>
+
+<section class="panel" aria-labelledby="chart-h">
+  <h2 id="chart-h">Actions</h2>
+  <svg class="chart" viewBox="0 0 {{.Chart.Width}} {{.Chart.Height}}" role="img" aria-label="Bar chart of changes by action">
+    {{range .Chart.Bars}}
+    <text x="0" y="{{.TextY}}">{{.Label}}</text>
+    <rect class="bar" x="{{$.Chart.LabelW}}" y="{{.Y}}" width="{{.W}}" height="16" rx="3" style="fill: var(--{{.Class}})"><title>{{.Label}}: {{.Count}}</title></rect>
+    <text x="{{.CountX}}" y="{{.TextY}}">{{.Count}}</text>
+    {{end}}
+  </svg>
+</section>
+
+{{if .A.Drift}}
+<section class="panel drift" aria-labelledby="drift-h">
+  <h2 id="drift-h">Drift: {{len .A.Drift}} changed outside Terraform</h2>
+  {{range .A.Drift}}
+  <div class="finding">
+    <div><span class="mono">{{.Address}}</span> {{if .HighRisk}}<span class="badge hi">HIGH RISK</span>{{end}}</div>
+    {{if .Note}}<p class="why">{{.Note}}</p>{{end}}
+    {{template "attrs" .Attrs}}
+  </div>
+  {{end}}
+</section>
+{{end}}
+
+<section aria-labelledby="changes-h">
+  <h2 id="changes-h">All changes</h2>
+  <div class="controls">
+    <input id="q" type="search" placeholder="Search address, type, account&hellip;" aria-label="Search changes">
+    <label>Action
+      <select id="action"><option value="">all</option>
+        {{range .Actions}}<option value="{{.}}">{{.}}</option>{{end}}
+      </select></label>
+    <label>Group by
+      <select id="group"><option value="">none</option><option value="account">account</option><option value="module">module</option><option value="type">type</option></select></label>
+    <label><input id="hidequiet" type="checkbox"> hide plain no-ops and reads</label>
+    <span id="count" class="src"></span>
+  </div>
+  <table>
+    <thead><tr><th>Action</th><th>Resource</th><th>Type</th><th>Target account (source)</th><th>Module</th></tr></thead>
+    <tbody id="rows">
+    {{range .Rows}}
+      <tr class="row" tabindex="0" data-idx="{{.Idx}}" data-action="{{.C.Action}}" data-account="{{.C.Account}}" data-module="{{.C.Module}}" data-type="{{.C.Type}}" data-quiet="{{if .C.Listed}}0{{else}}1{{end}}" data-text="{{.Text}}">
+        <td><b class="a-{{.C.Action}}">{{sym .C.Action}} {{.C.Action}}</b></td>
+        <td class="addr mono">{{.C.Address}}
+          {{if .C.Stateful}}<span class="badge stateful">STATEFUL</span>{{end}}
+          {{if .C.MovedFrom}}<span class="badge">moved</span>{{end}}
+          {{if .C.Import}}<span class="badge">import</span>{{end}}
+          {{if .C.StateOnly}}<span class="badge">state only</span>{{end}}
+          {{if .C.Warnings}}<span class="badge warn">{{len .C.Warnings}} warning(s)</span>{{end}}</td>
+        <td>{{.C.Type}}</td>
+        <td><span class="mono">{{.C.Account}}</span> <span class="src">({{.C.AccountSource}})</span>{{if .C.CrossAccount}} <span class="badge warn">differs from apply account</span>{{end}}</td>
+        <td>{{.C.Module}}</td>
+      </tr>
+    {{end}}
+    </tbody>
+  </table>
+</section>
+</main>
+
+<aside id="drawer" role="dialog" aria-label="Resource details" hidden>
+  <button id="drawer-close" type="button">Close</button>
+  <div id="drawer-body"></div>
+</aside>
+
+{{range .Rows}}
+<template id="d{{.Idx}}">
+  <h3 class="mono">{{.C.Address}}</h3>
+  <p><b class="a-{{.C.Action}}">{{.C.Label}}</b>
+    {{if .C.Stateful}}<span class="badge stateful">STATEFUL</span>{{end}}</p>
+  <p class="meta">{{.C.Type}} &middot; provider <span class="mono">{{.C.Provider}}</span><br>
+    target account <span class="mono">{{.C.Account}}</span> (source: {{.C.AccountSource}}){{if .C.CrossAccount}} &mdash; <b>differs from apply account</b>{{end}}</p>
+  {{if .C.ReasonText}}<p><b>Why:</b> {{.C.ReasonText}}</p>{{end}}
+  {{range .C.Warnings}}<p class="warnline"><b>WARNING:</b> {{.Message}}</p>{{end}}
+  {{if .C.KnownAfterApply}}<p class="src">{{.C.KnownAfterApply}} attribute(s) known after apply</p>{{end}}
+  {{template "attrs" .C.Attrs}}
+</template>
+{{end}}
+
+<script>{{.JS}}</script>
+</body>
+</html>
+{{define "attrs"}}{{range .}}
+<div class="attr">
+  <div><span class="path mono">{{.Path}}</span>{{if .ForcesReplace}} <span class="badge warn">forces replacement</span>{{end}}</div>
+  {{if eq .Kind "sensitive"}}<div class="empty">(sensitive value changed)</div>
+  {{else if eq .Kind "unknown"}}<div>{{if .Before}}<span class="mono">{{raw .Before}}</span> &rarr; {{end}}(known after apply)</div>
+  {{else if eq .Kind "long"}}
+    <div>{{.Diff.Header}}</div>
+    <div class="diff mono">{{range .Diff.Lines}}<div class="{{diffClass .}}">{{.}}</div>{{end}}{{if .Diff.Truncated}}<div class="hunk">&hellip; {{.Diff.Truncated}} more diff line(s) hidden</div>{{end}}</div>
+    <details class="full"><summary>expand full value</summary>
+      <b>before</b><pre>{{.Diff.FullBefore}}</pre>
+      <b>after</b><pre>{{.Diff.FullAfter}}</pre>
+    </details>
+  {{else}}<div><span class="mono">{{if .Before}}{{raw .Before}}{{else}}(absent){{end}}</span> &rarr; <span class="mono">{{if .After}}{{raw .After}}{{else}}(absent){{end}}</span></div>
+  {{end}}
+</div>
+{{end}}{{end}}

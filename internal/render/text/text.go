@@ -222,9 +222,7 @@ func countListed(g analyze.Group, by map[string]*analyze.Change) int {
 	return n
 }
 
-func listed(c *analyze.Change) bool {
-	return c.Action != "no-op" || c.MovedFrom != "" || c.Import || len(c.Warnings) > 0
-}
+func listed(c *analyze.Change) bool { return c.Listed() }
 
 func countsLine(c analyze.ActionCounts) string {
 	var p []string
@@ -252,22 +250,7 @@ var symbols = map[string]string{
 }
 
 func (r *renderer) change(c *analyze.Change) {
-	label := c.Action
-	switch {
-	case c.StateOnly:
-		label = "removed from state only"
-	case c.Import && c.Action == "no-op":
-		label = "import"
-	case c.Import:
-		label = "import + " + c.Action
-	}
-	if c.MovedFrom != "" {
-		if c.Action == "no-op" {
-			label = "moved from " + c.MovedFrom
-		} else {
-			label += ", moved from " + c.MovedFrom
-		}
-	}
+	label := c.Label()
 	badge := ""
 	if c.Stateful {
 		badge = " [STATEFUL]"

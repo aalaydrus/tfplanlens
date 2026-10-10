@@ -161,3 +161,31 @@ type Change struct {
 	Attrs           []Attr    `json:"attrs"`
 	KnownAfterApply int       `json:"known_after_apply"`
 }
+
+// Listed reports whether a change is worth listing in a report: it does
+// something, is moved or imported, or carries a warning. Plain no-ops are
+// counted but not listed.
+func (c Change) Listed() bool {
+	return c.Action != "no-op" || c.MovedFrom != "" || c.Import || len(c.Warnings) > 0
+}
+
+// Label describes what happens to the resource in a few words.
+func (c Change) Label() string {
+	label := c.Action
+	switch {
+	case c.StateOnly:
+		label = "removed from state only"
+	case c.Import && c.Action == "no-op":
+		label = "import"
+	case c.Import:
+		label = "import + " + c.Action
+	}
+	if c.MovedFrom != "" {
+		if c.Action == "no-op" {
+			label = "moved from " + c.MovedFrom
+		} else {
+			label += ", moved from " + c.MovedFrom
+		}
+	}
+	return label
+}

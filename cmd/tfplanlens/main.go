@@ -13,7 +13,9 @@ import (
 	"github.com/aalaydrus/tfplanlens/internal/analyze"
 	"github.com/aalaydrus/tfplanlens/internal/config"
 	"github.com/aalaydrus/tfplanlens/internal/plan"
+	htmlrender "github.com/aalaydrus/tfplanlens/internal/render/html"
 	"github.com/aalaydrus/tfplanlens/internal/render/jsonout"
+	"github.com/aalaydrus/tfplanlens/internal/render/markdown"
 	"github.com/aalaydrus/tfplanlens/internal/render/text"
 )
 
@@ -139,9 +141,7 @@ func runReport(cmd *cobra.Command, path string, o *reportOptions) error {
 	formats := o.formats
 	for _, f := range formats {
 		switch f {
-		case "text", "json":
-		case "html", "markdown":
-			return fmt.Errorf("--format %s: %w", f, errNotImplemented)
+		case "text", "json", "markdown", "html":
 		default:
 			return fmt.Errorf("unsupported --format %q (want text, html, markdown or json)", f)
 		}
@@ -198,6 +198,10 @@ func runReport(cmd *cobra.Command, path string, o *reportOptions) error {
 			err = text.Render(w, a, text.Options{Color: useColor(cmd.OutOrStdout(), o.noColor), MaxLine: o.maxLine})
 		case "json":
 			err = jsonout.Render(w, a)
+		case "markdown":
+			err = markdown.Render(w, a)
+		case "html":
+			err = htmlrender.Render(w, a)
 		}
 		if file != nil {
 			if cerr := file.Close(); err == nil {

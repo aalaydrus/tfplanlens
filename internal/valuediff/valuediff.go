@@ -62,6 +62,11 @@ type Result struct {
 	Total   int      `json:"total_lines"`
 	// Truncated is the number of diff lines hidden by MaxDiffLines.
 	Truncated int `json:"truncated_lines,omitempty"`
+	// FullBefore and FullAfter are the decoded values. Only the HTML report
+	// uses them (behind an "expand full value" toggle); they are never
+	// serialized and the terminal and markdown renderers never print them.
+	FullBefore string `json:"-"`
+	FullAfter  string `json:"-"`
 }
 
 // Decode normalizes a value for diffing: base64 is decoded, gzip is
@@ -158,6 +163,7 @@ func Diff(key, before, after string) Result {
 	b, _ := Decode(before)
 	a, _ := Decode(after)
 	res := diffLines(key, splitLines(b), splitLines(a))
+	res.FullBefore, res.FullAfter = b, a
 
 	// IAM policies additionally get a per-statement summary.
 	if bs, as := PolicyStatements(b), PolicyStatements(a); bs != nil || as != nil {

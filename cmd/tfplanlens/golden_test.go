@@ -170,14 +170,14 @@ func TestStdinAndErrors(t *testing.T) {
 }
 
 func TestSensitiveValuesNeverPrinted(t *testing.T) {
-	for _, f := range []string{"text", "json"} {
+	for _, f := range []string{"text", "json", "markdown", "html"} {
 		_, out, _ := runCLI("report", plans+"sensitive.json", "--no-color", "--format", f)
 		for _, secret := range []string{"old-secret-pw", "new-secret-pw", "s3cr3t-value"} {
 			if strings.Contains(out, secret) {
 				t.Errorf("%s output leaks %q", f, secret)
 			}
 		}
-		if !strings.Contains(out, "sensitive") {
+		if !strings.Contains(out, "sensitive") { // the marker, never the value
 			t.Errorf("%s output has no sensitive marker", f)
 		}
 	}
@@ -211,7 +211,7 @@ func TestLargePlanPerformance(t *testing.T) {
 	}
 	sb.WriteString(`]}`)
 
-	for _, format := range []string{"text", "json"} {
+	for _, format := range []string{"text", "json", "markdown", "html"} {
 		start := time.Now()
 		var out, errb bytes.Buffer
 		code := run([]string{"report", "-", "--no-color", "--format", format}, strings.NewReader(sb.String()), &out, &errb)
@@ -220,6 +220,9 @@ func TestLargePlanPerformance(t *testing.T) {
 		}
 		if d := time.Since(start); d > 2*time.Second {
 			t.Errorf("%s took %v, want < 2s", format, d)
+		}
+		if format == "markdown" && out.Len() > 60000 {
+			t.Errorf("markdown is %d bytes, want <= 60000", out.Len())
 		}
 	}
 }
