@@ -1,0 +1,9 @@
+# Environment for terraform when planning this scenario against floci, a local
+# AWS emulator (docker run -p 4566:4566 floci/floci). No real AWS access.
+# A 12-digit access key id is used by floci as the account id: this is the
+# runner's account. assume_role then resolves to the role's own account.
+AWS_ENDPOINT_URL=http://localhost:4566
+AWS_ACCESS_KEY_ID=999999999999
+AWS_SECRET_ACCESS_KEY=test
+AWS_REGION=us-east-1
+AWS_EC2_METADATA_DISABLED=true

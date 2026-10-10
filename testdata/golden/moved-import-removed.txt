@@ -1,0 +1,29 @@
+== Summary ==
+Plan: normal | applyable: yes | errored: no
+Executed from (apply account): unresolved
+NOTICE: Apply account unknown: set tfapply_account_id in tfplanlens.config.yaml (it cannot be read from the plan). Cros…
+Actions: create 0, update 2, replace 0, delete 0, read 0, no-op 2, forget 1
+Known after apply: 0 attribute(s)
+By type: aws_db_instance 1, aws_iam_role 1, aws_instance 1, aws_s3_bucket 1, aws_vpc 1
+By module: root 4, module.net 1
+
+== Danger ==
+No deletes or replacements.
+
+== Drift ==
+No changes made outside Terraform.
+
+== Changes by account ==
+aws: target account unresolved (alias: default) (source: unresolved)
+    update 2, forget 1, no-op 2
+    = aws_s3_bucket.new_name [STATEFUL]  (moved from aws_s3_bucket.old_name)
+    ~ module.net.aws_vpc.main  (update, moved from aws_vpc.main)
+        tags.m: (absent) -> "1"
+    = aws_iam_role.imported  (import)
+    ~ aws_instance.imported_update  (import + update)
+        instance_type: "t3.micro" -> "t3.small"
+    x aws_db_instance.forgotten [STATEFUL]  (removed from state only)
+
+== Changes by module ==
+module.net: update 1
+root: update 1, forget 1, no-op 2

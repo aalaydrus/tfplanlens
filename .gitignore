@@ -31,3 +31,10 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# GoReleaser output
+dist/
+
+node_modules
+work/
+/tfplanlens

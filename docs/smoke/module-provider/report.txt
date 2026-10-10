@@ -1,0 +1,38 @@
+== Summary ==
+Plan: normal | applyable: yes | errored: no
+Executed from (apply account): 111111111111 (source: flag)
+Actions: create 0, update 0, replace 3, delete 0, read 0, no-op 0, forget 0
+Known after apply: 21 attribute(s)
+By type: local_file 3
+By module: root 2, module.net 1
+
+== Danger ==
+! REPLACE local_file.alt
+    type: local_file | target account: 111111111111 (source: apply_account)
+    why: Attribute change forces replacement: content
+! REPLACE local_file.root
+    type: local_file | target account: 111111111111 (source: apply_account)
+    why: Attribute change forces replacement: content
+! REPLACE module.net.local_file.inner
+    type: local_file | target account: 111111111111 (source: apply_account)
+    why: Attribute change forces replacement: content
+
+== Drift ==
+No changes made outside Terraform.
+
+== Changes by account ==
+local: target account 111111111111 (source: apply_account)
+    replace 1
+    -/+ local_file.root  (replace, 7 known after apply)
+        content: "root-v1" -> "root-v2"  [forces replacement]
+
+local.alt: target account 111111111111 (source: apply_account)
+    replace 2
+    -/+ local_file.alt  (replace, 7 known after apply)
+        content: "alt-v1" -> "alt-v2"  [forces replacement]
+    -/+ module.net.local_file.inner  (replace, 7 known after apply)
+        content: "inner-v1" -> "inner-v2"  [forces replacement]
+
+== Changes by module ==
+module.net: replace 1
+root: replace 2

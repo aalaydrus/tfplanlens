@@ -1,0 +1,25 @@
+== Summary ==
+Plan: normal | applyable: yes | errored: no
+Executed from (apply account): unresolved
+NOTICE: Apply account unknown: set tfapply_account_id in tfplanlens.config.yaml (it cannot be read from the plan). Cros…
+Actions: create 0, update 2, replace 0, delete 0, read 0, no-op 0, forget 0
+Known after apply: 2 attribute(s)
+By type: terraform_data 2
+By module: root 2
+
+== Danger ==
+No deletes or replacements.
+
+== Drift ==
+No changes made outside Terraform.
+
+== Changes by account ==
+terraform: target account unresolved (alias: default) (source: unresolved)
+    update 2
+    ~ terraform_data.imp  (import + update, 1 known after apply)
+        input: null -> "managed"
+    ~ terraform_data.other  (update, 1 known after apply)
+        input: "other" -> "other-changed"
+
+== Changes by module ==
+root: update 2

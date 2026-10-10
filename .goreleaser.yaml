@@ -1,0 +1,61 @@
+# GoReleaser configuration (SPEC section 8). Releases run on `v*` tags via
+# .github/workflows/release.yml; CI runs `goreleaser check` and a snapshot
+# build on every pull request.
+version: 2
+
+project_name: tfplanlens
+
+builds:
+  - id: tfplanlens
+    main: ./cmd/tfplanlens
+    binary: tfplanlens
+    env:
+      - CGO_ENABLED=0
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w -X main.version={{.Version}}
+
+archives:
+  - id: tfplanlens
+    formats: [tar.gz]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    files:
+      - LICENSE
+      - README.md
+
+checksum:
+  name_template: checksums.txt
+  algorithm: sha256
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^Merge "
+
+# Homebrew formula (SPEC section 8), pushed to aalaydrus/homebrew-tap. Newer
+# GoReleaser (2.10+) deprecates `brews` in favor of `homebrew_casks`, which is
+# macOS-only and not a formula, so CI and the release workflow pin
+# GoReleaser to ~> v2.9. Revisit when moving to a cask or when v3 lands. The
+# upload is skipped unless HOMEBREW_TAP_GITHUB_TOKEN (a token with write
+# access to that repo) is set, so releases work before the tap exists.
+brews:
+  - name: tfplanlens
+    repository:
+      owner: aalaydrus
+      name: homebrew-tap
+      token: "{{ index .Env \"HOMEBREW_TAP_GITHUB_TOKEN\" }}"
+    skip_upload: '{{ if index .Env "HOMEBREW_TAP_GITHUB_TOKEN" }}auto{{ else }}true{{ end }}'
+    homepage: https://github.com/aalaydrus/tfplanlens
+    description: Read a Terraform plan the way a reviewer needs to
+    license: MIT
+    test: |
+      assert_match version.to_s, shell_output("#{bin}/tfplanlens version")

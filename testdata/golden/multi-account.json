@@ -1,0 +1,238 @@
+{
+  "schema_version": 1,
+  "apply_account": {
+    "source": "unresolved",
+    "resolved": false
+  },
+  "notices": [
+    "Apply account unknown: set tfapply_account_id in tfplanlens.config.yaml (it cannot be read from the plan). Cross-account flags are off."
+  ],
+  "summary": {
+    "mode": "normal",
+    "applyable": true,
+    "errored": false,
+    "terraform_version": "1.9.5",
+    "total": 5,
+    "actions": {
+      "create": 3,
+      "update": 1,
+      "replace": 0,
+      "delete": 1,
+      "read": 0,
+      "no_op": 0,
+      "forget": 0
+    },
+    "by_type": {
+      "aws_db_instance": 1,
+      "aws_s3_bucket": 3,
+      "aws_sqs_queue": 1
+    },
+    "by_module": {
+      "root": 5
+    },
+    "known_after_apply": 0,
+    "drift_count": 0,
+    "warnings": 0
+  },
+  "findings": [
+    {
+      "address": "aws_db_instance.prod",
+      "type": "aws_db_instance",
+      "action": "delete",
+      "provider": "aws.prod",
+      "account": "111111111111",
+      "account_source": "role_arn",
+      "stateful": true,
+      "reason": "delete_because_no_resource_config",
+      "reason_text": "Removed from config",
+      "index_shift": false,
+      "drift_also": false
+    }
+  ],
+  "drift": [],
+  "groups": [
+    {
+      "key": "aws",
+      "provider": "aws",
+      "account": "unresolved (alias: default)",
+      "resolved": false,
+      "source": "unresolved",
+      "default": true,
+      "cross_account": false,
+      "counts": {
+        "create": 1,
+        "update": 0,
+        "replace": 0,
+        "delete": 0,
+        "read": 0,
+        "no_op": 0,
+        "forget": 0
+      },
+      "addresses": [
+        "aws_s3_bucket.default"
+      ]
+    },
+    {
+      "key": "aws.mystery",
+      "provider": "aws",
+      "alias": "mystery",
+      "account": "unresolved (alias: mystery)",
+      "resolved": false,
+      "source": "unresolved",
+      "default": false,
+      "cross_account": false,
+      "counts": {
+        "create": 1,
+        "update": 0,
+        "replace": 0,
+        "delete": 0,
+        "read": 0,
+        "no_op": 0,
+        "forget": 0
+      },
+      "addresses": [
+        "aws_sqs_queue.eu"
+      ]
+    },
+    {
+      "key": "aws.prod",
+      "provider": "aws",
+      "alias": "prod",
+      "account": "111111111111",
+      "resolved": true,
+      "source": "role_arn",
+      "default": false,
+      "cross_account": false,
+      "counts": {
+        "create": 1,
+        "update": 0,
+        "replace": 0,
+        "delete": 1,
+        "read": 0,
+        "no_op": 0,
+        "forget": 0
+      },
+      "addresses": [
+        "aws_s3_bucket.prod",
+        "aws_db_instance.prod"
+      ]
+    },
+    {
+      "key": "aws.shared",
+      "provider": "aws",
+      "alias": "shared",
+      "account": "222222222222",
+      "resolved": true,
+      "source": "role_arn",
+      "default": false,
+      "cross_account": false,
+      "counts": {
+        "create": 0,
+        "update": 1,
+        "replace": 0,
+        "delete": 0,
+        "read": 0,
+        "no_op": 0,
+        "forget": 0
+      },
+      "addresses": [
+        "aws_s3_bucket.shared"
+      ]
+    }
+  ],
+  "changes": [
+    {
+      "address": "aws_s3_bucket.default",
+      "type": "aws_s3_bucket",
+      "module": "root",
+      "mode": "managed",
+      "action": "create",
+      "provider": "aws",
+      "account": "unresolved (alias: default)",
+      "account_source": "unresolved",
+      "cross_account": false,
+      "warnings": [],
+      "stateful": true,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [],
+      "known_after_apply": 0
+    },
+    {
+      "address": "aws_s3_bucket.prod",
+      "type": "aws_s3_bucket",
+      "module": "root",
+      "mode": "managed",
+      "action": "create",
+      "provider": "aws.prod",
+      "account": "111111111111",
+      "account_source": "role_arn",
+      "cross_account": false,
+      "warnings": [],
+      "stateful": true,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [],
+      "known_after_apply": 0
+    },
+    {
+      "address": "aws_s3_bucket.shared",
+      "type": "aws_s3_bucket",
+      "module": "root",
+      "mode": "managed",
+      "action": "update",
+      "provider": "aws.shared",
+      "account": "222222222222",
+      "account_source": "role_arn",
+      "cross_account": false,
+      "warnings": [],
+      "stateful": true,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [
+        {
+          "path": "tags.x",
+          "kind": "value",
+          "after": "y"
+        }
+      ],
+      "known_after_apply": 0
+    },
+    {
+      "address": "aws_db_instance.prod",
+      "type": "aws_db_instance",
+      "module": "root",
+      "mode": "managed",
+      "action": "delete",
+      "provider": "aws.prod",
+      "account": "111111111111",
+      "account_source": "role_arn",
+      "cross_account": false,
+      "warnings": [],
+      "stateful": true,
+      "reason": "delete_because_no_resource_config",
+      "reason_text": "Removed from config",
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [],
+      "known_after_apply": 0
+    },
+    {
+      "address": "aws_sqs_queue.eu",
+      "type": "aws_sqs_queue",
+      "module": "root",
+      "mode": "managed",
+      "action": "create",
+      "provider": "aws.mystery",
+      "account": "unresolved (alias: mystery)",
+      "account_source": "unresolved",
+      "cross_account": false,
+      "warnings": [],
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [],
+      "known_after_apply": 0
+    }
+  ]
+}

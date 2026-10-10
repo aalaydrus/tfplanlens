@@ -1,0 +1,369 @@
+{
+  "schema_version": 1,
+  "apply_account": {
+    "id": "111111111111",
+    "source": "flag",
+    "resolved": true
+  },
+  "notices": [],
+  "summary": {
+    "mode": "normal",
+    "applyable": true,
+    "errored": false,
+    "terraform_version": "1.16.5",
+    "total": 7,
+    "actions": {
+      "create": 1,
+      "update": 5,
+      "replace": 1,
+      "delete": 0,
+      "read": 0,
+      "no_op": 0,
+      "forget": 0
+    },
+    "by_type": {
+      "aws_sns_topic": 1,
+      "aws_sns_topic_subscription": 1,
+      "aws_sqs_queue": 4,
+      "aws_ssm_parameter": 1
+    },
+    "by_module": {
+      "module.net": 1,
+      "root": 6
+    },
+    "known_after_apply": 19,
+    "drift_count": 0,
+    "warnings": 2
+  },
+  "findings": [
+    {
+      "address": "module.net.aws_sqs_queue.inner",
+      "type": "aws_sqs_queue",
+      "action": "replace",
+      "provider": "aws.prod",
+      "account": "111111111111",
+      "account_source": "role_arn",
+      "stateful": false,
+      "reason": "replace_because_cannot_update",
+      "reason_text": "Attribute change forces replacement: name",
+      "replace_paths": [
+        "name"
+      ],
+      "index_shift": false,
+      "drift_also": false
+    }
+  ],
+  "drift": [],
+  "groups": [
+    {
+      "key": "aws",
+      "provider": "aws",
+      "account": "999999999999",
+      "resolved": true,
+      "source": "caller_identity",
+      "default": true,
+      "cross_account": true,
+      "counts": {
+        "create": 1,
+        "update": 1,
+        "replace": 0,
+        "delete": 0,
+        "read": 0,
+        "no_op": 0,
+        "forget": 0
+      },
+      "addresses": [
+        "aws_sns_topic_subscription.cross",
+        "aws_sqs_queue.runner"
+      ]
+    },
+    {
+      "key": "aws.audit",
+      "provider": "aws",
+      "alias": "audit",
+      "account": "999999999999",
+      "resolved": true,
+      "source": "allowed_account_ids",
+      "default": false,
+      "cross_account": true,
+      "counts": {
+        "create": 0,
+        "update": 1,
+        "replace": 0,
+        "delete": 0,
+        "read": 0,
+        "no_op": 0,
+        "forget": 0
+      },
+      "addresses": [
+        "aws_sqs_queue.audit"
+      ]
+    },
+    {
+      "key": "aws.prod",
+      "provider": "aws",
+      "alias": "prod",
+      "account": "111111111111",
+      "resolved": true,
+      "source": "role_arn",
+      "default": false,
+      "cross_account": false,
+      "counts": {
+        "create": 0,
+        "update": 1,
+        "replace": 1,
+        "delete": 0,
+        "read": 0,
+        "no_op": 0,
+        "forget": 0
+      },
+      "addresses": [
+        "aws_sns_topic.prod",
+        "module.net.aws_sqs_queue.inner"
+      ]
+    },
+    {
+      "key": "aws.sandbox",
+      "provider": "aws",
+      "alias": "sandbox",
+      "account": "111111111111",
+      "resolved": true,
+      "source": "apply_account",
+      "default": false,
+      "cross_account": false,
+      "counts": {
+        "create": 0,
+        "update": 1,
+        "replace": 0,
+        "delete": 0,
+        "read": 0,
+        "no_op": 0,
+        "forget": 0
+      },
+      "addresses": [
+        "aws_ssm_parameter.sandbox"
+      ]
+    },
+    {
+      "key": "aws.staging",
+      "provider": "aws",
+      "alias": "staging",
+      "account": "222222222222",
+      "resolved": true,
+      "source": "role_arn_variable",
+      "default": false,
+      "cross_account": true,
+      "counts": {
+        "create": 0,
+        "update": 1,
+        "replace": 0,
+        "delete": 0,
+        "read": 0,
+        "no_op": 0,
+        "forget": 0
+      },
+      "addresses": [
+        "aws_sqs_queue.staging"
+      ]
+    }
+  ],
+  "changes": [
+    {
+      "address": "aws_sns_topic.prod",
+      "type": "aws_sns_topic",
+      "module": "root",
+      "mode": "managed",
+      "action": "update",
+      "provider": "aws.prod",
+      "account": "111111111111",
+      "account_source": "role_arn",
+      "cross_account": false,
+      "warnings": [],
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [
+        {
+          "path": "display_name",
+          "kind": "value",
+          "before": "",
+          "after": "prod v2"
+        }
+      ],
+      "known_after_apply": 0
+    },
+    {
+      "address": "aws_sns_topic_subscription.cross",
+      "type": "aws_sns_topic_subscription",
+      "module": "root",
+      "mode": "managed",
+      "action": "create",
+      "provider": "aws",
+      "account": "999999999999",
+      "account_source": "caller_identity",
+      "cross_account": true,
+      "warnings": [
+        {
+          "kind": "arn_account_mismatch",
+          "path": "topic_arn",
+          "message": "topic_arn is in account 111111111111 but provider aws targets 999999999999 (caller_identity)"
+        }
+      ],
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [],
+      "known_after_apply": 6
+    },
+    {
+      "address": "aws_sqs_queue.audit",
+      "type": "aws_sqs_queue",
+      "module": "root",
+      "mode": "managed",
+      "action": "update",
+      "provider": "aws.audit",
+      "account": "999999999999",
+      "account_source": "allowed_account_ids",
+      "cross_account": true,
+      "warnings": [],
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [
+        {
+          "path": "visibility_timeout_seconds",
+          "kind": "value",
+          "before": 30,
+          "after": 60
+        }
+      ],
+      "known_after_apply": 0
+    },
+    {
+      "address": "aws_sqs_queue.runner",
+      "type": "aws_sqs_queue",
+      "module": "root",
+      "mode": "managed",
+      "action": "update",
+      "provider": "aws",
+      "account": "999999999999",
+      "account_source": "caller_identity",
+      "cross_account": true,
+      "warnings": [],
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [
+        {
+          "path": "tags.env",
+          "kind": "value",
+          "after": "v2"
+        },
+        {
+          "path": "tags_all.env",
+          "kind": "value",
+          "after": "v2"
+        }
+      ],
+      "known_after_apply": 0
+    },
+    {
+      "address": "aws_sqs_queue.staging",
+      "type": "aws_sqs_queue",
+      "module": "root",
+      "mode": "managed",
+      "action": "update",
+      "provider": "aws.staging",
+      "account": "222222222222",
+      "account_source": "role_arn_variable",
+      "cross_account": true,
+      "warnings": [],
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [
+        {
+          "path": "tags.env",
+          "kind": "value",
+          "after": "v2"
+        },
+        {
+          "path": "tags_all.env",
+          "kind": "value",
+          "after": "v2"
+        }
+      ],
+      "known_after_apply": 0
+    },
+    {
+      "address": "aws_ssm_parameter.sandbox",
+      "type": "aws_ssm_parameter",
+      "module": "root",
+      "mode": "managed",
+      "action": "update",
+      "provider": "aws.sandbox",
+      "account": "111111111111",
+      "account_source": "apply_account",
+      "cross_account": false,
+      "warnings": [
+        {
+          "kind": "arn_account_mismatch",
+          "path": "arn",
+          "message": "arn is in account 999999999999 but provider aws.sandbox targets 111111111111 (apply_account)"
+        }
+      ],
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [
+        {
+          "path": "value",
+          "kind": "sensitive"
+        }
+      ],
+      "known_after_apply": 1
+    },
+    {
+      "address": "module.net.aws_sqs_queue.inner",
+      "type": "aws_sqs_queue",
+      "module": "module.net",
+      "mode": "managed",
+      "action": "replace",
+      "provider": "aws.prod",
+      "account": "111111111111",
+      "account_source": "role_arn",
+      "cross_account": false,
+      "warnings": [],
+      "stateful": false,
+      "reason": "replace_because_cannot_update",
+      "reason_text": "Attribute change forces replacement: name",
+      "replace_paths": [
+        "name"
+      ],
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [
+        {
+          "path": "kms_master_key_id",
+          "kind": "value",
+          "before": "",
+          "after": null
+        },
+        {
+          "path": "name",
+          "kind": "value",
+          "before": "net-inner-v1",
+          "after": "net-inner-v2",
+          "forces_replacement": true
+        },
+        {
+          "path": "tags",
+          "kind": "value",
+          "before": {},
+          "after": null
+        }
+      ],
+      "known_after_apply": 12
+    }
+  ]
+}

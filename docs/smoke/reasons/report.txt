@@ -1,0 +1,50 @@
+== Summary ==
+Plan: normal | applyable: yes | errored: no
+Executed from (apply account): 111111111111 (source: flag)
+Actions: create 1, update 1, replace 3, delete 3, read 0, no-op 2, forget 0
+Known after apply: 9 attribute(s)
+By type: terraform_data 9
+By module: root 7, module.gone 1, module.mods["b"] 1
+
+== Danger ==
+! REPLACE terraform_data.follower
+    type: terraform_data | target account: 111111111111 (source: apply_account)
+    why: replace_triggered_by dependency changed
+! REPLACE terraform_data.requested
+    type: terraform_data | target account: 111111111111 (source: apply_account)
+    why: Replacement requested with -replace
+! DELETE terraform_data.single
+    type: terraform_data | target account: 111111111111 (source: apply_account)
+    why: Resource switched between count/for_each/single
+    WARNING: count/for_each was added or removed on this resource; instances are being destroyed rather than moved
+! REPLACE terraform_data.tainted
+    type: terraform_data | target account: 111111111111 (source: apply_account)
+    why: Resource is tainted
+! DELETE module.gone.terraform_data.inner
+    type: terraform_data | target account: 111111111111 (source: apply_account)
+    why: Removed from config
+! DELETE module.mods["b"].terraform_data.inner
+    type: terraform_data | target account: 111111111111 (source: apply_account)
+    why: Whole module removed or its call changed
+
+== Drift ==
+No changes made outside Terraform.
+
+== Changes by account ==
+terraform: target account 111111111111 (source: apply_account)
+    create 1, update 1, replace 3, delete 3, no-op 2
+    = terraform_data.counted[0]  (moved from terraform_data.counted)
+    -/+ terraform_data.follower  (replace, 2 known after apply)
+    -/+ terraform_data.requested  (replace, 2 known after apply)
+    - terraform_data.single  (delete)
+    + terraform_data.single["a"]  (create, 2 known after apply)
+    -/+ terraform_data.tainted  (replace, 2 known after apply)
+    ~ terraform_data.trigger  (update, 1 known after apply)
+        input: "t1" -> "t2"
+    - module.gone.terraform_data.inner  (delete)
+    - module.mods["b"].terraform_data.inner  (delete)
+
+== Changes by module ==
+module.gone: delete 1
+module.mods["b"]: delete 1
+root: create 1, update 1, replace 3, delete 1, no-op 1

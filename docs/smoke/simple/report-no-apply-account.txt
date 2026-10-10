@@ -1,0 +1,32 @@
+== Summary ==
+Plan: normal | applyable: yes | errored: no
+Executed from (apply account): unresolved
+NOTICE: Apply account unknown: set tfapply_account_id in tfplanlens.config.yaml (it cannot be read from the plan). Cros…
+Actions: create 1, update 1, replace 1, delete 1, read 0, no-op 0, forget 0
+Known after apply: 5 attribute(s)
+By type: terraform_data 4
+By module: root 4
+
+== Danger ==
+! REPLACE terraform_data.db
+    type: terraform_data | target account: unresolved (alias: default) (source: unresolved)
+    why: Attribute change forces replacement: triggers_replace
+! DELETE terraform_data.old
+    type: terraform_data | target account: unresolved (alias: default) (source: unresolved)
+    why: Removed from config
+
+== Drift ==
+No changes made outside Terraform.
+
+== Changes by account ==
+terraform: target account unresolved (alias: default) (source: unresolved)
+    create 1, update 1, replace 1, delete 1
+    + terraform_data.cache  (create, 2 known after apply)
+    -/+ terraform_data.db  (replace, 2 known after apply)
+        triggers_replace: "a" -> "b"  [forces replacement]
+    - terraform_data.old  (delete)
+    ~ terraform_data.web  (update, 1 known after apply)
+        input: "v1" -> "v2"
+
+== Changes by module ==
+root: create 1, update 1, replace 1, delete 1

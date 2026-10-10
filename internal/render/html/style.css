@@ -1,0 +1,94 @@
+:root {
+  --bg: #f7f8fa; --panel: #ffffff; --text: #1b1f24; --muted: #5b6573; --line: #d8dde4;
+  --create: #1a7f37; --update: #9a6700; --replace: #bc4c00; --delete: #cf222e; --read: #0969da; --no-op: #6e7781; --forget: #8250df;
+  --danger-bg: #fff1f0; --danger-line: #cf222e; --warn-bg: #fff8c5; --warn-line: #bf8700;
+  --add-bg: #dafbe1; --del-bg: #ffebe9; --hunk-bg: #ddf4ff;
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117; --panel: #161b22; --text: #e6edf3; --muted: #9ba7b4; --line: #30363d;
+  --create: #3fb950; --update: #d29922; --replace: #f0883e; --delete: #ff7b72; --read: #58a6ff; --no-op: #8b949e; --forget: #bc8cff;
+  --danger-bg: #2d1416; --danger-line: #ff7b72; --warn-bg: #2b2310; --warn-line: #d29922;
+  --add-bg: #12261e; --del-bg: #2d1416; --hunk-bg: #0c2d4a;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117; --panel: #161b22; --text: #e6edf3; --muted: #9ba7b4; --line: #30363d;
+    --create: #3fb950; --update: #d29922; --replace: #f0883e; --delete: #ff7b72; --read: #58a6ff; --no-op: #8b949e; --forget: #bc8cff;
+    --danger-bg: #2d1416; --danger-line: #ff7b72; --warn-bg: #2b2310; --warn-line: #d29922;
+    --add-bg: #12261e; --del-bg: #2d1416; --hunk-bg: #0c2d4a;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+code, pre, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.5px; }
+header { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; padding: 12px 24px; border-bottom: 1px solid var(--line); background: var(--panel); }
+header h1 { font-size: 18px; margin: 0; }
+header .grow { flex: 1; }
+main { max-width: 1200px; margin: 0 auto; padding: 16px 24px 64px; }
+section { margin: 16px 0; }
+h2 { font-size: 15px; margin: 0 0 8px; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; }
+.panel.danger { background: var(--danger-bg); border-color: var(--danger-line); }
+.panel.drift { border-color: var(--warn-line); }
+.chip { display: inline-block; padding: 1px 8px; border: 1px solid var(--line); border-radius: 999px; background: var(--bg); color: var(--muted); font-size: 12px; }
+.chip.bad { color: var(--delete); border-color: var(--delete); }
+.badge { display: inline-block; padding: 0 6px; border-radius: 4px; font-size: 11px; font-weight: 700; letter-spacing: .02em; border: 1px solid currentColor; }
+.badge.stateful { color: var(--delete); }
+.badge.warn { color: var(--update); }
+.badge.hi { color: var(--delete); background: var(--panel); }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; }
+.tile { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; }
+.tile b { display: block; font-size: 22px; line-height: 1.2; }
+.tile span { color: var(--muted); font-size: 12px; }
+.a-create { color: var(--create); } .a-update { color: var(--update); } .a-replace { color: var(--replace); }
+.a-delete { color: var(--delete); } .a-read { color: var(--read); } .a-no-op { color: var(--no-op); } .a-forget { color: var(--forget); }
+.finding { padding: 8px 0; border-top: 1px solid var(--danger-line); }
+.finding:first-of-type { border-top: 0; }
+.finding .why { margin: 2px 0 0 0; color: var(--text); }
+.finding .meta { color: var(--muted); font-size: 12px; }
+.warnline { margin: 4px 0 0; padding: 4px 8px; background: var(--warn-bg); border-left: 3px solid var(--warn-line); border-radius: 3px; }
+.chart { width: 100%; max-width: 380px; height: auto; }
+.chart text { fill: var(--text); font-size: 13px; }
+.chart .bar { stroke: none; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-bottom: 8px; }
+.controls input[type="search"], .controls select { padding: 4px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--text); font: inherit; }
+.controls input[type="search"] { min-width: 240px; }
+button { font: inherit; padding: 4px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--text); cursor: pointer; }
+button:hover { border-color: var(--read); }
+table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
+th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-weight: 600; font-size: 12px; position: sticky; top: 0; background: var(--panel); }
+tr.row { cursor: pointer; }
+tr.row:hover, tr.row:focus { background: var(--bg); outline: none; }
+tr.row:focus-visible { outline: 2px solid var(--read); }
+tr.group td { background: var(--bg); font-weight: 600; }
+.src { color: var(--muted); font-size: 12px; }
+td.addr { word-break: break-all; }
+#drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(640px, 100%); background: var(--panel); border-left: 1px solid var(--line); box-shadow: -8px 0 24px rgba(0, 0, 0, .25); overflow: auto; padding: 16px 20px; z-index: 10; }
+#drawer[hidden] { display: none; }
+#drawer h3 { margin: 0 0 4px; word-break: break-all; }
+.attr { margin: 10px 0; padding-top: 8px; border-top: 1px solid var(--line); }
+.attr .path { font-weight: 600; }
+.diff { margin: 6px 0; padding: 0; border: 1px solid var(--line); border-radius: 6px; overflow: auto; max-height: 360px; }
+.diff div { padding: 0 8px; white-space: pre; }
+.diff .add { background: var(--add-bg); } .diff .del { background: var(--del-bg); } .diff .hunk { background: var(--hunk-bg); color: var(--muted); }
+details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--line); border-radius: 6px; padding: 8px; margin: 4px 0; white-space: pre; }
+.empty { color: var(--muted); }
+.hidden { display: none !important; }
+@media (max-width: 700px) {
+  main, header { padding-left: 12px; padding-right: 12px; }
+  .controls input[type="search"] { min-width: 0; width: 100%; }
+  /* Stack each row: action and account on one line, the address on its own
+     full-width line, so long addresses are not squeezed into a narrow column. */
+  table, tbody { display: block; }
+  thead { display: none; }
+  tr.row { display: grid; grid-template-columns: auto 1fr; grid-template-areas: "a c" "r r"; gap: 0 12px; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  tr.row td { border: 0; padding: 1px 0; }
+  tr.row td:nth-child(1) { grid-area: a; }
+  tr.row td:nth-child(4) { grid-area: c; text-align: right; }
+  tr.row td.addr { grid-area: r; overflow-wrap: anywhere; word-break: normal; font-size: 12px; }
+  tr.row td:nth-child(3), tr.row td:nth-child(5) { display: none; }
+  tr.group { display: block; }
+  tr.group td { display: block; }
+}
+@media print { #drawer, .controls, #theme { display: none; } }

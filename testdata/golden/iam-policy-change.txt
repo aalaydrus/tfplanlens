@@ -1,0 +1,60 @@
+== Summary ==
+Plan: normal | applyable: yes | errored: no
+Executed from (apply account): unresolved
+NOTICE: Apply account unknown: set tfapply_account_id in tfplanlens.config.yaml (it cannot be read from the plan). Cros…
+Actions: create 0, update 2, replace 0, delete 0, read 0, no-op 0, forget 0
+Known after apply: 0 attribute(s)
+By type: aws_iam_policy 1, aws_iam_role 1
+By module: root 2
+
+== Danger ==
+No deletes or replacements.
+
+== Drift ==
+No changes made outside Terraform.
+
+== Changes by account ==
+aws: target account unresolved (alias: default) (source: unresolved)
+    update 2
+    ~ aws_iam_role.app  (update)
+        assume_role_policy: 5 lines changed of 15 (+4 -1)
+          @@ -5,5 +5,8 @@
+                 "Effect": "Allow",
+                 "Principal": {
+          -        "Service": "ec2.amazonaws.com"
+          +        "Service": [
+          +          "ec2.amazonaws.com",
+          +          "lambda.amazonaws.com"
+          +        ]
+                 }
+               }
+          statements:
+          -Allow sts:AssumeRole -> principal Service=ec2.amazonaws.com
+          +Allow sts:AssumeRole -> principal Service=ec2.amazonaws.com|lambda.amazonaws.com
+    ~ aws_iam_policy.data  (update)
+        policy: 7 lines changed of 22 (+4 -3)
+          @@ -4,4 +4,5 @@
+                 "Action": [
+                   "s3:GetObject",
+          +        "s3:PutObject",
+                   "s3:ListBucket"
+                 ],
+          @@ -13,7 +14,7 @@
+               },
+               {
+          -      "Action": "s3:DeleteObject",
+          -      "Effect": "Deny",
+          -      "Resource": "*"
+          +      "Action": "kms:Decrypt",
+          +      "Effect": "Allow",
+          +      "Resource": "arn:aws:kms:us-east-1:111111111111:key/abcd"
+               }
+             ],
+          statements:
+          -Allow s3:GetObject,s3:ListBucket -> arn:aws:s3:::acme-data,arn:aws:s3:::acme-data/*
+          -Deny s3:DeleteObject -> *
+          +Allow s3:GetObject,s3:ListBucket,s3:PutObject -> arn:aws:s3:::acme-data,arn:aws:s3:::acme-data/*
+          +Allow kms:Decrypt -> arn:aws:kms:us-east-1:111111111111:key/abcd
+
+== Changes by module ==
+root: update 2

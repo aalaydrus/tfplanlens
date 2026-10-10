@@ -1,0 +1,57 @@
+== Summary ==
+Plan: normal | applyable: yes | errored: no
+Executed from (apply account): 111111111111 (source: flag)
+Actions: create 1, update 4, replace 1, delete 3, read 0, no-op 6, forget 1
+Known after apply: 10 attribute(s)
+By type: terraform_data 12
+By module: root 10, module.network_core 2
+
+== Danger ==
+! REPLACE terraform_data.db
+    type: terraform_data | target account: 111111111111 (source: apply_account)
+    why: Attribute change forces replacement: triggers_replace
+! DELETE terraform_data.subnet["b"]
+    type: terraform_data | target account: 111111111111 (source: apply_account)
+    why: for_each key removed: b
+    WARNING: for_each key removed while sibling instances change (possible key rename: terraform_data.subnet["d"])
+! DELETE terraform_data.worker[2]
+    type: terraform_data | target account: 111111111111 (source: apply_account)
+    why: count shrank; index 2 no longer exists
+! DELETE terraform_data.worker[3]
+    type: terraform_data | target account: 111111111111 (source: apply_account)
+    why: count shrank; index 3 no longer exists
+
+== Drift ==
+No changes made outside Terraform.
+
+== Changes by account ==
+terraform: target account 111111111111 (source: apply_account)
+    create 1, update 4, replace 1, delete 3, forget 1, no-op 6
+    ~ terraform_data.app  (update, 2 known after apply)
+    ~ terraform_data.creds  (update, 1 known after apply)
+        input: (sensitive value changed)
+    -/+ terraform_data.db  (replace, 2 known after apply)
+        triggers_replace: "a" -> "b"  [forces replacement]
+    ~ terraform_data.lb  (update, 2 known after apply)
+        input[1]: "a211b832-4e57-d7a5-89c9-f9051c08db31" -> "93d5dd3a-0d98-f54f-6426-879666484ff0"
+    x terraform_data.legacy  (removed from state only)
+    - terraform_data.subnet["b"]  (delete)
+    + terraform_data.subnet["d"]  (create, 2 known after apply)
+    ~ terraform_data.user_data  (update, 1 known after apply)
+        input: 4 lines changed of 401 (+2 -2)
+          @@ -120,6 +120,6 @@
+           echo step-118
+           echo step-119
+          -echo step-120
+          -echo step-121
+          +echo CHANGED-120
+          +echo CHANGED-121
+           echo step-122
+           echo step-123
+    - terraform_data.worker[2]  (delete)
+    - terraform_data.worker[3]  (delete)
+    +2 more
+
+== Changes by module ==
+module.network_core: no-op 2
+root: create 1, update 4, replace 1, delete 3, forget 1

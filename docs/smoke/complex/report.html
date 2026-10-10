@@ -1,0 +1,1558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<title>tfplanlens report</title>
+<style>:root {
+  --bg: #f7f8fa; --panel: #ffffff; --text: #1b1f24; --muted: #5b6573; --line: #d8dde4;
+  --create: #1a7f37; --update: #9a6700; --replace: #bc4c00; --delete: #cf222e; --read: #0969da; --no-op: #6e7781; --forget: #8250df;
+  --danger-bg: #fff1f0; --danger-line: #cf222e; --warn-bg: #fff8c5; --warn-line: #bf8700;
+  --add-bg: #dafbe1; --del-bg: #ffebe9; --hunk-bg: #ddf4ff;
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117; --panel: #161b22; --text: #e6edf3; --muted: #9ba7b4; --line: #30363d;
+  --create: #3fb950; --update: #d29922; --replace: #f0883e; --delete: #ff7b72; --read: #58a6ff; --no-op: #8b949e; --forget: #bc8cff;
+  --danger-bg: #2d1416; --danger-line: #ff7b72; --warn-bg: #2b2310; --warn-line: #d29922;
+  --add-bg: #12261e; --del-bg: #2d1416; --hunk-bg: #0c2d4a;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117; --panel: #161b22; --text: #e6edf3; --muted: #9ba7b4; --line: #30363d;
+    --create: #3fb950; --update: #d29922; --replace: #f0883e; --delete: #ff7b72; --read: #58a6ff; --no-op: #8b949e; --forget: #bc8cff;
+    --danger-bg: #2d1416; --danger-line: #ff7b72; --warn-bg: #2b2310; --warn-line: #d29922;
+    --add-bg: #12261e; --del-bg: #2d1416; --hunk-bg: #0c2d4a;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+code, pre, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.5px; }
+header { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; padding: 12px 24px; border-bottom: 1px solid var(--line); background: var(--panel); }
+header h1 { font-size: 18px; margin: 0; }
+header .grow { flex: 1; }
+main { max-width: 1200px; margin: 0 auto; padding: 16px 24px 64px; }
+section { margin: 16px 0; }
+h2 { font-size: 15px; margin: 0 0 8px; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; }
+.panel.danger { background: var(--danger-bg); border-color: var(--danger-line); }
+.panel.drift { border-color: var(--warn-line); }
+.chip { display: inline-block; padding: 1px 8px; border: 1px solid var(--line); border-radius: 999px; background: var(--bg); color: var(--muted); font-size: 12px; }
+.chip.bad { color: var(--delete); border-color: var(--delete); }
+.badge { display: inline-block; padding: 0 6px; border-radius: 4px; font-size: 11px; font-weight: 700; letter-spacing: .02em; border: 1px solid currentColor; }
+.badge.stateful { color: var(--delete); }
+.badge.warn { color: var(--update); }
+.badge.hi { color: var(--delete); background: var(--panel); }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; }
+.tile { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; }
+.tile b { display: block; font-size: 22px; line-height: 1.2; }
+.tile span { color: var(--muted); font-size: 12px; }
+.a-create { color: var(--create); } .a-update { color: var(--update); } .a-replace { color: var(--replace); }
+.a-delete { color: var(--delete); } .a-read { color: var(--read); } .a-no-op { color: var(--no-op); } .a-forget { color: var(--forget); }
+.finding { padding: 8px 0; border-top: 1px solid var(--danger-line); }
+.finding:first-of-type { border-top: 0; }
+.finding .why { margin: 2px 0 0 0; color: var(--text); }
+.finding .meta { color: var(--muted); font-size: 12px; }
+.warnline { margin: 4px 0 0; padding: 4px 8px; background: var(--warn-bg); border-left: 3px solid var(--warn-line); border-radius: 3px; }
+.chart { width: 100%; max-width: 380px; height: auto; }
+.chart text { fill: var(--text); font-size: 13px; }
+.chart .bar { stroke: none; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-bottom: 8px; }
+.controls input[type="search"], .controls select { padding: 4px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--text); font: inherit; }
+.controls input[type="search"] { min-width: 240px; }
+button { font: inherit; padding: 4px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--text); cursor: pointer; }
+button:hover { border-color: var(--read); }
+table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
+th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-weight: 600; font-size: 12px; position: sticky; top: 0; background: var(--panel); }
+tr.row { cursor: pointer; }
+tr.row:hover, tr.row:focus { background: var(--bg); outline: none; }
+tr.row:focus-visible { outline: 2px solid var(--read); }
+tr.group td { background: var(--bg); font-weight: 600; }
+.src { color: var(--muted); font-size: 12px; }
+td.addr { word-break: break-all; }
+#drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(640px, 100%); background: var(--panel); border-left: 1px solid var(--line); box-shadow: -8px 0 24px rgba(0, 0, 0, .25); overflow: auto; padding: 16px 20px; z-index: 10; }
+#drawer[hidden] { display: none; }
+#drawer h3 { margin: 0 0 4px; word-break: break-all; }
+.attr { margin: 10px 0; padding-top: 8px; border-top: 1px solid var(--line); }
+.attr .path { font-weight: 600; }
+.diff { margin: 6px 0; padding: 0; border: 1px solid var(--line); border-radius: 6px; overflow: auto; max-height: 360px; }
+.diff div { padding: 0 8px; white-space: pre; }
+.diff .add { background: var(--add-bg); } .diff .del { background: var(--del-bg); } .diff .hunk { background: var(--hunk-bg); color: var(--muted); }
+details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--line); border-radius: 6px; padding: 8px; margin: 4px 0; white-space: pre; }
+.empty { color: var(--muted); }
+.hidden { display: none !important; }
+@media (max-width: 700px) {
+  main, header { padding-left: 12px; padding-right: 12px; }
+  .controls input[type="search"] { min-width: 0; width: 100%; }
+  /* Stack each row: action and account on one line, the address on its own
+     full-width line, so long addresses are not squeezed into a narrow column. */
+  table, tbody { display: block; }
+  thead { display: none; }
+  tr.row { display: grid; grid-template-columns: auto 1fr; grid-template-areas: "a c" "r r"; gap: 0 12px; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  tr.row td { border: 0; padding: 1px 0; }
+  tr.row td:nth-child(1) { grid-area: a; }
+  tr.row td:nth-child(4) { grid-area: c; text-align: right; }
+  tr.row td.addr { grid-area: r; overflow-wrap: anywhere; word-break: normal; font-size: 12px; }
+  tr.row td:nth-child(3), tr.row td:nth-child(5) { display: none; }
+  tr.group { display: block; }
+  tr.group td { display: block; }
+}
+@media print { #drawer, .controls, #theme { display: none; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>tfplanlens</h1>
+  <span class="chip">plan: normal</span>
+  <span class="chip">applyable: yes</span>
+  
+  <span class="chip" title="Where terraform apply runs">executed from: <span class="mono">111111111111</span> (source: flag)</span>
+  
+  <span class="grow"></span>
+  <button id="theme" type="button">Theme: auto</button>
+</header>
+<main>
+
+
+<section id="danger" class="panel danger" aria-labelledby="danger-h">
+  <h2 id="danger-h">Danger: 4 delete/replace</h2>
+  
+  
+  <div class="finding">
+    <div><b class="a-replace">REPLACE</b> <span class="mono">terraform_data.db</span>
+      
+      </div>
+    <p class="why">Attribute change forces replacement: triggers_replace</p>
+    
+    <div class="meta">terraform_data &middot; target account <span class="mono">111111111111</span> (source: apply_account)</div>
+  </div>
+  
+  <div class="finding">
+    <div><b class="a-delete">DELETE</b> <span class="mono">terraform_data.subnet[&#34;b&#34;]</span>
+      
+      </div>
+    <p class="why">for_each key removed: b</p>
+    <p class="warnline"><b>WARNING:</b> for_each key removed while sibling instances change (possible key rename: terraform_data.subnet[&#34;d&#34;])</p>
+    <div class="meta">terraform_data &middot; target account <span class="mono">111111111111</span> (source: apply_account)</div>
+  </div>
+  
+  <div class="finding">
+    <div><b class="a-delete">DELETE</b> <span class="mono">terraform_data.worker[2]</span>
+      
+      </div>
+    <p class="why">count shrank; index 2 no longer exists</p>
+    
+    <div class="meta">terraform_data &middot; target account <span class="mono">111111111111</span> (source: apply_account)</div>
+  </div>
+  
+  <div class="finding">
+    <div><b class="a-delete">DELETE</b> <span class="mono">terraform_data.worker[3]</span>
+      
+      </div>
+    <p class="why">count shrank; index 3 no longer exists</p>
+    
+    <div class="meta">terraform_data &middot; target account <span class="mono">111111111111</span> (source: apply_account)</div>
+  </div>
+  
+</section>
+
+<section aria-label="Summary">
+  <div class="tiles">
+    <div class="tile"><b class="a-create">1</b><span>create</span></div><div class="tile"><b class="a-update">4</b><span>update</span></div><div class="tile"><b class="a-replace">1</b><span>replace</span></div><div class="tile"><b class="a-delete">3</b><span>delete</span></div><div class="tile"><b class="a-no-op">6</b><span>no-op</span></div><div class="tile"><b class="a-forget">1</b><span>forget</span></div><div class="tile"><b class="a-update">0</b><span>drift</span></div><div class="tile"><b class="a-read">10</b><span>known after apply</span></div><div class="tile"><b class="a-replace">0</b><span>warnings</span></div>
+  </div>
+</section>
+
+<section class="panel" aria-labelledby="chart-h">
+  <h2 id="chart-h">Actions</h2>
+  <svg class="chart" viewBox="0 0 350 176" role="img" aria-label="Bar chart of changes by action">
+    
+    <text x="0" y="17">create</text>
+    <rect class="bar" x="70" y="4" width="38" height="16" rx="3" style="fill: var(--create)"><title>create: 1</title></rect>
+    <text x="114" y="17">1</text>
+    
+    <text x="0" y="41">update</text>
+    <rect class="bar" x="70" y="28" width="153" height="16" rx="3" style="fill: var(--update)"><title>update: 4</title></rect>
+    <text x="229" y="41">4</text>
+    
+    <text x="0" y="65">replace</text>
+    <rect class="bar" x="70" y="52" width="38" height="16" rx="3" style="fill: var(--replace)"><title>replace: 1</title></rect>
+    <text x="114" y="65">1</text>
+    
+    <text x="0" y="89">delete</text>
+    <rect class="bar" x="70" y="76" width="115" height="16" rx="3" style="fill: var(--delete)"><title>delete: 3</title></rect>
+    <text x="191" y="89">3</text>
+    
+    <text x="0" y="113">read</text>
+    <rect class="bar" x="70" y="100" width="0" height="16" rx="3" style="fill: var(--read)"><title>read: 0</title></rect>
+    <text x="76" y="113">0</text>
+    
+    <text x="0" y="137">no-op</text>
+    <rect class="bar" x="70" y="124" width="230" height="16" rx="3" style="fill: var(--no-op)"><title>no-op: 6</title></rect>
+    <text x="306" y="137">6</text>
+    
+    <text x="0" y="161">forget</text>
+    <rect class="bar" x="70" y="148" width="38" height="16" rx="3" style="fill: var(--forget)"><title>forget: 1</title></rect>
+    <text x="114" y="161">1</text>
+    
+  </svg>
+</section>
+
+
+
+<section aria-labelledby="changes-h">
+  <h2 id="changes-h">All changes</h2>
+  <div class="controls">
+    <input id="q" type="search" placeholder="Search address, type, account&hellip;" aria-label="Search changes">
+    <label>Action
+      <select id="action"><option value="">all</option>
+        <option value="update">update</option><option value="replace">replace</option><option value="forget">forget</option><option value="no-op">no-op</option><option value="delete">delete</option><option value="create">create</option>
+      </select></label>
+    <label>Group by
+      <select id="group"><option value="">none</option><option value="account">account</option><option value="module">module</option><option value="type">type</option></select></label>
+    <label><input id="hidequiet" type="checkbox"> hide plain no-ops and reads</label>
+    <span id="count" class="src"></span>
+  </div>
+  <table>
+    <thead><tr><th>Action</th><th>Resource</th><th>Type</th><th>Target account (source)</th><th>Module</th></tr></thead>
+    <tbody id="rows">
+    
+      <tr class="row" tabindex="0" data-idx="0" data-action="update" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="0" data-text="terraform_data.app terraform_data 111111111111 root update">
+        <td><b class="a-update">~ update</b></td>
+        <td class="addr mono">terraform_data.app
+          
+          
+          
+          
+          </td>
+        <td>terraform_data</td>
+        <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
+        <td>root</td>
+      </tr>
+    
+      <tr class="row" tabindex="0" data-idx="1" data-action="update" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="0" data-text="terraform_data.creds terraform_data 111111111111 root update">
+        <td><b class="a-update">~ update</b></td>
+        <td class="addr mono">terraform_data.creds
+          
+          
+          
+          
+          </td>
+        <td>terraform_data</td>
+        <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
+        <td>root</td>
+      </tr>
+    
+      <tr class="row" tabindex="0" data-idx="2" data-action="replace" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="0" data-text="terraform_data.db terraform_data 111111111111 root replace">
+        <td><b class="a-replace">-/&#43; replace</b></td>
+        <td class="addr mono">terraform_data.db
+          
+          
+          
+          
+          </td>
+        <td>terraform_data</td>
+        <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
+        <td>root</td>
+      </tr>
+    
+      <tr class="row" tabindex="0" data-idx="3" data-action="update" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="0" data-text="terraform_data.lb terraform_data 111111111111 root update">
+        <td><b class="a-update">~ update</b></td>
+        <td class="addr mono">terraform_data.lb
+          
+          
+          
+          
+          </td>
+        <td>terraform_data</td>
+        <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
+        <td>root</td>
+      </tr>
+    
+      <tr class="row" tabindex="0" data-idx="4" data-action="forget" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="0" data-text="terraform_data.legacy terraform_data 111111111111 root forget">
+        <td><b class="a-forget">x forget</b></td>
+        <td class="addr mono">terraform_data.legacy
+          
+          
+          
+          <span class="badge">state only</span>
+          </td>
+        <td>terraform_data</td>
+        <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
+        <td>root</td>
+      </tr>
+    
+      <tr class="row" tabindex="0" data-idx="5" data-action="no-op" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="1" data-text="terraform_data.subnet[&#34;a&#34;] terraform_data 111111111111 root no-op">
+        <td><b class="a-no-op">= no-op</b></td>
+        <td class="addr mono">terraform_data.subnet[&#34;a&#34;]
+          
+          
+          
+          
+          </td>
+        <td>terraform_data</td>
+        <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
+        <td>root</td>
+      </tr>
+    
+      <tr class="row" tabindex="0" data-idx="6" data-action="delete" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="0" data-text="terraform_data.subnet[&#34;b&#34;] terraform_data 111111111111 root delete">
+        <td><b class="a-delete">- delete</b></td>
+        <td class="addr mono">terraform_data.subnet[&#34;b&#34;]
+          
+          
+          
+          
+          </td>
+        <td>terraform_data</td>
+        <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
+        <td>root</td>
+      </tr>
+    
+      <tr class="row" tabindex="0" data-idx="7" data-action="no-op" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="1" data-text="terraform_data.subnet[&#34;c&#34;] terraform_data 111111111111 root no-op">
+        <td><b class="a-no-op">= no-op</b></td>
+        <td class="addr mono">terraform_data.subnet[&#34;c&#34;]
+          
+          
+          
+          
+          </td>
+        <td>terraform_data</td>
+        <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
+        <td>root</td>
+      </tr>
+    
+      <tr class="row" tabindex="0" data-idx="8" data-action="create" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="0" data-text="terraform_data.subnet[&#34;d&#34;] terraform_data 111111111111 root create">
+        <td><b class="a-create">&#43; create</b></td>
+        <td class="addr mono">terraform_data.subnet[&#34;d&#34;]
+          
+          
+          
+          
+          </td>
+        <td>terraform_data</td>
+        <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
+        <td>root</td>
+      </tr>
+    
+      <tr class="row" tabindex="0" data-idx="9" data-action="update" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="0" data-text="terraform_data.user_data terraform_data 111111111111 root update">
+        <td><b class="a-update">~ update</b></td>
+        <td class="addr mono">terraform_data.user_data
+          
+          
+          
+          
+          </td>
+        <td>terraform_data</td>
+        <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
+        <td>root</td>
+      </tr>
+    
+      <tr class="row" tabindex="0" data-idx="10" data-action="no-op" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="1" data-text="terraform_data.worker[0] terraform_data 111111111111 root no-op">
+        <td><b class="a-no-op">= no-op</b></td>
+        <td class="addr mono">terraform_data.worker[0]
+          
+          
+          
+          
+          </td>
+        <td>terraform_data</td>
+        <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
+        <td>root</td>
+      </tr>
+    
+      <tr class="row" tabindex="0" data-idx="11" data-action="no-op" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="1" data-text="terraform_data.worker[1] terraform_data 111111111111 root no-op">
+        <td><b class="a-no-op">= no-op</b></td>
+        <td class="addr mono">terraform_data.worker[1]
+          
+          
+          
+          
+          </td>
+        <td>terraform_data</td>
+        <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
+        <td>root</td>
+      </tr>
+    
+      <tr class="row" tabindex="0" data-idx="12" data-action="delete" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="0" data-text="terraform_data.worker[2] terraform_data 111111111111 root delete">
+        <td><b class="a-delete">- delete</b></td>
+        <td class="addr mono">terraform_data.worker[2]
+          
+          
+          
+          
+          </td>
+        <td>terraform_data</td>
+        <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
+        <td>root</td>
+      </tr>
+    
+      <tr class="row" tabindex="0" data-idx="13" data-action="delete" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="0" data-text="terraform_data.worker[3] terraform_data 111111111111 root delete">
+        <td><b class="a-delete">- delete</b></td>
+        <td class="addr mono">terraform_data.worker[3]
+          
+          
+          
+          
+          </td>
+        <td>terraform_data</td>
+        <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
+        <td>root</td>
+      </tr>
+    
+      <tr class="row" tabindex="0" data-idx="14" data-action="no-op" data-account="111111111111" data-module="module.network_core" data-type="terraform_data" data-quiet="0" data-text="module.network_core.terraform_data.route_table terraform_data 111111111111 module.network_core no-op">
+        <td><b class="a-no-op">= no-op</b></td>
+        <td class="addr mono">module.network_core.terraform_data.route_table
+          
+          <span class="badge">moved</span>
+          
+          
+          </td>
+        <td>terraform_data</td>
+        <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
+        <td>module.network_core</td>
+      </tr>
+    
+      <tr class="row" tabindex="0" data-idx="15" data-action="no-op" data-account="111111111111" data-module="module.network_core" data-type="terraform_data" data-quiet="0" data-text="module.network_core.terraform_data.vpc terraform_data 111111111111 module.network_core no-op">
+        <td><b class="a-no-op">= no-op</b></td>
+        <td class="addr mono">module.network_core.terraform_data.vpc
+          
+          <span class="badge">moved</span>
+          
+          
+          </td>
+        <td>terraform_data</td>
+        <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
+        <td>module.network_core</td>
+      </tr>
+    
+    </tbody>
+  </table>
+</section>
+</main>
+
+<aside id="drawer" role="dialog" aria-label="Resource details" hidden>
+  <button id="drawer-close" type="button">Close</button>
+  <div id="drawer-body"></div>
+</aside>
+
+
+<template id="d0">
+  <h3 class="mono">terraform_data.app</h3>
+  <p><b class="a-update">update, 2 known after apply</b>
+    </p>
+  <p class="meta">terraform_data &middot; provider <span class="mono">terraform</span><br>
+    target account <span class="mono">111111111111</span> (source: apply_account)</p>
+  
+  
+  
+  
+</template>
+
+<template id="d1">
+  <h3 class="mono">terraform_data.creds</h3>
+  <p><b class="a-update">update, 1 known after apply</b>
+    </p>
+  <p class="meta">terraform_data &middot; provider <span class="mono">terraform</span><br>
+    target account <span class="mono">111111111111</span> (source: apply_account)</p>
+  
+  
+  
+  
+<div class="attr">
+  <div><span class="path mono">input</span></div>
+  <div class="empty">(sensitive value changed)</div>
+  
+</div>
+
+</template>
+
+<template id="d2">
+  <h3 class="mono">terraform_data.db</h3>
+  <p><b class="a-replace">replace, 2 known after apply</b>
+    </p>
+  <p class="meta">terraform_data &middot; provider <span class="mono">terraform</span><br>
+    target account <span class="mono">111111111111</span> (source: apply_account)</p>
+  <p><b>Why:</b> Attribute change forces replacement: triggers_replace</p>
+  
+  
+  
+<div class="attr">
+  <div><span class="path mono">triggers_replace</span> <span class="badge warn">forces replacement</span></div>
+  <div><span class="mono">&#34;a&#34;</span> &rarr; <span class="mono">&#34;b&#34;</span></div>
+  
+</div>
+
+</template>
+
+<template id="d3">
+  <h3 class="mono">terraform_data.lb</h3>
+  <p><b class="a-update">update, 2 known after apply</b>
+    </p>
+  <p class="meta">terraform_data &middot; provider <span class="mono">terraform</span><br>
+    target account <span class="mono">111111111111</span> (source: apply_account)</p>
+  
+  
+  
+  
+<div class="attr">
+  <div><span class="path mono">input[1]</span></div>
+  <div><span class="mono">&#34;a211b832-4e57-d7a5-89c9-f9051c08db31&#34;</span> &rarr; <span class="mono">&#34;93d5dd3a-0d98-f54f-6426-879666484ff0&#34;</span></div>
+  
+</div>
+
+</template>
+
+<template id="d4">
+  <h3 class="mono">terraform_data.legacy</h3>
+  <p><b class="a-forget">removed from state only</b>
+    </p>
+  <p class="meta">terraform_data &middot; provider <span class="mono">terraform</span><br>
+    target account <span class="mono">111111111111</span> (source: apply_account)</p>
+  
+  
+  
+  
+</template>
+
+<template id="d5">
+  <h3 class="mono">terraform_data.subnet[&#34;a&#34;]</h3>
+  <p><b class="a-no-op">no-op</b>
+    </p>
+  <p class="meta">terraform_data &middot; provider <span class="mono">terraform</span><br>
+    target account <span class="mono">111111111111</span> (source: apply_account)</p>
+  
+  
+  
+  
+</template>
+
+<template id="d6">
+  <h3 class="mono">terraform_data.subnet[&#34;b&#34;]</h3>
+  <p><b class="a-delete">delete</b>
+    </p>
+  <p class="meta">terraform_data &middot; provider <span class="mono">terraform</span><br>
+    target account <span class="mono">111111111111</span> (source: apply_account)</p>
+  <p><b>Why:</b> for_each key removed: b</p>
+  
+  
+  
+</template>
+
+<template id="d7">
+  <h3 class="mono">terraform_data.subnet[&#34;c&#34;]</h3>
+  <p><b class="a-no-op">no-op</b>
+    </p>
+  <p class="meta">terraform_data &middot; provider <span class="mono">terraform</span><br>
+    target account <span class="mono">111111111111</span> (source: apply_account)</p>
+  
+  
+  
+  
+</template>
+
+<template id="d8">
+  <h3 class="mono">terraform_data.subnet[&#34;d&#34;]</h3>
+  <p><b class="a-create">create, 2 known after apply</b>
+    </p>
+  <p class="meta">terraform_data &middot; provider <span class="mono">terraform</span><br>
+    target account <span class="mono">111111111111</span> (source: apply_account)</p>
+  
+  
+  
+  
+</template>
+
+<template id="d9">
+  <h3 class="mono">terraform_data.user_data</h3>
+  <p><b class="a-update">update, 1 known after apply</b>
+    </p>
+  <p class="meta">terraform_data &middot; provider <span class="mono">terraform</span><br>
+    target account <span class="mono">111111111111</span> (source: apply_account)</p>
+  
+  
+  
+  
+<div class="attr">
+  <div><span class="path mono">input</span></div>
+  
+    <div>input: 4 lines changed of 401 (&#43;2 -2)</div>
+    <div class="diff mono"><div class="hunk">@@ -120,6 &#43;120,6 @@</div><div class="ctx"> echo step-118</div><div class="ctx"> echo step-119</div><div class="del">-echo step-120</div><div class="del">-echo step-121</div><div class="add">&#43;echo CHANGED-120</div><div class="add">&#43;echo CHANGED-121</div><div class="ctx"> echo step-122</div><div class="ctx"> echo step-123</div></div>
+    <details class="full"><summary>expand full value</summary>
+      <b>before</b><pre>#!/bin/bash
+echo step-0
+echo step-1
+echo step-2
+echo step-3
+echo step-4
+echo step-5
+echo step-6
+echo step-7
+echo step-8
+echo step-9
+echo step-10
+echo step-11
+echo step-12
+echo step-13
+echo step-14
+echo step-15
+echo step-16
+echo step-17
+echo step-18
+echo step-19
+echo step-20
+echo step-21
+echo step-22
+echo step-23
+echo step-24
+echo step-25
+echo step-26
+echo step-27
+echo step-28
+echo step-29
+echo step-30
+echo step-31
+echo step-32
+echo step-33
+echo step-34
+echo step-35
+echo step-36
+echo step-37
+echo step-38
+echo step-39
+echo step-40
+echo step-41
+echo step-42
+echo step-43
+echo step-44
+echo step-45
+echo step-46
+echo step-47
+echo step-48
+echo step-49
+echo step-50
+echo step-51
+echo step-52
+echo step-53
+echo step-54
+echo step-55
+echo step-56
+echo step-57
+echo step-58
+echo step-59
+echo step-60
+echo step-61
+echo step-62
+echo step-63
+echo step-64
+echo step-65
+echo step-66
+echo step-67
+echo step-68
+echo step-69
+echo step-70
+echo step-71
+echo step-72
+echo step-73
+echo step-74
+echo step-75
+echo step-76
+echo step-77
+echo step-78
+echo step-79
+echo step-80
+echo step-81
+echo step-82
+echo step-83
+echo step-84
+echo step-85
+echo step-86
+echo step-87
+echo step-88
+echo step-89
+echo step-90
+echo step-91
+echo step-92
+echo step-93
+echo step-94
+echo step-95
+echo step-96
+echo step-97
+echo step-98
+echo step-99
+echo step-100
+echo step-101
+echo step-102
+echo step-103
+echo step-104
+echo step-105
+echo step-106
+echo step-107
+echo step-108
+echo step-109
+echo step-110
+echo step-111
+echo step-112
+echo step-113
+echo step-114
+echo step-115
+echo step-116
+echo step-117
+echo step-118
+echo step-119
+echo step-120
+echo step-121
+echo step-122
+echo step-123
+echo step-124
+echo step-125
+echo step-126
+echo step-127
+echo step-128
+echo step-129
+echo step-130
+echo step-131
+echo step-132
+echo step-133
+echo step-134
+echo step-135
+echo step-136
+echo step-137
+echo step-138
+echo step-139
+echo step-140
+echo step-141
+echo step-142
+echo step-143
+echo step-144
+echo step-145
+echo step-146
+echo step-147
+echo step-148
+echo step-149
+echo step-150
+echo step-151
+echo step-152
+echo step-153
+echo step-154
+echo step-155
+echo step-156
+echo step-157
+echo step-158
+echo step-159
+echo step-160
+echo step-161
+echo step-162
+echo step-163
+echo step-164
+echo step-165
+echo step-166
+echo step-167
+echo step-168
+echo step-169
+echo step-170
+echo step-171
+echo step-172
+echo step-173
+echo step-174
+echo step-175
+echo step-176
+echo step-177
+echo step-178
+echo step-179
+echo step-180
+echo step-181
+echo step-182
+echo step-183
+echo step-184
+echo step-185
+echo step-186
+echo step-187
+echo step-188
+echo step-189
+echo step-190
+echo step-191
+echo step-192
+echo step-193
+echo step-194
+echo step-195
+echo step-196
+echo step-197
+echo step-198
+echo step-199
+echo step-200
+echo step-201
+echo step-202
+echo step-203
+echo step-204
+echo step-205
+echo step-206
+echo step-207
+echo step-208
+echo step-209
+echo step-210
+echo step-211
+echo step-212
+echo step-213
+echo step-214
+echo step-215
+echo step-216
+echo step-217
+echo step-218
+echo step-219
+echo step-220
+echo step-221
+echo step-222
+echo step-223
+echo step-224
+echo step-225
+echo step-226
+echo step-227
+echo step-228
+echo step-229
+echo step-230
+echo step-231
+echo step-232
+echo step-233
+echo step-234
+echo step-235
+echo step-236
+echo step-237
+echo step-238
+echo step-239
+echo step-240
+echo step-241
+echo step-242
+echo step-243
+echo step-244
+echo step-245
+echo step-246
+echo step-247
+echo step-248
+echo step-249
+echo step-250
+echo step-251
+echo step-252
+echo step-253
+echo step-254
+echo step-255
+echo step-256
+echo step-257
+echo step-258
+echo step-259
+echo step-260
+echo step-261
+echo step-262
+echo step-263
+echo step-264
+echo step-265
+echo step-266
+echo step-267
+echo step-268
+echo step-269
+echo step-270
+echo step-271
+echo step-272
+echo step-273
+echo step-274
+echo step-275
+echo step-276
+echo step-277
+echo step-278
+echo step-279
+echo step-280
+echo step-281
+echo step-282
+echo step-283
+echo step-284
+echo step-285
+echo step-286
+echo step-287
+echo step-288
+echo step-289
+echo step-290
+echo step-291
+echo step-292
+echo step-293
+echo step-294
+echo step-295
+echo step-296
+echo step-297
+echo step-298
+echo step-299
+echo step-300
+echo step-301
+echo step-302
+echo step-303
+echo step-304
+echo step-305
+echo step-306
+echo step-307
+echo step-308
+echo step-309
+echo step-310
+echo step-311
+echo step-312
+echo step-313
+echo step-314
+echo step-315
+echo step-316
+echo step-317
+echo step-318
+echo step-319
+echo step-320
+echo step-321
+echo step-322
+echo step-323
+echo step-324
+echo step-325
+echo step-326
+echo step-327
+echo step-328
+echo step-329
+echo step-330
+echo step-331
+echo step-332
+echo step-333
+echo step-334
+echo step-335
+echo step-336
+echo step-337
+echo step-338
+echo step-339
+echo step-340
+echo step-341
+echo step-342
+echo step-343
+echo step-344
+echo step-345
+echo step-346
+echo step-347
+echo step-348
+echo step-349
+echo step-350
+echo step-351
+echo step-352
+echo step-353
+echo step-354
+echo step-355
+echo step-356
+echo step-357
+echo step-358
+echo step-359
+echo step-360
+echo step-361
+echo step-362
+echo step-363
+echo step-364
+echo step-365
+echo step-366
+echo step-367
+echo step-368
+echo step-369
+echo step-370
+echo step-371
+echo step-372
+echo step-373
+echo step-374
+echo step-375
+echo step-376
+echo step-377
+echo step-378
+echo step-379
+echo step-380
+echo step-381
+echo step-382
+echo step-383
+echo step-384
+echo step-385
+echo step-386
+echo step-387
+echo step-388
+echo step-389
+echo step-390
+echo step-391
+echo step-392
+echo step-393
+echo step-394
+echo step-395
+echo step-396
+echo step-397
+echo step-398
+echo step-399</pre>
+      <b>after</b><pre>#!/bin/bash
+echo step-0
+echo step-1
+echo step-2
+echo step-3
+echo step-4
+echo step-5
+echo step-6
+echo step-7
+echo step-8
+echo step-9
+echo step-10
+echo step-11
+echo step-12
+echo step-13
+echo step-14
+echo step-15
+echo step-16
+echo step-17
+echo step-18
+echo step-19
+echo step-20
+echo step-21
+echo step-22
+echo step-23
+echo step-24
+echo step-25
+echo step-26
+echo step-27
+echo step-28
+echo step-29
+echo step-30
+echo step-31
+echo step-32
+echo step-33
+echo step-34
+echo step-35
+echo step-36
+echo step-37
+echo step-38
+echo step-39
+echo step-40
+echo step-41
+echo step-42
+echo step-43
+echo step-44
+echo step-45
+echo step-46
+echo step-47
+echo step-48
+echo step-49
+echo step-50
+echo step-51
+echo step-52
+echo step-53
+echo step-54
+echo step-55
+echo step-56
+echo step-57
+echo step-58
+echo step-59
+echo step-60
+echo step-61
+echo step-62
+echo step-63
+echo step-64
+echo step-65
+echo step-66
+echo step-67
+echo step-68
+echo step-69
+echo step-70
+echo step-71
+echo step-72
+echo step-73
+echo step-74
+echo step-75
+echo step-76
+echo step-77
+echo step-78
+echo step-79
+echo step-80
+echo step-81
+echo step-82
+echo step-83
+echo step-84
+echo step-85
+echo step-86
+echo step-87
+echo step-88
+echo step-89
+echo step-90
+echo step-91
+echo step-92
+echo step-93
+echo step-94
+echo step-95
+echo step-96
+echo step-97
+echo step-98
+echo step-99
+echo step-100
+echo step-101
+echo step-102
+echo step-103
+echo step-104
+echo step-105
+echo step-106
+echo step-107
+echo step-108
+echo step-109
+echo step-110
+echo step-111
+echo step-112
+echo step-113
+echo step-114
+echo step-115
+echo step-116
+echo step-117
+echo step-118
+echo step-119
+echo CHANGED-120
+echo CHANGED-121
+echo step-122
+echo step-123
+echo step-124
+echo step-125
+echo step-126
+echo step-127
+echo step-128
+echo step-129
+echo step-130
+echo step-131
+echo step-132
+echo step-133
+echo step-134
+echo step-135
+echo step-136
+echo step-137
+echo step-138
+echo step-139
+echo step-140
+echo step-141
+echo step-142
+echo step-143
+echo step-144
+echo step-145
+echo step-146
+echo step-147
+echo step-148
+echo step-149
+echo step-150
+echo step-151
+echo step-152
+echo step-153
+echo step-154
+echo step-155
+echo step-156
+echo step-157
+echo step-158
+echo step-159
+echo step-160
+echo step-161
+echo step-162
+echo step-163
+echo step-164
+echo step-165
+echo step-166
+echo step-167
+echo step-168
+echo step-169
+echo step-170
+echo step-171
+echo step-172
+echo step-173
+echo step-174
+echo step-175
+echo step-176
+echo step-177
+echo step-178
+echo step-179
+echo step-180
+echo step-181
+echo step-182
+echo step-183
+echo step-184
+echo step-185
+echo step-186
+echo step-187
+echo step-188
+echo step-189
+echo step-190
+echo step-191
+echo step-192
+echo step-193
+echo step-194
+echo step-195
+echo step-196
+echo step-197
+echo step-198
+echo step-199
+echo step-200
+echo step-201
+echo step-202
+echo step-203
+echo step-204
+echo step-205
+echo step-206
+echo step-207
+echo step-208
+echo step-209
+echo step-210
+echo step-211
+echo step-212
+echo step-213
+echo step-214
+echo step-215
+echo step-216
+echo step-217
+echo step-218
+echo step-219
+echo step-220
+echo step-221
+echo step-222
+echo step-223
+echo step-224
+echo step-225
+echo step-226
+echo step-227
+echo step-228
+echo step-229
+echo step-230
+echo step-231
+echo step-232
+echo step-233
+echo step-234
+echo step-235
+echo step-236
+echo step-237
+echo step-238
+echo step-239
+echo step-240
+echo step-241
+echo step-242
+echo step-243
+echo step-244
+echo step-245
+echo step-246
+echo step-247
+echo step-248
+echo step-249
+echo step-250
+echo step-251
+echo step-252
+echo step-253
+echo step-254
+echo step-255
+echo step-256
+echo step-257
+echo step-258
+echo step-259
+echo step-260
+echo step-261
+echo step-262
+echo step-263
+echo step-264
+echo step-265
+echo step-266
+echo step-267
+echo step-268
+echo step-269
+echo step-270
+echo step-271
+echo step-272
+echo step-273
+echo step-274
+echo step-275
+echo step-276
+echo step-277
+echo step-278
+echo step-279
+echo step-280
+echo step-281
+echo step-282
+echo step-283
+echo step-284
+echo step-285
+echo step-286
+echo step-287
+echo step-288
+echo step-289
+echo step-290
+echo step-291
+echo step-292
+echo step-293
+echo step-294
+echo step-295
+echo step-296
+echo step-297
+echo step-298
+echo step-299
+echo step-300
+echo step-301
+echo step-302
+echo step-303
+echo step-304
+echo step-305
+echo step-306
+echo step-307
+echo step-308
+echo step-309
+echo step-310
+echo step-311
+echo step-312
+echo step-313
+echo step-314
+echo step-315
+echo step-316
+echo step-317
+echo step-318
+echo step-319
+echo step-320
+echo step-321
+echo step-322
+echo step-323
+echo step-324
+echo step-325
+echo step-326
+echo step-327
+echo step-328
+echo step-329
+echo step-330
+echo step-331
+echo step-332
+echo step-333
+echo step-334
+echo step-335
+echo step-336
+echo step-337
+echo step-338
+echo step-339
+echo step-340
+echo step-341
+echo step-342
+echo step-343
+echo step-344
+echo step-345
+echo step-346
+echo step-347
+echo step-348
+echo step-349
+echo step-350
+echo step-351
+echo step-352
+echo step-353
+echo step-354
+echo step-355
+echo step-356
+echo step-357
+echo step-358
+echo step-359
+echo step-360
+echo step-361
+echo step-362
+echo step-363
+echo step-364
+echo step-365
+echo step-366
+echo step-367
+echo step-368
+echo step-369
+echo step-370
+echo step-371
+echo step-372
+echo step-373
+echo step-374
+echo step-375
+echo step-376
+echo step-377
+echo step-378
+echo step-379
+echo step-380
+echo step-381
+echo step-382
+echo step-383
+echo step-384
+echo step-385
+echo step-386
+echo step-387
+echo step-388
+echo step-389
+echo step-390
+echo step-391
+echo step-392
+echo step-393
+echo step-394
+echo step-395
+echo step-396
+echo step-397
+echo step-398
+echo step-399</pre>
+    </details>
+  
+</div>
+
+</template>
+
+<template id="d10">
+  <h3 class="mono">terraform_data.worker[0]</h3>
+  <p><b class="a-no-op">no-op</b>
+    </p>
+  <p class="meta">terraform_data &middot; provider <span class="mono">terraform</span><br>
+    target account <span class="mono">111111111111</span> (source: apply_account)</p>
+  
+  
+  
+  
+</template>
+
+<template id="d11">
+  <h3 class="mono">terraform_data.worker[1]</h3>
+  <p><b class="a-no-op">no-op</b>
+    </p>
+  <p class="meta">terraform_data &middot; provider <span class="mono">terraform</span><br>
+    target account <span class="mono">111111111111</span> (source: apply_account)</p>
+  
+  
+  
+  
+</template>
+
+<template id="d12">
+  <h3 class="mono">terraform_data.worker[2]</h3>
+  <p><b class="a-delete">delete</b>
+    </p>
+  <p class="meta">terraform_data &middot; provider <span class="mono">terraform</span><br>
+    target account <span class="mono">111111111111</span> (source: apply_account)</p>
+  <p><b>Why:</b> count shrank; index 2 no longer exists</p>
+  
+  
+  
+</template>
+
+<template id="d13">
+  <h3 class="mono">terraform_data.worker[3]</h3>
+  <p><b class="a-delete">delete</b>
+    </p>
+  <p class="meta">terraform_data &middot; provider <span class="mono">terraform</span><br>
+    target account <span class="mono">111111111111</span> (source: apply_account)</p>
+  <p><b>Why:</b> count shrank; index 3 no longer exists</p>
+  
+  
+  
+</template>
+
+<template id="d14">
+  <h3 class="mono">module.network_core.terraform_data.route_table</h3>
+  <p><b class="a-no-op">moved from module.network.terraform_data.route_table</b>
+    </p>
+  <p class="meta">terraform_data &middot; provider <span class="mono">terraform</span><br>
+    target account <span class="mono">111111111111</span> (source: apply_account)</p>
+  
+  
+  
+  
+</template>
+
+<template id="d15">
+  <h3 class="mono">module.network_core.terraform_data.vpc</h3>
+  <p><b class="a-no-op">moved from module.network.terraform_data.vpc</b>
+    </p>
+  <p class="meta">terraform_data &middot; provider <span class="mono">terraform</span><br>
+    target account <span class="mono">111111111111</span> (source: apply_account)</p>
+  
+  
+  
+  
+</template>
+
+
+<script>(function () {
+  "use strict";
+  var $ = function (sel, root) { return (root || document).querySelector(sel); };
+  var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
+
+  // Theme: auto (system) -> light -> dark. Storage may be unavailable.
+  var root = document.documentElement;
+  var themeBtn = $("#theme");
+  function setTheme(t) {
+    if (t === "light" || t === "dark") { root.setAttribute("data-theme", t); } else { root.removeAttribute("data-theme"); }
+    if (themeBtn) { themeBtn.textContent = "Theme: " + (t || "auto"); }
+    try { localStorage.setItem("tfplanlens-theme", t || ""); } catch (e) { /* ignore */ }
+  }
+  var saved = "";
+  try { saved = localStorage.getItem("tfplanlens-theme") || ""; } catch (e) { /* ignore */ }
+  setTheme(saved);
+  if (themeBtn) {
+    themeBtn.addEventListener("click", function () {
+      var cur = root.getAttribute("data-theme") || "";
+      setTheme(cur === "" ? "light" : cur === "light" ? "dark" : "");
+    });
+  }
+
+  // Filter, search and group the changes table.
+  var tbody = $("#rows");
+  if (!tbody) { return; }
+  var rows = $$("tr.row", tbody);
+  var q = $("#q"), act = $("#action"), grp = $("#group"), hideQuiet = $("#hidequiet"), count = $("#count");
+
+  function render() {
+    var term = (q.value || "").toLowerCase().trim();
+    var a = act.value, g = grp.value;
+    $$("tr.group", tbody).forEach(function (n) { n.parentNode.removeChild(n); });
+    var shown = rows.filter(function (r) {
+      var ok = (!term || r.getAttribute("data-text").indexOf(term) !== -1) &&
+               (!a || r.getAttribute("data-action") === a) &&
+               !(hideQuiet.checked && (r.getAttribute("data-action") === "no-op" || r.getAttribute("data-action") === "read") && r.getAttribute("data-quiet") === "1");
+      r.classList.toggle("hidden", !ok);
+      return ok;
+    });
+    var ordered = rows.slice().sort(function (x, y) {
+      if (g) {
+        var kx = x.getAttribute("data-" + g), ky = y.getAttribute("data-" + g);
+        if (kx !== ky) { return kx < ky ? -1 : 1; }
+      }
+      return Number(x.getAttribute("data-idx")) - Number(y.getAttribute("data-idx"));
+    });
+    var last = null;
+    ordered.forEach(function (r) {
+      if (g && !r.classList.contains("hidden")) {
+        var key = r.getAttribute("data-" + g);
+        if (key !== last) {
+          var n = shown.filter(function (s) { return s.getAttribute("data-" + g) === key; }).length;
+          var tr = document.createElement("tr");
+          tr.className = "group";
+          var td = document.createElement("td");
+          td.colSpan = 5;
+          td.textContent = key + " (" + n + ")";
+          tr.appendChild(td);
+          tbody.appendChild(tr);
+          last = key;
+        }
+      }
+      tbody.appendChild(r);
+    });
+    count.textContent = "Showing " + shown.length + " of " + rows.length;
+  }
+  [q, act, grp, hideQuiet].forEach(function (el) { el.addEventListener("input", render); el.addEventListener("change", render); });
+  render();
+
+  // Detail drawer.
+  var drawer = $("#drawer"), body = $("#drawer-body"), lastFocus = null;
+  function open(row) {
+    var tpl = document.getElementById("d" + row.getAttribute("data-idx"));
+    if (!tpl) { return; }
+    while (body.firstChild) { body.removeChild(body.firstChild); }
+    body.appendChild(tpl.content.cloneNode(true));
+    drawer.hidden = false;
+    lastFocus = row;
+    $("#drawer-close").focus();
+  }
+  function close() { drawer.hidden = true; if (lastFocus) { lastFocus.focus(); } }
+  tbody.addEventListener("click", function (e) {
+    var t = e.target;
+    while (t && t !== tbody && !(t.classList && t.classList.contains("row"))) { t = t.parentNode; }
+    if (t && t !== tbody) { open(t); }
+  });
+  tbody.addEventListener("keydown", function (e) {
+    if ((e.key === "Enter" || e.key === " ") && e.target.classList.contains("row")) { e.preventDefault(); open(e.target); }
+  });
+  $("#drawer-close").addEventListener("click", close);
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !drawer.hidden) { close(); } });
+})();
+</script>
+</body>
+</html>
+

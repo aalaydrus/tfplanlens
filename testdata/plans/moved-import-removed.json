@@ -1,0 +1,151 @@
+{
+  "format_version": "1.2",
+  "terraform_version": "1.9.5",
+  "planned_values": {
+    "root_module": {}
+  },
+  "resource_changes": [
+    {
+      "address": "aws_s3_bucket.new_name",
+      "mode": "managed",
+      "type": "aws_s3_bucket",
+      "name": "new_name",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "no-op"
+        ],
+        "before": {
+          "bucket": "b"
+        },
+        "after": {
+          "bucket": "b"
+        },
+        "after_unknown": {},
+        "before_sensitive": {},
+        "after_sensitive": {}
+      },
+      "previous_address": "aws_s3_bucket.old_name"
+    },
+    {
+      "address": "module.net.aws_vpc.main",
+      "mode": "managed",
+      "type": "aws_vpc",
+      "name": "main",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "update"
+        ],
+        "before": {
+          "cidr_block": "10.0.0.0/16",
+          "tags": {}
+        },
+        "after": {
+          "cidr_block": "10.0.0.0/16",
+          "tags": {
+            "m": "1"
+          }
+        },
+        "after_unknown": {},
+        "before_sensitive": {},
+        "after_sensitive": {}
+      },
+      "module_address": "module.net",
+      "previous_address": "aws_vpc.main"
+    },
+    {
+      "address": "aws_iam_role.imported",
+      "mode": "managed",
+      "type": "aws_iam_role",
+      "name": "imported",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "no-op"
+        ],
+        "before": {
+          "name": "legacy"
+        },
+        "after": {
+          "name": "legacy"
+        },
+        "after_unknown": {},
+        "before_sensitive": {},
+        "after_sensitive": {},
+        "importing": {
+          "id": "legacy"
+        }
+      }
+    },
+    {
+      "address": "aws_instance.imported_update",
+      "mode": "managed",
+      "type": "aws_instance",
+      "name": "imported_update",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "update"
+        ],
+        "before": {
+          "ami": "ami-0abc1234",
+          "instance_type": "t3.micro",
+          "tags": {
+            "Name": "web-0"
+          }
+        },
+        "after": {
+          "ami": "ami-0abc1234",
+          "instance_type": "t3.small",
+          "tags": {
+            "Name": "web-0"
+          }
+        },
+        "after_unknown": {},
+        "before_sensitive": {},
+        "after_sensitive": {},
+        "importing": {
+          "id": "i-0123456789abcdef0"
+        }
+      }
+    },
+    {
+      "address": "aws_db_instance.forgotten",
+      "mode": "managed",
+      "type": "aws_db_instance",
+      "name": "forgotten",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "forget"
+        ],
+        "before": {
+          "identifier": "keep-me"
+        },
+        "after": null,
+        "after_unknown": {},
+        "before_sensitive": {},
+        "after_sensitive": {}
+      },
+      "action_reason": "delete_because_no_resource_config"
+    }
+  ],
+  "configuration": {
+    "provider_config": {
+      "aws": {
+        "name": "aws",
+        "full_name": "registry.terraform.io/hashicorp/aws",
+        "expressions": {
+          "region": {
+            "constant_value": "us-east-1"
+          }
+        }
+      }
+    },
+    "root_module": {}
+  },
+  "applyable": true,
+  "complete": true,
+  "errored": false
+}

@@ -1,0 +1,338 @@
+{
+  "schema_version": 1,
+  "apply_account": {
+    "id": "999999999999",
+    "source": "flag",
+    "resolved": true
+  },
+  "notices": [],
+  "summary": {
+    "mode": "normal",
+    "applyable": true,
+    "errored": false,
+    "terraform_version": "1.9.5",
+    "total": 7,
+    "actions": {
+      "create": 2,
+      "update": 3,
+      "replace": 1,
+      "delete": 1,
+      "read": 0,
+      "no_op": 0,
+      "forget": 0
+    },
+    "by_type": {
+      "aws_db_instance": 1,
+      "aws_iam_role": 1,
+      "aws_instance": 1,
+      "aws_s3_bucket": 1,
+      "aws_sns_topic": 1,
+      "aws_sqs_queue": 1,
+      "aws_ssm_parameter": 1
+    },
+    "by_module": {
+      "root": 7
+    },
+    "known_after_apply": 4,
+    "drift_count": 0,
+    "warnings": 3
+  },
+  "findings": [
+    {
+      "address": "aws_db_instance.prod",
+      "type": "aws_db_instance",
+      "action": "delete",
+      "provider": "aws.prod",
+      "account": "444444444444",
+      "account_source": "flag",
+      "stateful": true,
+      "reason": "delete_because_no_resource_config",
+      "reason_text": "Removed from config",
+      "index_shift": false,
+      "drift_also": false
+    },
+    {
+      "address": "aws_instance.web",
+      "type": "aws_instance",
+      "action": "replace",
+      "provider": "aws.staging",
+      "account": "222222222222",
+      "account_source": "role_arn_variable",
+      "stateful": false,
+      "reason": "replace_because_cannot_update",
+      "reason_text": "Attribute change forces replacement: ami",
+      "replace_paths": [
+        "ami"
+      ],
+      "index_shift": false,
+      "drift_also": false
+    }
+  ],
+  "drift": [],
+  "groups": [
+    {
+      "key": "aws",
+      "provider": "aws",
+      "account": "999999999999",
+      "resolved": true,
+      "source": "caller_identity",
+      "default": true,
+      "cross_account": false,
+      "counts": {
+        "create": 1,
+        "update": 0,
+        "replace": 0,
+        "delete": 0,
+        "read": 0,
+        "no_op": 0,
+        "forget": 0
+      },
+      "addresses": [
+        "aws_s3_bucket.artifacts"
+      ]
+    },
+    {
+      "key": "aws.prod",
+      "provider": "aws",
+      "alias": "prod",
+      "account": "444444444444",
+      "resolved": true,
+      "source": "flag",
+      "default": false,
+      "cross_account": true,
+      "counts": {
+        "create": 0,
+        "update": 1,
+        "replace": 0,
+        "delete": 1,
+        "read": 0,
+        "no_op": 0,
+        "forget": 0
+      },
+      "addresses": [
+        "aws_iam_role.deployer",
+        "aws_db_instance.prod"
+      ]
+    },
+    {
+      "key": "aws.sandbox",
+      "provider": "aws",
+      "alias": "sandbox",
+      "account": "999999999999",
+      "resolved": true,
+      "source": "apply_account",
+      "default": false,
+      "cross_account": false,
+      "counts": {
+        "create": 1,
+        "update": 1,
+        "replace": 0,
+        "delete": 0,
+        "read": 0,
+        "no_op": 0,
+        "forget": 0
+      },
+      "addresses": [
+        "aws_sqs_queue.jobs",
+        "aws_sns_topic.alerts"
+      ]
+    },
+    {
+      "key": "aws.staging",
+      "provider": "aws",
+      "alias": "staging",
+      "account": "222222222222",
+      "resolved": true,
+      "source": "role_arn_variable",
+      "default": false,
+      "cross_account": true,
+      "counts": {
+        "create": 0,
+        "update": 1,
+        "replace": 1,
+        "delete": 0,
+        "read": 0,
+        "no_op": 0,
+        "forget": 0
+      },
+      "addresses": [
+        "aws_instance.web",
+        "aws_ssm_parameter.config"
+      ]
+    }
+  ],
+  "changes": [
+    {
+      "address": "aws_s3_bucket.artifacts",
+      "type": "aws_s3_bucket",
+      "module": "root",
+      "mode": "managed",
+      "action": "create",
+      "provider": "aws",
+      "account": "999999999999",
+      "account_source": "caller_identity",
+      "cross_account": false,
+      "warnings": [],
+      "stateful": true,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [],
+      "known_after_apply": 2
+    },
+    {
+      "address": "aws_iam_role.deployer",
+      "type": "aws_iam_role",
+      "module": "root",
+      "mode": "managed",
+      "action": "update",
+      "provider": "aws.prod",
+      "account": "444444444444",
+      "account_source": "flag",
+      "cross_account": true,
+      "warnings": [
+        {
+          "kind": "arn_account_mismatch",
+          "path": "arn",
+          "message": "arn is in account 111111111111 but provider aws.prod targets 444444444444 (flag)"
+        }
+      ],
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [
+        {
+          "path": "max_session_duration",
+          "kind": "value",
+          "before": 3600,
+          "after": 7200
+        }
+      ],
+      "known_after_apply": 0
+    },
+    {
+      "address": "aws_db_instance.prod",
+      "type": "aws_db_instance",
+      "module": "root",
+      "mode": "managed",
+      "action": "delete",
+      "provider": "aws.prod",
+      "account": "444444444444",
+      "account_source": "flag",
+      "cross_account": true,
+      "warnings": [
+        {
+          "kind": "arn_account_mismatch",
+          "path": "arn",
+          "message": "arn is in account 111111111111 but provider aws.prod targets 444444444444 (flag)"
+        }
+      ],
+      "stateful": true,
+      "reason": "delete_because_no_resource_config",
+      "reason_text": "Removed from config",
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [],
+      "known_after_apply": 0
+    },
+    {
+      "address": "aws_instance.web",
+      "type": "aws_instance",
+      "module": "root",
+      "mode": "managed",
+      "action": "replace",
+      "provider": "aws.staging",
+      "account": "222222222222",
+      "account_source": "role_arn_variable",
+      "cross_account": true,
+      "warnings": [],
+      "stateful": false,
+      "reason": "replace_because_cannot_update",
+      "reason_text": "Attribute change forces replacement: ami",
+      "replace_paths": [
+        "ami"
+      ],
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [
+        {
+          "path": "ami",
+          "kind": "value",
+          "before": "ami-old",
+          "after": "ami-new",
+          "forces_replacement": true
+        }
+      ],
+      "known_after_apply": 0
+    },
+    {
+      "address": "aws_ssm_parameter.config",
+      "type": "aws_ssm_parameter",
+      "module": "root",
+      "mode": "managed",
+      "action": "update",
+      "provider": "aws.staging",
+      "account": "222222222222",
+      "account_source": "role_arn_variable",
+      "cross_account": true,
+      "warnings": [
+        {
+          "kind": "arn_account_mismatch",
+          "path": "kms_key_arn",
+          "message": "kms_key_arn is in account 111111111111 but provider aws.staging targets 222222222222 (role_arn_variable)"
+        }
+      ],
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [
+        {
+          "path": "description",
+          "kind": "value",
+          "before": "old",
+          "after": "new"
+        }
+      ],
+      "known_after_apply": 0
+    },
+    {
+      "address": "aws_sqs_queue.jobs",
+      "type": "aws_sqs_queue",
+      "module": "root",
+      "mode": "managed",
+      "action": "create",
+      "provider": "aws.sandbox",
+      "account": "999999999999",
+      "account_source": "apply_account",
+      "cross_account": false,
+      "warnings": [],
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [],
+      "known_after_apply": 2
+    },
+    {
+      "address": "aws_sns_topic.alerts",
+      "type": "aws_sns_topic",
+      "module": "root",
+      "mode": "managed",
+      "action": "update",
+      "provider": "aws.sandbox",
+      "account": "999999999999",
+      "account_source": "apply_account",
+      "cross_account": false,
+      "warnings": [],
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [
+        {
+          "path": "tags.team",
+          "kind": "value",
+          "after": "sre"
+        }
+      ],
+      "known_after_apply": 0
+    }
+  ]
+}

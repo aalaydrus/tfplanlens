@@ -1,0 +1,159 @@
+{
+  "schema_version": 1,
+  "apply_account": {
+    "source": "unresolved",
+    "resolved": false
+  },
+  "notices": [
+    "Apply account unknown: set tfapply_account_id in tfplanlens.config.yaml (it cannot be read from the plan). Cross-account flags are off."
+  ],
+  "summary": {
+    "mode": "normal",
+    "applyable": true,
+    "errored": false,
+    "terraform_version": "1.9.5",
+    "total": 2,
+    "actions": {
+      "create": 0,
+      "update": 2,
+      "replace": 0,
+      "delete": 0,
+      "read": 0,
+      "no_op": 0,
+      "forget": 0
+    },
+    "by_type": {
+      "aws_iam_policy": 1,
+      "aws_iam_role": 1
+    },
+    "by_module": {
+      "root": 2
+    },
+    "known_after_apply": 0,
+    "drift_count": 0,
+    "warnings": 0
+  },
+  "findings": [],
+  "drift": [],
+  "groups": [
+    {
+      "key": "aws",
+      "provider": "aws",
+      "account": "unresolved (alias: default)",
+      "resolved": false,
+      "source": "unresolved",
+      "default": true,
+      "cross_account": false,
+      "counts": {
+        "create": 0,
+        "update": 2,
+        "replace": 0,
+        "delete": 0,
+        "read": 0,
+        "no_op": 0,
+        "forget": 0
+      },
+      "addresses": [
+        "aws_iam_role.app",
+        "aws_iam_policy.data"
+      ]
+    }
+  ],
+  "changes": [
+    {
+      "address": "aws_iam_role.app",
+      "type": "aws_iam_role",
+      "module": "root",
+      "mode": "managed",
+      "action": "update",
+      "provider": "aws",
+      "account": "unresolved (alias: default)",
+      "account_source": "unresolved",
+      "cross_account": false,
+      "warnings": [],
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [
+        {
+          "path": "assume_role_policy",
+          "kind": "long",
+          "diff": {
+            "header": "assume_role_policy: 5 lines changed of 15 (+4 -1)",
+            "lines": [
+              "@@ -5,5 +5,8 @@",
+              "       \"Effect\": \"Allow\",",
+              "       \"Principal\": {",
+              "-        \"Service\": \"ec2.amazonaws.com\"",
+              "+        \"Service\": [",
+              "+          \"ec2.amazonaws.com\",",
+              "+          \"lambda.amazonaws.com\"",
+              "+        ]",
+              "       }",
+              "     }",
+              "statements:",
+              "-Allow sts:AssumeRole -> principal Service=ec2.amazonaws.com",
+              "+Allow sts:AssumeRole -> principal Service=ec2.amazonaws.com|lambda.amazonaws.com"
+            ],
+            "added": 4,
+            "removed": 1,
+            "total_lines": 15
+          }
+        }
+      ],
+      "known_after_apply": 0
+    },
+    {
+      "address": "aws_iam_policy.data",
+      "type": "aws_iam_policy",
+      "module": "root",
+      "mode": "managed",
+      "action": "update",
+      "provider": "aws",
+      "account": "unresolved (alias: default)",
+      "account_source": "unresolved",
+      "cross_account": false,
+      "warnings": [],
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [
+        {
+          "path": "policy",
+          "kind": "long",
+          "diff": {
+            "header": "policy: 7 lines changed of 22 (+4 -3)",
+            "lines": [
+              "@@ -4,4 +4,5 @@",
+              "       \"Action\": [",
+              "         \"s3:GetObject\",",
+              "+        \"s3:PutObject\",",
+              "         \"s3:ListBucket\"",
+              "       ],",
+              "@@ -13,7 +14,7 @@",
+              "     },",
+              "     {",
+              "-      \"Action\": \"s3:DeleteObject\",",
+              "-      \"Effect\": \"Deny\",",
+              "-      \"Resource\": \"*\"",
+              "+      \"Action\": \"kms:Decrypt\",",
+              "+      \"Effect\": \"Allow\",",
+              "+      \"Resource\": \"arn:aws:kms:us-east-1:111111111111:key/abcd\"",
+              "     }",
+              "   ],",
+              "statements:",
+              "-Allow s3:GetObject,s3:ListBucket -> arn:aws:s3:::acme-data,arn:aws:s3:::acme-data/*",
+              "-Deny s3:DeleteObject -> *",
+              "+Allow s3:GetObject,s3:ListBucket,s3:PutObject -> arn:aws:s3:::acme-data,arn:aws:s3:::acme-data/*",
+              "+Allow kms:Decrypt -> arn:aws:kms:us-east-1:111111111111:key/abcd"
+            ],
+            "added": 4,
+            "removed": 3,
+            "total_lines": 22
+          }
+        }
+      ],
+      "known_after_apply": 0
+    }
+  ]
+}

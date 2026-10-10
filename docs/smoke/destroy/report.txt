@@ -1,0 +1,36 @@
+== Summary ==
+Plan: destroy | applyable: yes | errored: no
+Executed from (apply account): 111111111111 (source: flag)
+NOTICE: Destroy plan: applying destroys every resource listed under Danger.
+Actions: create 0, update 0, replace 0, delete 4, read 0, no-op 0, forget 0
+Known after apply: 0 attribute(s)
+By type: terraform_data 4
+By module: root 4
+
+== Danger ==
+! DELETE terraform_data.db
+    type: terraform_data | target account: 111111111111 (source: apply_account)
+    why: Destroy plan: every resource is being destroyed
+! DELETE terraform_data.shard[0]
+    type: terraform_data | target account: 111111111111 (source: apply_account)
+    why: Destroy plan: every resource is being destroyed
+! DELETE terraform_data.shard[1]
+    type: terraform_data | target account: 111111111111 (source: apply_account)
+    why: Destroy plan: every resource is being destroyed
+! DELETE terraform_data.web
+    type: terraform_data | target account: 111111111111 (source: apply_account)
+    why: Destroy plan: every resource is being destroyed
+
+== Drift ==
+No changes made outside Terraform.
+
+== Changes by account ==
+terraform: target account 111111111111 (source: apply_account)
+    delete 4
+    - terraform_data.db  (delete)
+    - terraform_data.shard[0]  (delete)
+    - terraform_data.shard[1]  (delete)
+    - terraform_data.web  (delete)
+
+== Changes by module ==
+root: delete 4
