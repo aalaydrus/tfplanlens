@@ -1,0 +1,35 @@
+== Summary ==
+Plan: normal | applyable: yes | errored: no
+Actions: create 1, update 1, replace 1, delete 0, read 0, no-op 0, forget 0
+Known after apply: 0 attribute(s)
+By type: aws_instance 2, aws_security_group 1
+By module: root 3
+
+== Danger ==
+! REPLACE aws_security_group.web
+    type: aws_security_group | account: unresolved (alias: default)
+    why: Attribute change forces replacement: description
+    HIGH RISK: resource also drifted outside Terraform
+
+== Drift ==
+~ aws_security_group.web [HIGH RISK]
+    Also being replaced or deleted by this plan.
+    ingress[0].cidr_blocks[0]: "10.0.0.0/8" -> "0.0.0.0/0"
+~ aws_instance.api
+    instance_type: "t3.micro" -> "t3.large"
+~ aws_s3_bucket.logs
+    tags.owner: (absent) -> "bob"
+~ aws_instance.legacy
+    Deleted outside Terraform
+
+== Changes by account ==
+aws: unresolved (alias: default)
+    create 1, update 1, replace 1
+    -/+ aws_security_group.web  (replace)
+        description: "web" -> "web v2"  [forces replacement]
+    ~ aws_instance.api  (update)
+        instance_type: "t3.large" -> "t3.small"
+    + aws_instance.legacy  (create)
+
+== Changes by module ==
+root: create 1, update 1, replace 1

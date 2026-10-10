@@ -6,8 +6,15 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
+
+	"github.com/aalaydrus/tfplanlens/internal/analyze"
+	"github.com/aalaydrus/tfplanlens/internal/config"
+	"github.com/aalaydrus/tfplanlens/internal/plan"
+	"github.com/aalaydrus/tfplanlens/internal/render/jsonout"
+	"github.com/aalaydrus/tfplanlens/internal/render/text"
 )
 
 // version is overridden at release time via -ldflags.
@@ -42,6 +49,11 @@ func run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	root := newRootCmd(stdin, stdout, stderr)
 	root.SetArgs(args)
 	if err := root.Execute(); err != nil {
+		var fo *failOnError
+		if errors.As(err, &fo) {
+			fmt.Fprintln(stderr, "fail-on:", fo.Error())
+			return exitFailOn
+		}
 		fmt.Fprintln(stderr, "error:", err)
 		return exitError
 	}
@@ -80,8 +92,7 @@ func newReportCmd() *cobra.Command {
 		Short: "Analyze a `terraform show -json` plan and print a report",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// TODO(v0.1): load plan, analyze, render, evaluate --fail-on.
-			return fmt.Errorf("report: %w", errNotImplemented)
+			return runReport(cmd, args[0], &o)
 		},
 	}
 	f := cmd.Flags()
@@ -92,4 +103,107 @@ func newReportCmd() *cobra.Command {
 	f.IntVar(&o.maxLine, "max-line", 120, "truncation width for terminal output")
 	f.BoolVar(&o.noColor, "no-color", false, "disable colored output")
 	return cmd
+}
+
+// failOnError is returned when a --fail-on rule matched; the report has
+// already been written.
+type failOnError struct{ matches []analyze.Match }
+
+func (e *failOnError) Error() string {
+	seen := map[string]bool{}
+	var parts []string
+	for _, m := range e.matches {
+		k := m.Rule.String() + " " + m.Address
+		if !seen[k] {
+			seen[k] = true
+			parts = append(parts, fmt.Sprintf("%s matched %s", m.Rule, m.Address))
+		}
+	}
+	return strings.Join(parts, "; ")
+}
+
+func runReport(cmd *cobra.Command, path string, o *reportOptions) error {
+	rules, err := analyze.ParseRules(o.failOn)
+	if err != nil {
+		return err
+	}
+	formats := o.formats
+	for _, f := range formats {
+		switch f {
+		case "text", "json":
+		case "html", "markdown":
+			return fmt.Errorf("--format %s: %w", f, errNotImplemented)
+		default:
+			return fmt.Errorf("unsupported --format %q (want text, html, markdown or json)", f)
+		}
+	}
+	if len(formats) > 1 && o.out != "" {
+		return errors.New("--out cannot be combined with several --format values yet")
+	}
+
+	cfg, err := config.Load(o.config)
+	if err != nil {
+		return err
+	}
+	var in io.Reader = cmd.InOrStdin()
+	if path != "-" {
+		f, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+		in = f
+	}
+	p, err := plan.Load(in)
+	if err != nil {
+		return err
+	}
+	a := analyze.Analyze(p, cfg)
+
+	for i, f := range formats {
+		var w io.Writer = cmd.OutOrStdout()
+		var file *os.File
+		if o.out != "" {
+			if file, err = os.Create(o.out); err != nil {
+				return err
+			}
+			w = file
+		} else if i > 0 {
+			fmt.Fprintln(w)
+		}
+		switch f {
+		case "text":
+			err = text.Render(w, a, text.Options{Color: useColor(cmd.OutOrStdout(), o.noColor), MaxLine: o.maxLine})
+		case "json":
+			err = jsonout.Render(w, a)
+		}
+		if file != nil {
+			if cerr := file.Close(); err == nil {
+				err = cerr
+			}
+		}
+		if err != nil {
+			return err
+		}
+	}
+
+	// --fail-on is evaluated on the whole plan, including ignored types.
+	if m := analyze.CheckFailOn(p, rules); len(m) > 0 {
+		return &failOnError{matches: m}
+	}
+	return nil
+}
+
+// useColor enables ANSI color only for terminals, honoring --no-color and
+// the NO_COLOR convention.
+func useColor(w io.Writer, noColor bool) bool {
+	if noColor || os.Getenv("NO_COLOR") != "" {
+		return false
+	}
+	f, ok := w.(*os.File)
+	if !ok {
+		return false
+	}
+	st, err := f.Stat()
+	return err == nil && st.Mode()&os.ModeCharDevice != 0
 }

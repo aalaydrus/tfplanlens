@@ -1,0 +1,189 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "mode": "normal",
+    "applyable": true,
+    "errored": false,
+    "terraform_version": "1.9.5",
+    "total": 3,
+    "actions": {
+      "create": 1,
+      "update": 1,
+      "replace": 1,
+      "delete": 0,
+      "read": 0,
+      "no_op": 0,
+      "forget": 0
+    },
+    "by_type": {
+      "aws_instance": 2,
+      "aws_security_group": 1
+    },
+    "by_module": {
+      "root": 3
+    },
+    "known_after_apply": 0,
+    "drift_count": 4
+  },
+  "findings": [
+    {
+      "address": "aws_security_group.web",
+      "type": "aws_security_group",
+      "action": "replace",
+      "provider": "aws",
+      "account": "unresolved (alias: default)",
+      "stateful": false,
+      "reason": "replace_because_cannot_update",
+      "reason_text": "Attribute change forces replacement: description",
+      "replace_paths": [
+        "description"
+      ],
+      "index_shift": false,
+      "drift_also": true
+    }
+  ],
+  "drift": [
+    {
+      "address": "aws_security_group.web",
+      "type": "aws_security_group",
+      "action": "update",
+      "attrs": [
+        {
+          "path": "ingress[0].cidr_blocks[0]",
+          "kind": "value",
+          "before": "10.0.0.0/8",
+          "after": "0.0.0.0/0"
+        }
+      ],
+      "high_risk": true,
+      "note": "Also being replaced or deleted by this plan."
+    },
+    {
+      "address": "aws_instance.api",
+      "type": "aws_instance",
+      "action": "update",
+      "attrs": [
+        {
+          "path": "instance_type",
+          "kind": "value",
+          "before": "t3.micro",
+          "after": "t3.large"
+        }
+      ],
+      "high_risk": false
+    },
+    {
+      "address": "aws_s3_bucket.logs",
+      "type": "aws_s3_bucket",
+      "action": "update",
+      "attrs": [
+        {
+          "path": "tags.owner",
+          "kind": "value",
+          "after": "bob"
+        }
+      ],
+      "high_risk": false
+    },
+    {
+      "address": "aws_instance.legacy",
+      "type": "aws_instance",
+      "action": "delete",
+      "attrs": [],
+      "high_risk": false,
+      "note": "Deleted outside Terraform"
+    }
+  ],
+  "groups": [
+    {
+      "key": "aws",
+      "provider": "aws",
+      "account": "unresolved (alias: default)",
+      "resolved": false,
+      "source": "none",
+      "default": true,
+      "cross_account": false,
+      "counts": {
+        "create": 1,
+        "update": 1,
+        "replace": 1,
+        "delete": 0,
+        "read": 0,
+        "no_op": 0,
+        "forget": 0
+      },
+      "addresses": [
+        "aws_security_group.web",
+        "aws_instance.api",
+        "aws_instance.legacy"
+      ]
+    }
+  ],
+  "changes": [
+    {
+      "address": "aws_security_group.web",
+      "type": "aws_security_group",
+      "module": "root",
+      "mode": "managed",
+      "action": "replace",
+      "provider": "aws",
+      "account": "unresolved (alias: default)",
+      "cross_account": false,
+      "stateful": false,
+      "reason": "replace_because_cannot_update",
+      "reason_text": "Attribute change forces replacement: description",
+      "replace_paths": [
+        "description"
+      ],
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [
+        {
+          "path": "description",
+          "kind": "value",
+          "before": "web",
+          "after": "web v2",
+          "forces_replacement": true
+        }
+      ],
+      "known_after_apply": 0
+    },
+    {
+      "address": "aws_instance.api",
+      "type": "aws_instance",
+      "module": "root",
+      "mode": "managed",
+      "action": "update",
+      "provider": "aws",
+      "account": "unresolved (alias: default)",
+      "cross_account": false,
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [
+        {
+          "path": "instance_type",
+          "kind": "value",
+          "before": "t3.large",
+          "after": "t3.small"
+        }
+      ],
+      "known_after_apply": 0
+    },
+    {
+      "address": "aws_instance.legacy",
+      "type": "aws_instance",
+      "module": "root",
+      "mode": "managed",
+      "action": "create",
+      "provider": "aws",
+      "account": "unresolved (alias: default)",
+      "cross_account": false,
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [],
+      "known_after_apply": 0
+    }
+  ]
+}

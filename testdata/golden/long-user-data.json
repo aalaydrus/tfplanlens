@@ -1,0 +1,198 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "mode": "normal",
+    "applyable": true,
+    "errored": false,
+    "terraform_version": "1.9.5",
+    "total": 3,
+    "actions": {
+      "create": 0,
+      "update": 3,
+      "replace": 0,
+      "delete": 0,
+      "read": 0,
+      "no_op": 0,
+      "forget": 0
+    },
+    "by_type": {
+      "aws_instance": 2,
+      "aws_launch_template": 1
+    },
+    "by_module": {
+      "root": 3
+    },
+    "known_after_apply": 0,
+    "drift_count": 0
+  },
+  "findings": [],
+  "drift": [],
+  "groups": [
+    {
+      "key": "aws",
+      "provider": "aws",
+      "account": "unresolved (alias: default)",
+      "resolved": false,
+      "source": "none",
+      "default": true,
+      "cross_account": false,
+      "counts": {
+        "create": 0,
+        "update": 3,
+        "replace": 0,
+        "delete": 0,
+        "read": 0,
+        "no_op": 0,
+        "forget": 0
+      },
+      "addresses": [
+        "aws_instance.app",
+        "aws_launch_template.gz",
+        "aws_instance.plain"
+      ]
+    }
+  ],
+  "changes": [
+    {
+      "address": "aws_instance.app",
+      "type": "aws_instance",
+      "module": "root",
+      "mode": "managed",
+      "action": "update",
+      "provider": "aws",
+      "account": "unresolved (alias: default)",
+      "cross_account": false,
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [
+        {
+          "path": "user_data_base64",
+          "kind": "long",
+          "diff": {
+            "header": "user_data_base64: 4 lines changed of 412 (+2 -2)",
+            "lines": [
+              "@@ -99,5 +99,5 @@",
+              " echo 'step 97: configuring subsystem 97' >> /var/log/boot.log",
+              " echo 'step 98: configuring subsystem 98' >> /var/log/boot.log",
+              "-echo 'step 99: configuring subsystem 99' >> /var/log/boot.log",
+              "+echo 'step 99: configuring subsystem 99 (patched)' >> /var/log/boot.log",
+              " echo 'step 100: configuring subsystem 100' >> /var/log/boot.log",
+              " echo 'step 101: configuring subsystem 101' >> /var/log/boot.log",
+              "@@ -249,4 +249,5 @@",
+              " echo 'step 247: configuring subsystem 247' >> /var/log/boot.log",
+              " echo 'step 248: configuring subsystem 248' >> /var/log/boot.log",
+              "+systemctl enable --now node_exporter",
+              " echo 'step 249: configuring subsystem 249' >> /var/log/boot.log",
+              " echo 'step 250: configuring subsystem 250' >> /var/log/boot.log",
+              "@@ -298,5 +299,4 @@",
+              " echo 'step 296: configuring subsystem 296' >> /var/log/boot.log",
+              " echo 'step 297: configuring subsystem 297' >> /var/log/boot.log",
+              "-echo 'step 298: configuring subsystem 298' >> /var/log/boot.log",
+              " echo 'step 299: configuring subsystem 299' >> /var/log/boot.log",
+              " echo 'step 300: configuring subsystem 300' >> /var/log/boot.log"
+            ],
+            "added": 2,
+            "removed": 2,
+            "total_lines": 412
+          }
+        }
+      ],
+      "known_after_apply": 0
+    },
+    {
+      "address": "aws_launch_template.gz",
+      "type": "aws_launch_template",
+      "module": "root",
+      "mode": "managed",
+      "action": "update",
+      "provider": "aws",
+      "account": "unresolved (alias: default)",
+      "cross_account": false,
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [
+        {
+          "path": "user_data",
+          "kind": "long",
+          "diff": {
+            "header": "user_data: 4 lines changed of 412 (+2 -2)",
+            "lines": [
+              "@@ -99,5 +99,5 @@",
+              " echo 'step 97: configuring subsystem 97' >> /var/log/boot.log",
+              " echo 'step 98: configuring subsystem 98' >> /var/log/boot.log",
+              "-echo 'step 99: configuring subsystem 99' >> /var/log/boot.log",
+              "+echo 'step 99: configuring subsystem 99 (patched)' >> /var/log/boot.log",
+              " echo 'step 100: configuring subsystem 100' >> /var/log/boot.log",
+              " echo 'step 101: configuring subsystem 101' >> /var/log/boot.log",
+              "@@ -249,4 +249,5 @@",
+              " echo 'step 247: configuring subsystem 247' >> /var/log/boot.log",
+              " echo 'step 248: configuring subsystem 248' >> /var/log/boot.log",
+              "+systemctl enable --now node_exporter",
+              " echo 'step 249: configuring subsystem 249' >> /var/log/boot.log",
+              " echo 'step 250: configuring subsystem 250' >> /var/log/boot.log",
+              "@@ -298,5 +299,4 @@",
+              " echo 'step 296: configuring subsystem 296' >> /var/log/boot.log",
+              " echo 'step 297: configuring subsystem 297' >> /var/log/boot.log",
+              "-echo 'step 298: configuring subsystem 298' >> /var/log/boot.log",
+              " echo 'step 299: configuring subsystem 299' >> /var/log/boot.log",
+              " echo 'step 300: configuring subsystem 300' >> /var/log/boot.log"
+            ],
+            "added": 2,
+            "removed": 2,
+            "total_lines": 412
+          }
+        }
+      ],
+      "known_after_apply": 0
+    },
+    {
+      "address": "aws_instance.plain",
+      "type": "aws_instance",
+      "module": "root",
+      "mode": "managed",
+      "action": "update",
+      "provider": "aws",
+      "account": "unresolved (alias: default)",
+      "cross_account": false,
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [
+        {
+          "path": "user_data",
+          "kind": "long",
+          "diff": {
+            "header": "user_data: 4 lines changed of 412 (+2 -2)",
+            "lines": [
+              "@@ -99,5 +99,5 @@",
+              " echo 'step 97: configuring subsystem 97' >> /var/log/boot.log",
+              " echo 'step 98: configuring subsystem 98' >> /var/log/boot.log",
+              "-echo 'step 99: configuring subsystem 99' >> /var/log/boot.log",
+              "+echo 'step 99: configuring subsystem 99 (patched)' >> /var/log/boot.log",
+              " echo 'step 100: configuring subsystem 100' >> /var/log/boot.log",
+              " echo 'step 101: configuring subsystem 101' >> /var/log/boot.log",
+              "@@ -249,4 +249,5 @@",
+              " echo 'step 247: configuring subsystem 247' >> /var/log/boot.log",
+              " echo 'step 248: configuring subsystem 248' >> /var/log/boot.log",
+              "+systemctl enable --now node_exporter",
+              " echo 'step 249: configuring subsystem 249' >> /var/log/boot.log",
+              " echo 'step 250: configuring subsystem 250' >> /var/log/boot.log",
+              "@@ -298,5 +299,4 @@",
+              " echo 'step 296: configuring subsystem 296' >> /var/log/boot.log",
+              " echo 'step 297: configuring subsystem 297' >> /var/log/boot.log",
+              "-echo 'step 298: configuring subsystem 298' >> /var/log/boot.log",
+              " echo 'step 299: configuring subsystem 299' >> /var/log/boot.log",
+              " echo 'step 300: configuring subsystem 300' >> /var/log/boot.log"
+            ],
+            "added": 2,
+            "removed": 2,
+            "total_lines": 412
+          }
+        }
+      ],
+      "known_after_apply": 0
+    }
+  ]
+}
