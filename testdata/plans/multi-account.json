@@ -1,0 +1,219 @@
+{
+  "format_version": "1.2",
+  "terraform_version": "1.9.5",
+  "planned_values": {
+    "root_module": {}
+  },
+  "resource_changes": [
+    {
+      "address": "aws_s3_bucket.default",
+      "mode": "managed",
+      "type": "aws_s3_bucket",
+      "name": "default",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "before": null,
+        "after": {
+          "bucket": "d"
+        },
+        "after_unknown": {},
+        "before_sensitive": {},
+        "after_sensitive": {}
+      }
+    },
+    {
+      "address": "aws_s3_bucket.prod",
+      "mode": "managed",
+      "type": "aws_s3_bucket",
+      "name": "prod",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "before": null,
+        "after": {
+          "bucket": "p"
+        },
+        "after_unknown": {},
+        "before_sensitive": {},
+        "after_sensitive": {}
+      }
+    },
+    {
+      "address": "aws_s3_bucket.shared",
+      "mode": "managed",
+      "type": "aws_s3_bucket",
+      "name": "shared",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "update"
+        ],
+        "before": {
+          "bucket": "s",
+          "tags": {}
+        },
+        "after": {
+          "bucket": "s",
+          "tags": {
+            "x": "y"
+          }
+        },
+        "after_unknown": {},
+        "before_sensitive": {},
+        "after_sensitive": {}
+      }
+    },
+    {
+      "address": "aws_db_instance.prod",
+      "mode": "managed",
+      "type": "aws_db_instance",
+      "name": "prod",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "delete"
+        ],
+        "before": {
+          "identifier": "prod"
+        },
+        "after": null,
+        "after_unknown": {},
+        "before_sensitive": {},
+        "after_sensitive": {}
+      },
+      "action_reason": "delete_because_no_resource_config"
+    },
+    {
+      "address": "aws_sqs_queue.eu",
+      "mode": "managed",
+      "type": "aws_sqs_queue",
+      "name": "eu",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "before": null,
+        "after": {
+          "name": "eu"
+        },
+        "after_unknown": {},
+        "before_sensitive": {},
+        "after_sensitive": {}
+      }
+    }
+  ],
+  "configuration": {
+    "provider_config": {
+      "aws": {
+        "name": "aws",
+        "full_name": "registry.terraform.io/hashicorp/aws",
+        "expressions": {
+          "region": {
+            "constant_value": "us-east-1"
+          }
+        }
+      },
+      "aws.prod": {
+        "name": "aws",
+        "alias": "prod",
+        "full_name": "registry.terraform.io/hashicorp/aws",
+        "expressions": {
+          "region": {
+            "constant_value": "us-east-1"
+          },
+          "assume_role": [
+            {
+              "role_arn": {
+                "constant_value": "arn:aws:iam::111111111111:role/deployer"
+              }
+            }
+          ]
+        }
+      },
+      "aws.shared": {
+        "name": "aws",
+        "alias": "shared",
+        "full_name": "registry.terraform.io/hashicorp/aws",
+        "expressions": {
+          "region": {
+            "constant_value": "us-east-1"
+          },
+          "assume_role": [
+            {
+              "role_arn": {
+                "constant_value": "arn:aws:iam::222222222222:role/deployer"
+              }
+            }
+          ]
+        }
+      },
+      "aws.mystery": {
+        "name": "aws",
+        "alias": "mystery",
+        "full_name": "registry.terraform.io/hashicorp/aws",
+        "expressions": {
+          "region": {
+            "constant_value": "eu-west-1"
+          },
+          "assume_role": [
+            {
+              "role_arn": {
+                "references": [
+                  "var.role_arn"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    "root_module": {
+      "resources": [
+        {
+          "address": "aws_s3_bucket.default",
+          "mode": "managed",
+          "type": "aws_s3_bucket",
+          "name": "default",
+          "provider_config_key": "aws"
+        },
+        {
+          "address": "aws_s3_bucket.prod",
+          "mode": "managed",
+          "type": "aws_s3_bucket",
+          "name": "prod",
+          "provider_config_key": "aws.prod"
+        },
+        {
+          "address": "aws_s3_bucket.shared",
+          "mode": "managed",
+          "type": "aws_s3_bucket",
+          "name": "shared",
+          "provider_config_key": "aws.shared"
+        },
+        {
+          "address": "aws_db_instance.prod",
+          "mode": "managed",
+          "type": "aws_db_instance",
+          "name": "prod",
+          "provider_config_key": "aws.prod"
+        },
+        {
+          "address": "aws_sqs_queue.eu",
+          "mode": "managed",
+          "type": "aws_sqs_queue",
+          "name": "eu",
+          "provider_config_key": "aws.mystery"
+        }
+      ]
+    }
+  },
+  "applyable": true,
+  "complete": true,
+  "errored": false
+}

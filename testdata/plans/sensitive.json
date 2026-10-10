@@ -1,0 +1,109 @@
+{
+  "format_version": "1.2",
+  "terraform_version": "1.9.5",
+  "planned_values": {
+    "root_module": {}
+  },
+  "resource_changes": [
+    {
+      "address": "aws_db_instance.main",
+      "mode": "managed",
+      "type": "aws_db_instance",
+      "name": "main",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "update"
+        ],
+        "before": {
+          "identifier": "main",
+          "password": "old-secret-pw"
+        },
+        "after": {
+          "identifier": "main",
+          "password": "new-secret-pw"
+        },
+        "after_unknown": {},
+        "before_sensitive": {
+          "password": true
+        },
+        "after_sensitive": {
+          "password": true
+        }
+      }
+    },
+    {
+      "address": "aws_secretsmanager_secret_version.s",
+      "mode": "managed",
+      "type": "aws_secretsmanager_secret_version",
+      "name": "s",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "before": null,
+        "after": {
+          "secret_string": "s3cr3t-value"
+        },
+        "after_unknown": {},
+        "before_sensitive": {},
+        "after_sensitive": {
+          "secret_string": true
+        }
+      }
+    },
+    {
+      "address": "aws_ssm_parameter.mixed",
+      "mode": "managed",
+      "type": "aws_ssm_parameter",
+      "name": "mixed",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "update"
+        ],
+        "before": {
+          "name": "/a",
+          "value": "old",
+          "tags": {
+            "k": "v1"
+          }
+        },
+        "after": {
+          "name": "/a",
+          "value": "new",
+          "tags": {
+            "k": "v2"
+          }
+        },
+        "after_unknown": {},
+        "before_sensitive": {
+          "value": true,
+          "tags": {}
+        },
+        "after_sensitive": {
+          "value": true,
+          "tags": {}
+        }
+      }
+    }
+  ],
+  "configuration": {
+    "provider_config": {
+      "aws": {
+        "name": "aws",
+        "full_name": "registry.terraform.io/hashicorp/aws",
+        "expressions": {
+          "region": {
+            "constant_value": "us-east-1"
+          }
+        }
+      }
+    },
+    "root_module": {}
+  },
+  "applyable": true,
+  "complete": true,
+  "errored": false
+}
