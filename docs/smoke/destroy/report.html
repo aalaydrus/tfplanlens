@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<title>tfplanlens report</title>
+<style>:root {
+  --bg: #f7f8fa; --panel: #ffffff; --text: #1b1f24; --muted: #5b6573; --line: #d8dde4;
+  --create: #1a7f37; --update: #9a6700; --replace: #bc4c00; --delete: #cf222e; --read: #0969da; --no-op: #6e7781; --forget: #8250df;
+  --danger-bg: #fff1f0; --danger-line: #cf222e; --warn-bg: #fff8c5; --warn-line: #bf8700;
+  --add-bg: #dafbe1; --del-bg: #ffebe9; --hunk-bg: #ddf4ff;
+}
+:root[data-theme="dark"] {
+  --bg: #0d1117; --panel: #161b22; --text: #e6edf3; --muted: #9ba7b4; --line: #30363d;
+  --create: #3fb950; --update: #d29922; --replace: #f0883e; --delete: #ff7b72; --read: #58a6ff; --no-op: #8b949e; --forget: #bc8cff;
+  --danger-bg: #2d1416; --danger-line: #ff7b72; --warn-bg: #2b2310; --warn-line: #d29922;
+  --add-bg: #12261e; --del-bg: #2d1416; --hunk-bg: #0c2d4a;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1117; --panel: #161b22; --text: #e6edf3; --muted: #9ba7b4; --line: #30363d;
+    --create: #3fb950; --update: #d29922; --replace: #f0883e; --delete: #ff7b72; --read: #58a6ff; --no-op: #8b949e; --forget: #bc8cff;
+    --danger-bg: #2d1416; --danger-line: #ff7b72; --warn-bg: #2b2310; --warn-line: #d29922;
+    --add-bg: #12261e; --del-bg: #2d1416; --hunk-bg: #0c2d4a;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+code, pre, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12.5px; }
+header { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; padding: 12px 24px; border-bottom: 1px solid var(--line); background: var(--panel); }
+header h1 { font-size: 18px; margin: 0; }
+header .grow { flex: 1; }
+main { max-width: 1200px; margin: 0 auto; padding: 16px 24px 64px; }
+section { margin: 16px 0; }
+h2 { font-size: 15px; margin: 0 0 8px; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; }
+.panel.danger { background: var(--danger-bg); border-color: var(--danger-line); }
+.panel.drift { border-color: var(--warn-line); }
+.chip { display: inline-block; padding: 1px 8px; border: 1px solid var(--line); border-radius: 999px; background: var(--bg); color: var(--muted); font-size: 12px; }
+.chip.bad { color: var(--delete); border-color: var(--delete); }
+.badge { display: inline-block; padding: 0 6px; border-radius: 4px; font-size: 11px; font-weight: 700; letter-spacing: .02em; border: 1px solid currentColor; }
+.badge.stateful { color: var(--delete); }
+.badge.warn { color: var(--update); }
+.badge.hi { color: var(--delete); background: var(--panel); }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; }
+.tile { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; }
+.tile b { display: block; font-size: 22px; line-height: 1.2; }
+.tile span { color: var(--muted); font-size: 12px; }
+.a-create { color: var(--create); } .a-update { color: var(--update); } .a-replace { color: var(--replace); }
+.a-delete { color: var(--delete); } .a-read { color: var(--read); } .a-no-op { color: var(--no-op); } .a-forget { color: var(--forget); }
+.finding { padding: 8px 0; border-top: 1px solid var(--danger-line); }
+.finding:first-of-type { border-top: 0; }
+.finding .why { margin: 2px 0 0 0; color: var(--text); }
+.finding .meta { color: var(--muted); font-size: 12px; }
+.warnline { margin: 4px 0 0; padding: 4px 8px; background: var(--warn-bg); border-left: 3px solid var(--warn-line); border-radius: 3px; }
+.chart { width: 100%; max-width: 380px; height: auto; }
+.chart text { fill: var(--text); font-size: 13px; }
+.chart .bar { stroke: none; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-bottom: 8px; }
+.controls input[type="search"], .controls select { padding: 4px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--text); font: inherit; }
+.controls input[type="search"] { min-width: 240px; }
+button { font: inherit; padding: 4px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--text); cursor: pointer; }
+button:hover { border-color: var(--read); }
+table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
+th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-weight: 600; font-size: 12px; position: sticky; top: 0; background: var(--panel); }
+tr.row { cursor: pointer; }
+tr.row:hover, tr.row:focus { background: var(--bg); outline: none; }
+tr.row:focus-visible { outline: 2px solid var(--read); }
+tr.group td { background: var(--bg); font-weight: 600; }
+.src { color: var(--muted); font-size: 12px; }
+td.addr { word-break: break-all; }
+#drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(640px, 100%); background: var(--panel); border-left: 1px solid var(--line); box-shadow: -8px 0 24px rgba(0, 0, 0, .25); overflow: auto; padding: 16px 20px; z-index: 10; }
+#drawer[hidden] { display: none; }
+#drawer h3 { margin: 0 0 4px; word-break: break-all; }
+.attr { margin: 10px 0; padding-top: 8px; border-top: 1px solid var(--line); }
+.attr .path { font-weight: 600; }
+.diff { margin: 6px 0; padding: 0; border: 1px solid var(--line); border-radius: 6px; overflow: auto; max-height: 360px; }
+.diff div { padding: 0 8px; white-space: pre; }
+.diff .add { background: var(--add-bg); } .diff .del { background: var(--del-bg); } .diff .hunk { background: var(--hunk-bg); color: var(--muted); }
+details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--line); border-radius: 6px; padding: 8px; margin: 4px 0; white-space: pre; }
+.empty { color: var(--muted); }
+.hidden { display: none !important; }
+@media (max-width: 700px) {
+  main, header { padding-left: 12px; padding-right: 12px; }
+  .controls input[type="search"] { min-width: 0; width: 100%; }
+  /* Stack each row: action and account on one line, the address on its own
+     full-width line, so long addresses are not squeezed into a narrow column. */
+  table, tbody { display: block; }
+  thead { display: none; }
+  tr.row { display: grid; grid-template-columns: auto 1fr; grid-template-areas: "a c" "r r"; gap: 0 12px; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  tr.row td { border: 0; padding: 1px 0; }
+  tr.row td:nth-child(1) { grid-area: a; }
+  tr.row td:nth-child(4) { grid-area: c; text-align: right; }
+  tr.row td.addr { grid-area: r; overflow-wrap: anywhere; word-break: normal; font-size: 12px; }
+  tr.row td:nth-child(3), tr.row td:nth-child(5) { display: none; }
+  tr.group { display: block; }
+  tr.group td { display: block; }
+}
+@media print { #drawer, .controls, #theme { display: none; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>tfplanlens</h1>
+  <span class="chip">plan: destroy</span>
+  <span class="chip">applyable: yes</span>
+  
+  <span class="chip" title="Where terraform apply runs">executed from: <span class="mono">111111111111</span> (flag)</span>
+  
+  <span class="grow"></span>
+  <button id="theme" type="button">Theme: auto</button>
+</header>
+<main>
+<p class="panel"><b>Notice:</b> Destroy plan: applying destroys every resource listed under Danger.</p>
+
+<section id="danger" class="panel danger" aria-labelledby="danger-h">
+  <h2 id="danger-h">Danger: 4 delete/replace</h2>
+  
+  
+  <div class="finding">
+    <div><b class="a-delete">DELETE</b> <span class="mono">terraform_data.db</span>
+      
+      </div>
+    <p class="why">Destroy plan: every resource is being destroyed</p>
+    
+    <div class="meta">terraform_data &middot; target account <span class="mono">111111111111</span> (source: apply_account)</div>
+  </div>
+  
+  <div class="finding">
+    <div><b class="a-delete">DELETE</b> <span class="mono">terraform_data.shard[0]</span>
+      
+      </div>
+    <p class="why">Destroy plan: every resource is being destroyed</p>
+    
+    <div class="meta">terraform_data &middot; target account <span class="mono">111111111111</span> (source: apply_account)</div>
+  </div>
+  
+  <div class="finding">
+    <div><b class="a-delete">DELETE</b> <span class="mono">terraform_data.shard[1]</span>
+      
+      </div>
+    <p class="why">Destroy plan: every resource is being destroyed</p>
+    
+    <div class="meta">terraform_data &middot; target account <span class="mono">111111111111</span> (source: apply_account)</div>
+  </div>
+  
+  <div class="finding">
+    <div><b class="a-delete">DELETE</b> <span class="mono">terraform_data.web</span>
+      
+      </div>
+    <p class="why">Destroy plan: every resource is being destroyed</p>
+    
+    <div class="meta">terraform_data &middot; target account <span class="mono">111111111111</span> (source: apply_account)</div>
+  </div>
+  
+</section>
+
+<section aria-label="Summary">
+  <div class="tiles">
+    <div class="tile"><b class="a-create">0</b><span>create</span></div><div class="tile"><b class="a-update">0</b><span>update</span></div><div class="tile"><b class="a-replace">0</b><span>replace</span></div><div class="tile"><b class="a-delete">4</b><span>delete</span></div><div class="tile"><b class="a-update">0</b><span>drift</span></div><div class="tile"><b class="a-read">0</b><span>known after apply</span></div><div class="tile"><b class="a-replace">0</b><span>warnings</span></div>
+  </div>
+</section>
+
+<section class="panel" aria-labelledby="chart-h">
+  <h2 id="chart-h">Actions</h2>
+  <svg class="chart" viewBox="0 0 350 176" role="img" aria-label="Bar chart of changes by action">
+    
+    <text x="0" y="17">create</text>
+    <rect class="bar" x="70" y="4" width="0" height="16" rx="3" style="fill: var(--create)"><title>create: 0</title></rect>
+    <text x="76" y="17">0</text>
+    
+    <text x="0" y="41">update</text>
+    <rect class="bar" x="70" y="28" width="0" height="16" rx="3" style="fill: var(--update)"><title>update: 0</title></rect>
+    <text x="76" y="41">0</text>
+    
+    <text x="0" y="65">replace</text>
+    <rect class="bar" x="70" y="52" width="0" height="16" rx="3" style="fill: var(--replace)"><title>replace: 0</title></rect>
+    <text x="76" y="65">0</text>
+    
+    <text x="0" y="89">delete</text>
+    <rect class="bar" x="70" y="76" width="230" height="16" rx="3" style="fill: var(--delete)"><title>delete: 4</title></rect>
+    <text x="306" y="89">4</text>
+    
+    <text x="0" y="113">read</text>
+    <rect class="bar" x="70" y="100" width="0" height="16" rx="3" style="fill: var(--read)"><title>read: 0</title></rect>
+    <text x="76" y="113">0</text>
+    
+    <text x="0" y="137">no-op</text>
+    <rect class="bar" x="70" y="124" width="0" height="16" rx="3" style="fill: var(--no-op)"><title>no-op: 0</title></rect>
+    <text x="76" y="137">0</text>
+    
+    <text x="0" y="161">forget</text>
+    <rect class="bar" x="70" y="148" width="0" height="16" rx="3" style="fill: var(--forget)"><title>forget: 0</title></rect>
+    <text x="76" y="161">0</text>
+    
+  </svg>
+</section>
+
+
+
+<section aria-labelledby="changes-h">
+  <h2 id="changes-h">All changes</h2>
+  <div class="controls">
+    <input id="q" type="search" placeholder="Search address, type, account&hellip;" aria-label="Search changes">
+    <label>Action
+      <select id="action"><option value="">all</option>
+        <option value="delete">delete</option>
+      </select></label>
+    <label>Group by
+      <select id="group"><option value="">none</option><option value="account">account</option><option value="module">module</option><option value="type">type</option></select></label>
+    <label><input id="hidequiet" type="checkbox"> hide plain no-ops and reads</label>
+    <span id="count" class="src"></span>
+  </div>
+  <table>
+    <thead><tr><th>Action</th><th>Resource</th><th>Type</th><th>Target account (source)</th><th>Module</th></tr></thead>
+    <tbody id="rows">
+    
+      <tr class="row" tabindex="0" data-idx="0" data-action="delete" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="0" data-text="terraform_data.db terraform_data 111111111111 root delete">
+        <td><b class="a-delete">- delete</b></td>
+        <td class="addr mono">terraform_data.db
+          
+          
+          
+          
+          </td>
+        <td>terraform_data</td>
+        <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
+        <td>root</td>
+      </tr>
+    
+      <tr class="row" tabindex="0" data-idx="1" data-action="delete" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="0" data-text="terraform_data.shard[0] terraform_data 111111111111 root delete">
+        <td><b class="a-delete">- delete</b></td>
+        <td class="addr mono">terraform_data.shard[0]
+          
+          
+          
+          
+          </td>
+        <td>terraform_data</td>
+        <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
+        <td>root</td>
+      </tr>
+    
+      <tr class="row" tabindex="0" data-idx="2" data-action="delete" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="0" data-text="terraform_data.shard[1] terraform_data 111111111111 root delete">
+        <td><b class="a-delete">- delete</b></td>
+        <td class="addr mono">terraform_data.shard[1]
+          
+          
+          
+          
+          </td>
+        <td>terraform_data</td>
+        <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
+        <td>root</td>
+      </tr>
+    
+      <tr class="row" tabindex="0" data-idx="3" data-action="delete" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="0" data-text="terraform_data.web terraform_data 111111111111 root delete">
+        <td><b class="a-delete">- delete</b></td>
+        <td class="addr mono">terraform_data.web
+          
+          
+          
+          
+          </td>
+        <td>terraform_data</td>
+        <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
+        <td>root</td>
+      </tr>
+    
+    </tbody>
+  </table>
+</section>
+</main>
+
+<aside id="drawer" role="dialog" aria-label="Resource details" hidden>
+  <button id="drawer-close" type="button">Close</button>
+  <div id="drawer-body"></div>
+</aside>
+
+
+<template id="d0">
+  <h3 class="mono">terraform_data.db</h3>
+  <p><b class="a-delete">delete</b>
+    </p>
+  <p class="meta">terraform_data &middot; provider <span class="mono">terraform</span><br>
+    target account <span class="mono">111111111111</span> (source: apply_account)</p>
+  <p><b>Why:</b> Destroy plan: every resource is being destroyed</p>
+  
+  
+  
+</template>
+
+<template id="d1">
+  <h3 class="mono">terraform_data.shard[0]</h3>
+  <p><b class="a-delete">delete</b>
+    </p>
+  <p class="meta">terraform_data &middot; provider <span class="mono">terraform</span><br>
+    target account <span class="mono">111111111111</span> (source: apply_account)</p>
+  <p><b>Why:</b> Destroy plan: every resource is being destroyed</p>
+  
+  
+  
+</template>
+
+<template id="d2">
+  <h3 class="mono">terraform_data.shard[1]</h3>
+  <p><b class="a-delete">delete</b>
+    </p>
+  <p class="meta">terraform_data &middot; provider <span class="mono">terraform</span><br>
+    target account <span class="mono">111111111111</span> (source: apply_account)</p>
+  <p><b>Why:</b> Destroy plan: every resource is being destroyed</p>
+  
+  
+  
+</template>
+
+<template id="d3">
+  <h3 class="mono">terraform_data.web</h3>
+  <p><b class="a-delete">delete</b>
+    </p>
+  <p class="meta">terraform_data &middot; provider <span class="mono">terraform</span><br>
+    target account <span class="mono">111111111111</span> (source: apply_account)</p>
+  <p><b>Why:</b> Destroy plan: every resource is being destroyed</p>
+  
+  
+  
+</template>
+
+
+<script>(function () {
+  "use strict";
+  var $ = function (sel, root) { return (root || document).querySelector(sel); };
+  var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
+
+  // Theme: auto (system) -> light -> dark. Storage may be unavailable.
+  var root = document.documentElement;
+  var themeBtn = $("#theme");
+  function setTheme(t) {
+    if (t === "light" || t === "dark") { root.setAttribute("data-theme", t); } else { root.removeAttribute("data-theme"); }
+    if (themeBtn) { themeBtn.textContent = "Theme: " + (t || "auto"); }
+    try { localStorage.setItem("tfplanlens-theme", t || ""); } catch (e) { /* ignore */ }
+  }
+  var saved = "";
+  try { saved = localStorage.getItem("tfplanlens-theme") || ""; } catch (e) { /* ignore */ }
+  setTheme(saved);
+  if (themeBtn) {
+    themeBtn.addEventListener("click", function () {
+      var cur = root.getAttribute("data-theme") || "";
+      setTheme(cur === "" ? "light" : cur === "light" ? "dark" : "");
+    });
+  }
+
+  // Filter, search and group the changes table.
+  var tbody = $("#rows");
+  if (!tbody) { return; }
+  var rows = $$("tr.row", tbody);
+  var q = $("#q"), act = $("#action"), grp = $("#group"), hideQuiet = $("#hidequiet"), count = $("#count");
+
+  function render() {
+    var term = (q.value || "").toLowerCase().trim();
+    var a = act.value, g = grp.value;
+    $$("tr.group", tbody).forEach(function (n) { n.parentNode.removeChild(n); });
+    var shown = rows.filter(function (r) {
+      var ok = (!term || r.getAttribute("data-text").indexOf(term) !== -1) &&
+               (!a || r.getAttribute("data-action") === a) &&
+               !(hideQuiet.checked && (r.getAttribute("data-action") === "no-op" || r.getAttribute("data-action") === "read") && r.getAttribute("data-quiet") === "1");
+      r.classList.toggle("hidden", !ok);
+      return ok;
+    });
+    var ordered = rows.slice().sort(function (x, y) {
+      if (g) {
+        var kx = x.getAttribute("data-" + g), ky = y.getAttribute("data-" + g);
+        if (kx !== ky) { return kx < ky ? -1 : 1; }
+      }
+      return Number(x.getAttribute("data-idx")) - Number(y.getAttribute("data-idx"));
+    });
+    var last = null;
+    ordered.forEach(function (r) {
+      if (g && !r.classList.contains("hidden")) {
+        var key = r.getAttribute("data-" + g);
+        if (key !== last) {
+          var n = shown.filter(function (s) { return s.getAttribute("data-" + g) === key; }).length;
+          var tr = document.createElement("tr");
+          tr.className = "group";
+          var td = document.createElement("td");
+          td.colSpan = 5;
+          td.textContent = key + " (" + n + ")";
+          tr.appendChild(td);
+          tbody.appendChild(tr);
+          last = key;
+        }
+      }
+      tbody.appendChild(r);
+    });
+    count.textContent = "Showing " + shown.length + " of " + rows.length;
+  }
+  [q, act, grp, hideQuiet].forEach(function (el) { el.addEventListener("input", render); el.addEventListener("change", render); });
+  render();
+
+  // Detail drawer.
+  var drawer = $("#drawer"), body = $("#drawer-body"), lastFocus = null;
+  function open(row) {
+    var tpl = document.getElementById("d" + row.getAttribute("data-idx"));
+    if (!tpl) { return; }
+    while (body.firstChild) { body.removeChild(body.firstChild); }
+    body.appendChild(tpl.content.cloneNode(true));
+    drawer.hidden = false;
+    lastFocus = row;
+    $("#drawer-close").focus();
+  }
+  function close() { drawer.hidden = true; if (lastFocus) { lastFocus.focus(); } }
+  tbody.addEventListener("click", function (e) {
+    var t = e.target;
+    while (t && t !== tbody && !(t.classList && t.classList.contains("row"))) { t = t.parentNode; }
+    if (t && t !== tbody) { open(t); }
+  });
+  tbody.addEventListener("keydown", function (e) {
+    if ((e.key === "Enter" || e.key === " ") && e.target.classList.contains("row")) { e.preventDefault(); open(e.target); }
+  });
+  $("#drawer-close").addEventListener("click", close);
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !drawer.hidden) { close(); } });
+})();
+</script>
+</body>
+</html>
+

@@ -168,7 +168,11 @@ func (r *renderer) drift(a *analyze.Analysis) {
 		if d.HighRisk {
 			risk = " " + r.c(red+bold, "[HIGH RISK]")
 		}
-		r.line("~ %s%s", d.Address, risk)
+		sym := "~"
+		if d.Action == "delete" {
+			sym = "-" // deleted outside Terraform, not merely modified
+		}
+		r.line("%s %s%s", sym, d.Address, risk)
 		if d.Note != "" {
 			r.line("    %s", d.Note)
 		}

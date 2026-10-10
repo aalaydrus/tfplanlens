@@ -51,8 +51,12 @@ jobs:
       - name: Generate real plans
         run: |
           set -eu
-          for scenario in simple complex; do
-            scripts/smoke-plan.sh "$scenario" "$RUNNER_TEMP/work"
+          # Every scenario directory under testdata/real. Most use only the
+          # built-in terraform_data resource; drift, refresh-only and
+          # module-provider also install the credential-free hashicorp/local
+          # provider from the registry.
+          for dir in testdata/real/*/; do
+            scripts/smoke-plan.sh "$(basename "$dir")" "$RUNNER_TEMP/work"
           done
           ls -la testdata/plans/real
 
@@ -70,7 +74,8 @@ jobs:
           set -eu
           npm install --no-save --no-package-lock playwright
           npx playwright install --with-deps chromium
-          node scripts/screenshot.mjs docs/smoke docs/screenshots
+          # Screenshots are committed, so only the two showcase scenarios.
+          SCREENSHOT_SCENARIOS=simple,complex node scripts/screenshot.mjs docs/smoke docs/screenshots
           ls -la docs/screenshots
 
       - name: Commit outputs back to the PR branch

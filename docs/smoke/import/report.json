@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "apply_account": {
+    "id": "111111111111",
+    "source": "flag",
+    "resolved": true
+  },
+  "notices": [],
+  "summary": {
+    "mode": "normal",
+    "applyable": true,
+    "errored": false,
+    "terraform_version": "1.16.5",
+    "total": 2,
+    "actions": {
+      "create": 0,
+      "update": 2,
+      "replace": 0,
+      "delete": 0,
+      "read": 0,
+      "no_op": 0,
+      "forget": 0
+    },
+    "by_type": {
+      "terraform_data": 2
+    },
+    "by_module": {
+      "root": 2
+    },
+    "known_after_apply": 2,
+    "drift_count": 0,
+    "warnings": 0
+  },
+  "findings": [],
+  "drift": [],
+  "groups": [
+    {
+      "key": "terraform",
+      "provider": "terraform",
+      "account": "111111111111",
+      "resolved": true,
+      "source": "apply_account",
+      "default": true,
+      "cross_account": false,
+      "counts": {
+        "create": 0,
+        "update": 2,
+        "replace": 0,
+        "delete": 0,
+        "read": 0,
+        "no_op": 0,
+        "forget": 0
+      },
+      "addresses": [
+        "terraform_data.imp",
+        "terraform_data.other"
+      ]
+    }
+  ],
+  "changes": [
+    {
+      "address": "terraform_data.imp",
+      "type": "terraform_data",
+      "module": "root",
+      "mode": "managed",
+      "action": "update",
+      "provider": "terraform",
+      "account": "111111111111",
+      "account_source": "apply_account",
+      "cross_account": false,
+      "warnings": null,
+      "stateful": false,
+      "import": true,
+      "import_id": "b2c3fd2d-f8ef-2564-ea76-559285315653",
+      "removed_from_state_only": false,
+      "attrs": [
+        {
+          "path": "input",
+          "kind": "value",
+          "before": null,
+          "after": "managed"
+        }
+      ],
+      "known_after_apply": 1
+    },
+    {
+      "address": "terraform_data.other",
+      "type": "terraform_data",
+      "module": "root",
+      "mode": "managed",
+      "action": "update",
+      "provider": "terraform",
+      "account": "111111111111",
+      "account_source": "apply_account",
+      "cross_account": false,
+      "warnings": null,
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [
+        {
+          "path": "input",
+          "kind": "value",
+          "before": "other",
+          "after": "other-changed"
+        }
+      ],
+      "known_after_apply": 1
+    }
+  ]
+}

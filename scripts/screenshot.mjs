@@ -3,6 +3,9 @@
 //
 //   node scripts/screenshot.mjs [smoke-dir] [screenshots-dir]
 //
+// SCREENSHOT_SCENARIOS=simple,complex limits it to those scenarios (default:
+// all). Screenshots are committed, so keep the list short.
+//
 // Needs Playwright: npm i --no-save playwright && npx playwright install chromium
 import { chromium } from 'playwright';
 import { readdirSync, mkdirSync, existsSync } from 'node:fs';
@@ -11,6 +14,7 @@ import { resolve, join } from 'node:path';
 const smokeDir = resolve(process.argv[2] ?? 'docs/smoke');
 const outDir = resolve(process.argv[3] ?? 'docs/screenshots');
 mkdirSync(outDir, { recursive: true });
+const only = process.env.SCREENSHOT_SCENARIOS ? process.env.SCREENSHOT_SCENARIOS.split(',') : null;
 
 const viewports = [
   { name: 'desktop', width: 1280, height: 900 },
@@ -20,6 +24,7 @@ const viewports = [
 const browser = await chromium.launch();
 let failed = false;
 for (const scenario of readdirSync(smokeDir, { withFileTypes: true }).filter((d) => d.isDirectory())) {
+  if (only && !only.includes(scenario.name)) continue;
   const report = join(smokeDir, scenario.name, 'report.html');
   if (!existsSync(report)) continue;
   for (const vp of viewports) {

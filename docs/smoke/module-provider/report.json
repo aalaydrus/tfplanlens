@@ -1,0 +1,224 @@
+{
+  "schema_version": 1,
+  "apply_account": {
+    "id": "111111111111",
+    "source": "flag",
+    "resolved": true
+  },
+  "notices": [],
+  "summary": {
+    "mode": "normal",
+    "applyable": true,
+    "errored": false,
+    "terraform_version": "1.16.5",
+    "total": 3,
+    "actions": {
+      "create": 0,
+      "update": 0,
+      "replace": 3,
+      "delete": 0,
+      "read": 0,
+      "no_op": 0,
+      "forget": 0
+    },
+    "by_type": {
+      "local_file": 3
+    },
+    "by_module": {
+      "module.net": 1,
+      "root": 2
+    },
+    "known_after_apply": 21,
+    "drift_count": 0,
+    "warnings": 0
+  },
+  "findings": [
+    {
+      "address": "local_file.alt",
+      "type": "local_file",
+      "action": "replace",
+      "provider": "local.alt",
+      "account": "111111111111",
+      "account_source": "apply_account",
+      "stateful": false,
+      "reason": "replace_because_cannot_update",
+      "reason_text": "Attribute change forces replacement: content",
+      "replace_paths": [
+        "content"
+      ],
+      "index_shift": false,
+      "drift_also": false
+    },
+    {
+      "address": "local_file.root",
+      "type": "local_file",
+      "action": "replace",
+      "provider": "local",
+      "account": "111111111111",
+      "account_source": "apply_account",
+      "stateful": false,
+      "reason": "replace_because_cannot_update",
+      "reason_text": "Attribute change forces replacement: content",
+      "replace_paths": [
+        "content"
+      ],
+      "index_shift": false,
+      "drift_also": false
+    },
+    {
+      "address": "module.net.local_file.inner",
+      "type": "local_file",
+      "action": "replace",
+      "provider": "local.alt",
+      "account": "111111111111",
+      "account_source": "apply_account",
+      "stateful": false,
+      "reason": "replace_because_cannot_update",
+      "reason_text": "Attribute change forces replacement: content",
+      "replace_paths": [
+        "content"
+      ],
+      "index_shift": false,
+      "drift_also": false
+    }
+  ],
+  "drift": [],
+  "groups": [
+    {
+      "key": "local",
+      "provider": "local",
+      "account": "111111111111",
+      "resolved": true,
+      "source": "apply_account",
+      "default": true,
+      "cross_account": false,
+      "counts": {
+        "create": 0,
+        "update": 0,
+        "replace": 1,
+        "delete": 0,
+        "read": 0,
+        "no_op": 0,
+        "forget": 0
+      },
+      "addresses": [
+        "local_file.root"
+      ]
+    },
+    {
+      "key": "local.alt",
+      "provider": "local",
+      "alias": "alt",
+      "account": "111111111111",
+      "resolved": true,
+      "source": "apply_account",
+      "default": false,
+      "cross_account": false,
+      "counts": {
+        "create": 0,
+        "update": 0,
+        "replace": 2,
+        "delete": 0,
+        "read": 0,
+        "no_op": 0,
+        "forget": 0
+      },
+      "addresses": [
+        "local_file.alt",
+        "module.net.local_file.inner"
+      ]
+    }
+  ],
+  "changes": [
+    {
+      "address": "local_file.alt",
+      "type": "local_file",
+      "module": "root",
+      "mode": "managed",
+      "action": "replace",
+      "provider": "local.alt",
+      "account": "111111111111",
+      "account_source": "apply_account",
+      "cross_account": false,
+      "warnings": null,
+      "stateful": false,
+      "reason": "replace_because_cannot_update",
+      "reason_text": "Attribute change forces replacement: content",
+      "replace_paths": [
+        "content"
+      ],
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [
+        {
+          "path": "content",
+          "kind": "value",
+          "before": "alt-v1",
+          "after": "alt-v2",
+          "forces_replacement": true
+        }
+      ],
+      "known_after_apply": 7
+    },
+    {
+      "address": "local_file.root",
+      "type": "local_file",
+      "module": "root",
+      "mode": "managed",
+      "action": "replace",
+      "provider": "local",
+      "account": "111111111111",
+      "account_source": "apply_account",
+      "cross_account": false,
+      "warnings": null,
+      "stateful": false,
+      "reason": "replace_because_cannot_update",
+      "reason_text": "Attribute change forces replacement: content",
+      "replace_paths": [
+        "content"
+      ],
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [
+        {
+          "path": "content",
+          "kind": "value",
+          "before": "root-v1",
+          "after": "root-v2",
+          "forces_replacement": true
+        }
+      ],
+      "known_after_apply": 7
+    },
+    {
+      "address": "module.net.local_file.inner",
+      "type": "local_file",
+      "module": "module.net",
+      "mode": "managed",
+      "action": "replace",
+      "provider": "local.alt",
+      "account": "111111111111",
+      "account_source": "apply_account",
+      "cross_account": false,
+      "warnings": null,
+      "stateful": false,
+      "reason": "replace_because_cannot_update",
+      "reason_text": "Attribute change forces replacement: content",
+      "replace_paths": [
+        "content"
+      ],
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [
+        {
+          "path": "content",
+          "kind": "value",
+          "before": "inner-v1",
+          "after": "inner-v2",
+          "forces_replacement": true
+        }
+      ],
+      "known_after_apply": 7
+    }
+  ]
+}

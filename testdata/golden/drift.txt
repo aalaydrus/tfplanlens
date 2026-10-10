@@ -21,7 +21,7 @@ By module: root 3
     instance_type: "t3.micro" -> "t3.large"
 ~ aws_s3_bucket.logs
     tags.owner: (absent) -> "bob"
-~ aws_instance.legacy
+- aws_instance.legacy
     Deleted outside Terraform
 
 == Changes by account ==
