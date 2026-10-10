@@ -16,8 +16,8 @@ No changes made outside Terraform.
 == Changes by account ==
 aws: target account unresolved (alias: default) (source: unresolved)
     create 2, update 2, read 1, no-op 1
-    + aws_s3_bucket.logs [STATEFUL]  (create)
-    + aws_instance.web  (create)
+    + aws_s3_bucket.logs [STATEFUL]  (create, 2 known after apply)
+    + aws_instance.web  (create, 2 known after apply)
     ~ aws_instance.api  (update)
         instance_type: "t3.micro" -> "t3.small"
     ~ aws_security_group.web  (update)

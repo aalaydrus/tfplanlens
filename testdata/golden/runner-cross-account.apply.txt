@@ -21,7 +21,7 @@ No changes made outside Terraform.
 == Changes by account ==
 aws: target account 999999999999 (source: caller_identity)
     create 1
-    + aws_s3_bucket.artifacts [STATEFUL]  (create)
+    + aws_s3_bucket.artifacts [STATEFUL]  (create, 2 known after apply)
 
 aws.prod: target account 111111111111 (source: role_arn) [DIFFERENT from apply account]
     update 1, delete 1
@@ -31,7 +31,7 @@ aws.prod: target account 111111111111 (source: role_arn) [DIFFERENT from apply a
 
 aws.sandbox: target account 999999999999 (source: apply_account)
     create 1, update 1
-    + aws_sqs_queue.jobs  (create)
+    + aws_sqs_queue.jobs  (create, 2 known after apply)
     ~ aws_sns_topic.alerts  (update)
         tags.team: (absent) -> "sre"
 

@@ -87,8 +87,22 @@ func TestEveryFixtureRendersValidSelfContainedHTML(t *testing.T) {
 		t.Fatal(err)
 	}
 	external := regexp.MustCompile(`(?i)(https?:)?//[a-z0-9.-]+\.[a-z]{2,}|<link\b|\bsrc\s*=|@import|url\(`)
+	var files []string // fixture paths relative to testdata/plans
 	for _, e := range entries {
-		name := strings.TrimSuffix(e.Name(), ".json")
+		if e.IsDir() {
+			sub, err := os.ReadDir("../../../testdata/plans/" + e.Name())
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, f := range sub {
+				files = append(files, e.Name()+"/"+f.Name())
+			}
+			continue
+		}
+		files = append(files, e.Name())
+	}
+	for _, f := range files {
+		name := strings.TrimSuffix(f, ".json")
 		t.Run(name, func(t *testing.T) {
 			doc := render(t, analysis(t, fixture(t, name), &analyze.Options{ApplyAccount: "999999999999", ApplySource: analyze.SourceFlag}))
 			wellFormed(t, doc)

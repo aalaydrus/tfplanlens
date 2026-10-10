@@ -2,6 +2,7 @@ package analyze
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/aalaydrus/tfplanlens/internal/valuediff"
 )
@@ -186,6 +187,9 @@ func (c Change) Label() string {
 		} else {
 			label += ", moved from " + c.MovedFrom
 		}
+	}
+	if c.KnownAfterApply > 0 {
+		label += fmt.Sprintf(", %d known after apply", c.KnownAfterApply)
 	}
 	return label
 }

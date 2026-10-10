@@ -226,10 +226,5 @@ func useColor(w io.Writer, noColor bool) bool {
 	if noColor || os.Getenv("NO_COLOR") != "" {
 		return false
 	}
-	f, ok := w.(*os.File)
-	if !ok {
-		return false
-	}
-	st, err := f.Stat()
-	return err == nil && st.Mode()&os.ModeCharDevice != 0
+	return isTerminal(w)
 }

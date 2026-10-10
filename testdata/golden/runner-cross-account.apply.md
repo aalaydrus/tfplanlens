@@ -24,7 +24,7 @@
 
 <details><summary><b>aws</b> &mdash; target account 999999999999 (source: caller_identity) &mdash; create 1</summary>
 
-- `aws_s3_bucket.artifacts` **STATEFUL** (create)
+- `aws_s3_bucket.artifacts` **STATEFUL** (create, 2 known after apply)
 
 </details>
 
@@ -38,7 +38,7 @@
 
 <details><summary><b>aws.sandbox</b> &mdash; target account 999999999999 (source: apply_account) &mdash; create 1, update 1</summary>
 
-- `aws_sqs_queue.jobs` (create)
+- `aws_sqs_queue.jobs` (create, 2 known after apply)
 - `aws_sns_topic.alerts` (update)
   - `tags.team`: `(absent)` → `"sre"`
 
@@ -60,12 +60,12 @@
 
 | Action | Resource | Target account |
 |---|---|---|
-| create | `aws_s3_bucket.artifacts` | `999999999999` (caller_identity) |
+| create, 2 known after apply | `aws_s3_bucket.artifacts` | `999999999999` (caller_identity) |
 | update | `aws_iam_role.deployer` | `111111111111` (role_arn) |
 | delete | `aws_db_instance.prod` | `111111111111` (role_arn) |
 | replace | `aws_instance.web` | `222222222222` (role_arn_variable) |
 | update | `aws_ssm_parameter.config` | `222222222222` (role_arn_variable) |
-| create | `aws_sqs_queue.jobs` | `999999999999` (apply_account) |
+| create, 2 known after apply | `aws_sqs_queue.jobs` | `999999999999` (apply_account) |
 | update | `aws_sns_topic.alerts` | `999999999999` (apply_account) |
 
 </details>

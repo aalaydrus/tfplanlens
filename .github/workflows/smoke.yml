@@ -1,0 +1,145 @@
+name: Smoke test (real plans)
+
+# Runs tfplanlens against REAL Terraform plans (built-in terraform_data
+# resources only: no providers, no cloud credentials), renders every output
+# format, takes screenshots, and reports the results on the pull request.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "testdata/real/**"
+      - ".github/workflows/smoke.yml"
+      - "scripts/smoke-*.sh"
+      - "scripts/screenshot.mjs"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    env:
+      # Pull requests from forks get a read-only token: skip the commit-back.
+      CAN_PUSH: ${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Same-repo PRs: check out the PR branch itself (not the merge ref) so
+          # we can push to it. Fork PRs: default merge ref, read-only.
+          ref: ${{ env.CAN_PUSH == 'true' && (github.head_ref || github.ref_name) || '' }}
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.x"
+          terraform_wrapper: false
+
+      - name: Versions
+        run: |
+          terraform version
+          go version
+
+      - name: Build tfplanlens
+        run: go build -o tfplanlens ./cmd/tfplanlens
+
+      - name: Generate real plans
+        run: |
+          set -eu
+          for scenario in simple complex; do
+            scripts/smoke-plan.sh "$scenario" "$RUNNER_TEMP/work"
+          done
+          ls -la testdata/plans/real
+
+      - name: Render every format
+        run: |
+          set -eu
+          for plan in testdata/plans/real/*.json; do
+            scenario=$(basename "$plan" | sed 's/-tf.*//')
+            scripts/smoke-report.sh "$scenario" "$plan"
+          done
+          find docs/smoke -type f | sort
+
+      - name: Install Playwright and screenshot
+        run: |
+          set -eu
+          npm install --no-save --no-package-lock playwright
+          npx playwright install --with-deps chromium
+          node scripts/screenshot.mjs docs/smoke docs/screenshots
+          ls -la docs/screenshots
+
+      - name: Commit outputs back to the PR branch
+        if: env.CAN_PUSH == 'true'
+        run: |
+          set -eu
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add testdata/plans/real docs/smoke docs/screenshots
+          if git diff --cached --quiet; then
+            echo "nothing to commit"
+          else
+            git commit -m "chore: smoke test outputs [skip ci]"
+            # If someone pushed while this ran, the branch moved on: skip rather
+            # than fail. That push starts a newer run that regenerates the outputs.
+            if ! git push origin "HEAD:${{ github.head_ref || github.ref_name }}"; then
+              echo "::warning::branch moved while the smoke test ran; outputs not committed (a newer run will)"
+            fi
+          fi
+
+      - name: Post markdown reports and screenshots on the PR
+        if: github.event_name == 'pull_request' && env.CAN_PUSH == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+            const branch = context.payload.pull_request.head.ref;
+
+            async function upsert(tag, body) {
+              const mark = `<!-- smoke-${tag} -->`;
+              const full = `${mark}\n${body}`;
+              const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number, per_page: 100 });
+              const existing = comments.find((c) => c.body && c.body.startsWith(mark));
+              if (existing) {
+                await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body: full });
+              } else {
+                await github.rest.issues.createComment({ owner, repo, issue_number, body: full });
+              }
+            }
+
+            // (a) the markdown report of each scenario, verbatim. The report
+            // starts with its own hidden marker, so each scenario gets its own
+            // comment keyed by scenario name.
+            for (const scenario of ['simple', 'complex']) {
+              let md = fs.readFileSync(path.join('docs/smoke', scenario, 'report.md'), 'utf8');
+              if (md.length > 60000) md = md.slice(0, 60000);
+              await upsert(`report-${scenario}`, `**Smoke test: \`${scenario}\` scenario, tfplanlens markdown report (verbatim)**\n\n${md}`);
+            }
+
+            // (b) screenshots, referenced from the committed files on the branch.
+            const raw = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/docs/screenshots`;
+            const lines = ['**Smoke test: HTML report screenshots**', ''];
+            for (const scenario of ['simple', 'complex']) {
+              lines.push(`### ${scenario}`, '', `Desktop (1280px):`, '', `![${scenario} desktop](${raw}/${scenario}-desktop.png)`, '',
+                `Phone (390px):`, '', `![${scenario} phone](${raw}/${scenario}-mobile.png)`, '');
+            }
+            lines.push('### complex: detail drawers', '',
+              `![user_data drawer](${raw}/complex-drawer-user_data.png)`, '',
+              `![creds drawer](${raw}/complex-drawer-creds.png)`, '');
+            await upsert('screenshots', lines.join('\n'));
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smoke-outputs
+          path: |
+            testdata/plans/real
+            docs/smoke
+            docs/screenshots

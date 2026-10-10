@@ -1,0 +1,184 @@
+{
+  "schema_version": 1,
+  "apply_account": {
+    "id": "111111111111",
+    "source": "flag",
+    "resolved": true
+  },
+  "notices": [],
+  "summary": {
+    "mode": "normal",
+    "applyable": true,
+    "errored": false,
+    "terraform_version": "1.16.5",
+    "total": 4,
+    "actions": {
+      "create": 1,
+      "update": 1,
+      "replace": 1,
+      "delete": 1,
+      "read": 0,
+      "no_op": 0,
+      "forget": 0
+    },
+    "by_type": {
+      "terraform_data": 4
+    },
+    "by_module": {
+      "root": 4
+    },
+    "known_after_apply": 5,
+    "drift_count": 0,
+    "warnings": 0
+  },
+  "findings": [
+    {
+      "address": "terraform_data.db",
+      "type": "terraform_data",
+      "action": "replace",
+      "provider": "terraform",
+      "account": "111111111111",
+      "account_source": "apply_account",
+      "stateful": false,
+      "reason": "replace_because_cannot_update",
+      "reason_text": "Attribute change forces replacement: triggers_replace",
+      "replace_paths": [
+        "triggers_replace"
+      ],
+      "index_shift": false,
+      "drift_also": false
+    },
+    {
+      "address": "terraform_data.old",
+      "type": "terraform_data",
+      "action": "delete",
+      "provider": "terraform",
+      "account": "111111111111",
+      "account_source": "apply_account",
+      "stateful": false,
+      "reason": "delete_because_no_resource_config",
+      "reason_text": "Removed from config",
+      "index_shift": false,
+      "drift_also": false
+    }
+  ],
+  "drift": [],
+  "groups": [
+    {
+      "key": "terraform",
+      "provider": "terraform",
+      "account": "111111111111",
+      "resolved": true,
+      "source": "apply_account",
+      "default": true,
+      "cross_account": false,
+      "counts": {
+        "create": 1,
+        "update": 1,
+        "replace": 1,
+        "delete": 1,
+        "read": 0,
+        "no_op": 0,
+        "forget": 0
+      },
+      "addresses": [
+        "terraform_data.cache",
+        "terraform_data.db",
+        "terraform_data.old",
+        "terraform_data.web"
+      ]
+    }
+  ],
+  "changes": [
+    {
+      "address": "terraform_data.cache",
+      "type": "terraform_data",
+      "module": "root",
+      "mode": "managed",
+      "action": "create",
+      "provider": "terraform",
+      "account": "111111111111",
+      "account_source": "apply_account",
+      "cross_account": false,
+      "warnings": null,
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [],
+      "known_after_apply": 2
+    },
+    {
+      "address": "terraform_data.db",
+      "type": "terraform_data",
+      "module": "root",
+      "mode": "managed",
+      "action": "replace",
+      "provider": "terraform",
+      "account": "111111111111",
+      "account_source": "apply_account",
+      "cross_account": false,
+      "warnings": null,
+      "stateful": false,
+      "reason": "replace_because_cannot_update",
+      "reason_text": "Attribute change forces replacement: triggers_replace",
+      "replace_paths": [
+        "triggers_replace"
+      ],
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [
+        {
+          "path": "triggers_replace",
+          "kind": "value",
+          "before": "a",
+          "after": "b",
+          "forces_replacement": true
+        }
+      ],
+      "known_after_apply": 2
+    },
+    {
+      "address": "terraform_data.old",
+      "type": "terraform_data",
+      "module": "root",
+      "mode": "managed",
+      "action": "delete",
+      "provider": "terraform",
+      "account": "111111111111",
+      "account_source": "apply_account",
+      "cross_account": false,
+      "warnings": null,
+      "stateful": false,
+      "reason": "delete_because_no_resource_config",
+      "reason_text": "Removed from config",
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [],
+      "known_after_apply": 0
+    },
+    {
+      "address": "terraform_data.web",
+      "type": "terraform_data",
+      "module": "root",
+      "mode": "managed",
+      "action": "update",
+      "provider": "terraform",
+      "account": "111111111111",
+      "account_source": "apply_account",
+      "cross_account": false,
+      "warnings": null,
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [
+        {
+          "path": "input",
+          "kind": "value",
+          "before": "v1",
+          "after": "v2"
+        }
+      ],
+      "known_after_apply": 1
+    }
+  ]
+}

@@ -275,12 +275,6 @@ func (r *renderer) attrs(attrs []analyze.Attr, indent string) {
 		switch at.Kind {
 		case "sensitive":
 			r.line("%s%s: (sensitive value changed)%s", indent, at.Path, force)
-		case "unknown":
-			if len(at.Before) > 0 {
-				r.line("%s%s: %s -> (known after apply)%s", indent, at.Path, string(at.Before), force)
-			} else {
-				r.line("%s%s: (known after apply)%s", indent, at.Path, force)
-			}
 		case "long":
 			r.line("%s%s%s", indent, at.Diff.Header, force)
 			for _, l := range at.Diff.Lines {

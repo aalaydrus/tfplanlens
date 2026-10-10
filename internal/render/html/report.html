@@ -115,7 +115,7 @@
     target account <span class="mono">{{.C.Account}}</span> (source: {{.C.AccountSource}}){{if .C.CrossAccount}} &mdash; <b>differs from apply account</b>{{end}}</p>
   {{if .C.ReasonText}}<p><b>Why:</b> {{.C.ReasonText}}</p>{{end}}
   {{range .C.Warnings}}<p class="warnline"><b>WARNING:</b> {{.Message}}</p>{{end}}
-  {{if .C.KnownAfterApply}}<p class="src">{{.C.KnownAfterApply}} attribute(s) known after apply</p>{{end}}
+  
   {{template "attrs" .C.Attrs}}
 </template>
 {{end}}
@@ -127,7 +127,6 @@
 <div class="attr">
   <div><span class="path mono">{{.Path}}</span>{{if .ForcesReplace}} <span class="badge warn">forces replacement</span>{{end}}</div>
   {{if eq .Kind "sensitive"}}<div class="empty">(sensitive value changed)</div>
-  {{else if eq .Kind "unknown"}}<div>{{if .Before}}<span class="mono">{{raw .Before}}</span> &rarr; {{end}}(known after apply)</div>
   {{else if eq .Kind "long"}}
     <div>{{.Diff.Header}}</div>
     <div class="diff mono">{{range .Diff.Lines}}<div class="{{diffClass .}}">{{.}}</div>{{end}}{{if .Diff.Truncated}}<div class="hunk">&hellip; {{.Diff.Truncated}} more diff line(s) hidden</div>{{end}}</div>

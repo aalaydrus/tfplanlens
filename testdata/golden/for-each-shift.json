@@ -59,7 +59,7 @@
       "reason": "delete_because_count_index",
       "reason_text": "count shrank; index 2 no longer exists",
       "index_shift": true,
-      "warning": "likely count/for_each index shift: sibling instances also changing (aws_instance.fleet[1])",
+      "warning": "likely count index shift: other instances of this resource are also changing (aws_instance.fleet[1])",
       "drift_also": false
     },
     {

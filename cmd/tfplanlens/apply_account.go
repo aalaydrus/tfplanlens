@@ -8,6 +8,8 @@ import (
 	"os"
 	"strings"
 
+	"golang.org/x/term"
+
 	"github.com/aalaydrus/tfplanlens/internal/analyze"
 	"github.com/aalaydrus/tfplanlens/internal/config"
 )
@@ -27,13 +29,12 @@ type terminal struct {
 	stdoutTTY bool
 }
 
+// isTerminal reports whether x is a real terminal. A character-device check
+// is not enough: /dev/null is a character device too, so `tfplanlens ... </dev/null`
+// (cron, CI, scripts) would be treated as interactive and prompt.
 func isTerminal(x any) bool {
 	f, ok := x.(*os.File)
-	if !ok {
-		return false
-	}
-	st, err := f.Stat()
-	return err == nil && st.Mode()&os.ModeCharDevice != 0
+	return ok && term.IsTerminal(int(f.Fd()))
 }
 
 func checkAccountID(what, id string) error {

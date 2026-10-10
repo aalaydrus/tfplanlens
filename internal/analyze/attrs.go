@@ -196,6 +196,11 @@ func diffAttrs(before, after, bsens, asens, aunk any, replacePaths []string, lon
 	}
 	dropEmptyShadowed(bl, al)
 	dropEmptyShadowed(al, bl)
+	// A marked (unknown or sensitive) leaf stands for everything beneath it,
+	// so the other side's expanded children are not separate changes.
+	collapseUnderMarked(bl, al)
+	collapseUnderMarked(al, bl)
+	maskDerivedSecrets(bl, al)
 	paths := make([]string, 0, len(bl)+len(al))
 	seen := map[string]bool{}
 	for p := range bl {
@@ -223,10 +228,10 @@ func diffAttrs(before, after, bsens, asens, aunk any, replacePaths []string, lon
 		at := Attr{Path: p, ForcesReplace: forces[p]}
 		switch {
 		case a.unknown:
-			at.Kind = "unknown"
-			if bok && !b.sens && !b.unknown {
-				at.Before = json.RawMessage(format(b.val))
-			}
+			// Known-after-apply attributes are counted (Change.KnownAfterApply),
+			// never listed (SPEC 5.1): their old values are often huge or
+			// derived from secrets, and they are noise in a review.
+			continue
 		case b.sens || a.sens:
 			at.Kind = "sensitive"
 		default:
@@ -277,4 +282,51 @@ func isEmptyContainer(v any) bool {
 		return len(x) == 0
 	}
 	return false
+}
+
+// collapseUnderMarked removes leaves of m that sit beneath an unknown or
+// sensitive leaf of other: "output" becoming (known after apply) must not
+// also report output[0], output[1], ... as removed.
+func collapseUnderMarked(m, other map[string]leaf) {
+	for p, l := range other {
+		if !l.unknown && !l.sens {
+			continue
+		}
+		for q := range m {
+			if strings.HasPrefix(q, p+".") || strings.HasPrefix(q, p+"[") {
+				delete(m, q)
+			}
+		}
+	}
+}
+
+// minDerivedSecretLen is the shortest sensitive value that is also masked
+// where it reappears; shorter values ("1", "on") would mask innocent fields.
+const minDerivedSecretLen = 4
+
+// maskDerivedSecrets marks a leaf sensitive when its string value equals the
+// value of a sensitive leaf in the same change. Providers often mirror a
+// sensitive input into a computed attribute (terraform_data.output) without
+// marking the copy, and Terraform's own plan JSON then carries the secret in
+// the clear.
+func maskDerivedSecrets(bl, al map[string]leaf) {
+	secrets := map[string]bool{}
+	for _, m := range []map[string]leaf{bl, al} {
+		for _, l := range m {
+			if s, ok := l.val.(string); ok && l.sens && len(s) >= minDerivedSecretLen {
+				secrets[s] = true
+			}
+		}
+	}
+	if len(secrets) == 0 {
+		return
+	}
+	for _, m := range []map[string]leaf{bl, al} {
+		for p, l := range m {
+			if s, ok := l.val.(string); ok && !l.sens && secrets[s] {
+				l.sens = true
+				m[p] = l
+			}
+		}
+	}
 }
