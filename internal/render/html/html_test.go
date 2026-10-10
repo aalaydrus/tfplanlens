@@ -121,7 +121,7 @@ func TestContainsFindingsApplyAndTargetAccounts(t *testing.T) {
 	for _, want := range []string{
 		"aws_db_instance.prod", "Removed from config", "STATEFUL",
 		"Attribute change forces replacement: ami",
-		"executed from:", "999999999999", "(flag)",
+		"executed from:", "999999999999", "source: flag",
 		"222222222222", "role_arn_variable", "caller_identity", "apply_account",
 		"differs from apply account",
 		"kms_key_arn is in account 111111111111",
@@ -142,9 +142,16 @@ func TestContainsFindingsApplyAndTargetAccounts(t *testing.T) {
 }
 
 func TestUnresolvedApplyAccountIsShown(t *testing.T) {
-	doc := render(t, analysis(t, fixture(t, "runner-cross-account"), nil))
-	if !strings.Contains(doc, "executed from: unresolved") || !strings.Contains(doc, "Apply account unresolved") {
+	doc := render(t, analysis(t, fixture(t, "basic-create"), nil))
+	if !strings.Contains(doc, "executed from: unresolved") || !strings.Contains(doc, "Apply account unknown") {
 		t.Error("unresolved apply account not shown")
+	}
+}
+
+func TestInferredApplyAccountIsShown(t *testing.T) {
+	doc := render(t, analysis(t, fixture(t, "runner-cross-account"), nil))
+	if !strings.Contains(doc, "inferred from the default provider via caller_identity") {
+		t.Error("inferred apply account not shown")
 	}
 }
 

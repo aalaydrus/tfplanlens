@@ -68,10 +68,10 @@
       "account": "111111111111",
       "account_source": "apply_account",
       "cross_account": false,
-      "warnings": null,
+      "warnings": [],
       "stateful": false,
       "import": true,
-      "import_id": "2ef3d7ea-57af-2dde-12f5-513d36019c49",
+      "import_id": "fc76c219-248d-24eb-504a-a5f4a1f8c9bd",
       "removed_from_state_only": false,
       "attrs": [
         {
@@ -93,7 +93,7 @@
       "account": "111111111111",
       "account_source": "apply_account",
       "cross_account": false,
-      "warnings": null,
+      "warnings": [],
       "stateful": false,
       "import": false,
       "removed_from_state_only": false,

@@ -29,7 +29,6 @@ type Analysis struct {
 const (
 	SourceFlag             = "flag"
 	SourceEnv              = "env"
-	SourcePrompt           = "prompt"
 	SourceConfig           = "config"
 	SourceRoleARN          = "role_arn"
 	SourceRoleARNVariable  = "role_arn_variable"
@@ -37,13 +36,28 @@ const (
 	SourceCallerIdentity   = "caller_identity"
 	SourceApplyAccount     = "apply_account"
 	SourceUnresolved       = "unresolved"
+	// SourceInferred marks an apply account taken from the plan's default
+	// provider; ApplyAccount.Via says which source resolved that provider.
+	SourceInferred = "inferred"
 )
 
 // ApplyAccount is the account terraform apply runs from (SPEC 5.5).
 type ApplyAccount struct {
 	ID       string `json:"id,omitempty"`
-	Source   string `json:"source"` // flag | env | config | prompt | unresolved
+	Source   string `json:"source"` // flag | env | config | inferred | unresolved
 	Resolved bool   `json:"resolved"`
+	// Via is, for an inferred account, how the default provider's account was
+	// found (config, allowed_account_ids or caller_identity).
+	Via string `json:"via,omitempty"`
+}
+
+// Describe says where the apply account came from, e.g. "source: flag" or
+// "source: inferred from the default provider via caller_identity".
+func (a ApplyAccount) Describe() string {
+	if a.Source == SourceInferred {
+		return "source: inferred from the default provider via " + a.Via
+	}
+	return "source: " + a.Source
 }
 
 // Warning is a per-resource warning.

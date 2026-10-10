@@ -8,7 +8,7 @@ deterministic.
 | Field | Type | Notes |
 |---|---|---|
 | `schema_version` | int | Always `1` for this schema. |
-| `apply_account` | object | Where terraform apply runs: `id`, `source` (`flag` / `env` / `config` / `prompt` / `unresolved`), `resolved`. |
+| `apply_account` | object | Where terraform apply runs: `id`, `source` (`flag` / `env` / `config` / `inferred` / `unresolved`), `resolved`, and for `inferred` also `via` (`config` / `allowed_account_ids` / `caller_identity`). |
 | `notices` | array of string | Plan-wide warnings, e.g. an unresolved apply account. |
 | `summary` | object | See below. |
 | `findings` | array | Danger section: one entry per delete or replace, in plan order. |

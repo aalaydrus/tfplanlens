@@ -13,7 +13,7 @@
   <span class="chip">plan: {{.A.Summary.Mode}}</span>
   <span class="chip">applyable: {{yesno .A.Summary.Applyable}}</span>
   {{if .A.Summary.Errored}}<span class="chip bad">errored</span>{{end}}
-  {{if .A.ApplyAccount.Resolved}}<span class="chip" title="Where terraform apply runs">executed from: <span class="mono">{{.A.ApplyAccount.ID}}</span> ({{.A.ApplyAccount.Source}})</span>
+  {{if .A.ApplyAccount.Resolved}}<span class="chip" title="Where terraform apply runs">executed from: <span class="mono">{{.A.ApplyAccount.ID}}</span> ({{.A.ApplyAccount.Describe}})</span>
   {{else}}<span class="chip bad" title="Set --tfapply-account-id">executed from: unresolved</span>{{end}}
   <span class="grow"></span>
   <button id="theme" type="button">Theme: auto</button>

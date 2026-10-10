@@ -5,7 +5,7 @@
     "resolved": false
   },
   "notices": [
-    "Apply account unresolved (set --tfapply-account-id): cross-account flags are off."
+    "Apply account unknown: set tfapply_account_id in tfplanlens.config.yaml (it cannot be read from the plan). Cross-account flags are off."
   ],
   "summary": {
     "mode": "normal",
@@ -168,7 +168,7 @@
       "account": "111111111111",
       "account_source": "role_arn",
       "cross_account": false,
-      "warnings": null,
+      "warnings": [],
       "stateful": true,
       "import": false,
       "removed_from_state_only": false,
@@ -185,7 +185,7 @@
       "account": "222222222222",
       "account_source": "role_arn",
       "cross_account": false,
-      "warnings": null,
+      "warnings": [],
       "stateful": true,
       "import": false,
       "removed_from_state_only": false,
@@ -208,7 +208,7 @@
       "account": "111111111111",
       "account_source": "role_arn",
       "cross_account": false,
-      "warnings": null,
+      "warnings": [],
       "stateful": true,
       "reason": "delete_because_no_resource_config",
       "reason_text": "Removed from config",

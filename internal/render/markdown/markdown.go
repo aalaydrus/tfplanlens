@@ -114,7 +114,7 @@ func summary(w *writer, a *analyze.Analysis) {
 	w.line("|---|---|")
 	w.line("| Plan | %s, applyable: %s, errored: %s |", s.Mode, yesno(s.Applyable), yesno(s.Errored))
 	if aa := a.ApplyAccount; aa.Resolved {
-		w.line("| Executed from (apply account) | %s (source: %s) |", code(aa.ID), aa.Source)
+		w.line("| Executed from (apply account) | %s (%s) |", code(aa.ID), aa.Describe())
 	} else {
 		w.line("| Executed from (apply account) | **unresolved** |")
 	}

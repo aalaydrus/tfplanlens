@@ -1,7 +1,7 @@
 == Summary ==
 Plan: normal | applyable: yes | errored: no
 Executed from (apply account): unresolved
-NOTICE: Apply account unresolved (set --tfapply-account-id): cross-account flags are off.
+NOTICE: Apply account unknown: set tfapply_account_id in tfplanlens.config.yaml (it cannot be read from the plan). Cros…
 Actions: create 1, update 4, replace 1, delete 3, read 0, no-op 6, forget 1
 Known after apply: 10 attribute(s)
 By type: terraform_data 12
@@ -34,7 +34,7 @@ terraform: target account unresolved (alias: default) (source: unresolved)
     -/+ terraform_data.db  (replace, 2 known after apply)
         triggers_replace: "a" -> "b"  [forces replacement]
     ~ terraform_data.lb  (update, 2 known after apply)
-        input[1]: "a12338ec-a4c6-002e-d128-528133f3e243" -> "f8c617e6-2660-def6-c6a9-8b0342fa351d"
+        input[1]: "1e1186d4-7412-edaf-fa09-0f3f237d6f27" -> "8071d48d-b169-4fab-1d37-18df598648e5"
     x terraform_data.legacy  (removed from state only)
     - terraform_data.subnet["b"]  (delete)
     + terraform_data.subnet["d"]  (create, 2 known after apply)

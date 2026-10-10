@@ -1,7 +1,7 @@
 == Summary ==
 Plan: normal | applyable: yes | errored: no
 Executed from (apply account): unresolved
-NOTICE: Apply account unresolved (set --tfapply-account-id): cross-account flags are off.
+NOTICE: Apply account unknown: set tfapply_account_id in tfplanlens.config.yaml (it cannot be read from the plan). Cros…
 Actions: create 0, update 0, replace 6, delete 6, read 0, no-op 0, forget 0
 Known after apply: 0 attribute(s)
 By type: aws_instance 3, aws_db_instance 1, aws_ebs_volume 1, aws_eip 1, aws_iam_user 1, aws_lambda_function 1, aws_lb …

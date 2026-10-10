@@ -1,7 +1,7 @@
 == Summary ==
 Plan: normal | applyable: yes | errored: no
 Executed from (apply account): unresolved
-NOTICE: Apply account unresolved (set --tfapply-account-id): cross-account flags are off.
+NOTICE: Apply account unknown: set tfapply_account_id in tfplanlens.config.yaml (it cannot be read from the plan). Cros…
 Actions: create 1, update 1, replace 3, delete 3, read 0, no-op 2, forget 0
 Known after apply: 9 attribute(s)
 By type: terraform_data 9

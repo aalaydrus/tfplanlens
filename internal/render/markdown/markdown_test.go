@@ -60,8 +60,11 @@ func TestShowsApplyAccountAndTargetSources(t *testing.T) {
 		}
 	}
 	balanced(t, md)
-	if !strings.Contains(render(t, fixture(t, "runner-cross-account"), nil), "**unresolved**") {
+	if !strings.Contains(render(t, fixture(t, "basic-create"), nil), "**unresolved**") {
 		t.Error("unresolved apply account not shown")
+	}
+	if !strings.Contains(render(t, fixture(t, "runner-cross-account"), nil), "`999999999999` (source: inferred from the default provider via caller_identity)") {
+		t.Error("inferred apply account not shown")
 	}
 }
 

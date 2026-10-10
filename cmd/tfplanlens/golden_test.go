@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -57,9 +56,6 @@ func TestGolden(t *testing.T) {
 				args := []string{"report", "../../testdata/plans/" + gc.plan + ".json", "--format", format, "--no-color"}
 				root.SetArgs(append(args, gc.args...))
 				if err := root.Execute(); err != nil {
-					if errors.Is(err, errNotImplemented) {
-						t.Skip("format not implemented yet")
-					}
 					t.Fatalf("%v\n%s", err, errb.String())
 				}
 				golden := filepath.Join("../../testdata/golden", gc.name+"."+ext)
@@ -130,7 +126,7 @@ func TestEveryPlanEveryFormat(t *testing.T) {
 	}
 	for _, plan := range plans {
 		for _, format := range []string{"text", "markdown", "json", "html"} {
-			if code, out, errs := runCLI("report", plan, "--format", format, "--no-color", "--no-prompt"); code != exitOK || out == "" {
+			if code, out, errs := runCLI("report", plan, "--format", format, "--no-color"); code != exitOK || out == "" {
 				t.Errorf("%s --format %s: exit %d, %d bytes: %s", filepath.Base(plan), format, code, len(out), errs)
 			}
 		}

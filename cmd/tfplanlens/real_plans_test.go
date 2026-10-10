@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -64,7 +65,7 @@ func analyzeReal(t *testing.T, plan string) (realAnalysis, map[string]string) {
 	t.Setenv(envApplyAccount, "")
 	outs := map[string]string{}
 	for _, f := range []string{"json", "text", "markdown", "html"} {
-		code, out, errs := runCLI("report", plan, "--format", f, "--no-color", "--no-prompt", "--tfapply-account-id", "111111111111")
+		code, out, errs := runCLI("report", plan, "--format", f, "--no-color", "--tfapply-account-id", "111111111111")
 		if code != exitOK {
 			t.Fatalf("%s: exit %d: %s", f, code, errs)
 		}
@@ -256,10 +257,10 @@ func TestRealDestroyPlan(t *testing.T) {
 			if strings.Contains(outs["text"], "no reason reported") {
 				t.Error("destroy plan deletes look like missing data")
 			}
-			if code, _, _ := runCLI("report", plan, "--no-prompt", "--fail-on", "delete"); code != exitFailOn {
+			if code, _, _ := runCLI("report", plan, "--fail-on", "delete"); code != exitFailOn {
 				t.Errorf("--fail-on delete: exit %d", code)
 			}
-			if code, _, _ := runCLI("report", plan, "--no-prompt", "--fail-on", "replace,drift"); code != exitOK {
+			if code, _, _ := runCLI("report", plan, "--fail-on", "replace,drift"); code != exitOK {
 				t.Errorf("--fail-on replace,drift: exit %d", code)
 			}
 		})
@@ -348,7 +349,7 @@ func TestRealDriftPlan(t *testing.T) {
 			if !strings.Contains(outs["text"], "- local_file.config") {
 				t.Errorf("a resource deleted outside Terraform should use the delete symbol:\n%s", outs["text"])
 			}
-			if code, _, _ := runCLI("report", plan, "--no-prompt", "--fail-on", "drift"); code != exitFailOn {
+			if code, _, _ := runCLI("report", plan, "--fail-on", "drift"); code != exitFailOn {
 				t.Errorf("--fail-on drift: exit %d", code)
 			}
 		})
@@ -371,10 +372,10 @@ func TestRealRefreshOnlyPlan(t *testing.T) {
 			if len(a.Notices) == 0 || !strings.Contains(outs["text"], "Refresh-only plan: applying only updates state") {
 				t.Error("refresh-only notice missing")
 			}
-			if code, _, _ := runCLI("report", plan, "--no-prompt", "--fail-on", "drift"); code != exitFailOn {
+			if code, _, _ := runCLI("report", plan, "--fail-on", "drift"); code != exitFailOn {
 				t.Errorf("--fail-on drift: exit %d", code)
 			}
-			if code, _, _ := runCLI("report", plan, "--no-prompt", "--fail-on", "delete,replace"); code != exitOK {
+			if code, _, _ := runCLI("report", plan, "--fail-on", "delete,replace"); code != exitOK {
 				t.Errorf("--fail-on delete,replace: exit %d (drift is not a planned delete)", code)
 			}
 		})
@@ -389,7 +390,7 @@ func TestRealModuleProviderPlan(t *testing.T) {
 	for _, plan := range realPlans(t, "module-provider") {
 		t.Run(filepath.Base(plan), func(t *testing.T) {
 			t.Setenv(envApplyAccount, "")
-			code, out, errs := runCLI("report", plan, "--format", "json", "--no-prompt", "--tfapply-account-id", "111111111111", "--account", "alt=222222222222")
+			code, out, errs := runCLI("report", plan, "--format", "json", "--tfapply-account-id", "111111111111", "--account", "alt=222222222222")
 			if code != exitOK {
 				t.Fatalf("exit %d: %s", code, errs)
 			}
@@ -426,10 +427,50 @@ func TestRealModuleProviderPlan(t *testing.T) {
 				t.Error("module resource landed in the default provider group")
 			}
 			// Without any account information the alias is unresolved, not a guess.
-			_, text, _ := runCLI("report", plan, "--no-color", "--no-prompt")
+			_, text, _ := runCLI("report", plan, "--no-color")
 			if !strings.Contains(text, "local.alt: target account unresolved (alias: alt)") {
 				t.Errorf("alias fallback label missing:\n%s", text)
 			}
 		})
+	}
+}
+
+// The documented JSON schema promises arrays, never null. Check every array
+// field of every plan's JSON report.
+func TestJSONArraysAreNeverNull(t *testing.T) {
+	t.Setenv(envApplyAccount, "")
+	arrayKeys := map[string]bool{"notices": true, "findings": true, "drift": true, "groups": true, "changes": true,
+		"attrs": true, "warnings": true, "addresses": true}
+	var walk func(path string, v any)
+	walk = func(path string, v any) {
+		switch x := v.(type) {
+		case map[string]any:
+			for k, c := range x {
+				if arrayKeys[k] && c == nil {
+					t.Errorf("%s.%s is null", path, k)
+				}
+				walk(path+"."+k, c)
+			}
+		case []any:
+			for i, c := range x {
+				walk(fmt.Sprintf("%s[%d]", path, i), c)
+			}
+		}
+	}
+	var plans []string
+	for _, pattern := range []string{"../../testdata/plans/*.json", "../../testdata/plans/real/*.json"} {
+		m, _ := filepath.Glob(pattern)
+		plans = append(plans, m...)
+	}
+	for _, plan := range plans {
+		code, out, errs := runCLI("report", plan, "-f", "json")
+		if code != exitOK {
+			t.Fatalf("%s: exit %d: %s", plan, code, errs)
+		}
+		var doc any
+		if err := json.Unmarshal([]byte(out), &doc); err != nil {
+			t.Fatal(err)
+		}
+		walk(filepath.Base(plan), doc)
 	}
 }
