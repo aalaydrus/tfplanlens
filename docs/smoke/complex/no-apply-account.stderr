@@ -1,1 +1,1 @@
-Which account ID does terraform apply run from? (12 digits, empty to skip) warning: apply account is unresolved (use --tfapply-account-id, TFPLANLENS_TFAPPLY_ACCOUNT_ID or tfapply_account_id); providers without assume_role stay unresolved and cross-account flags are off
+warning: apply account is unresolved (use --tfapply-account-id, TFPLANLENS_TFAPPLY_ACCOUNT_ID or tfapply_account_id); providers without assume_role stay unresolved and cross-account flags are off
