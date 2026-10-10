@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"runtime/debug"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -19,7 +20,8 @@ import (
 	"github.com/aalaydrus/tfplanlens/internal/render/text"
 )
 
-// version is overridden at release time via -ldflags.
+// version is overridden at release time via -ldflags. Local builds keep "dev"
+// and report the git revision they were built from (see versionString).
 var version = "dev"
 
 // Exit codes (SPEC section 4).
@@ -81,13 +83,47 @@ func newRootCmd(stdin io.Reader, stdout, stderr io.Writer) *cobra.Command {
 	return root
 }
 
+// versionString is the injected release version, or for a local build
+// ("dev") the short git revision stamped by the Go toolchain, e.g.
+// "dev (8814cf7)" or "dev (8814cf7, modified)".
+func versionString() string {
+	info, _ := debug.ReadBuildInfo()
+	return formatVersion(version, info)
+}
+
+func formatVersion(v string, info *debug.BuildInfo) string {
+	if v != "dev" || info == nil {
+		return v
+	}
+	var rev string
+	modified := false
+	for _, s := range info.Settings {
+		switch s.Key {
+		case "vcs.revision":
+			rev = s.Value
+		case "vcs.modified":
+			modified = s.Value == "true"
+		}
+	}
+	if rev == "" {
+		return v
+	}
+	if len(rev) > 7 {
+		rev = rev[:7]
+	}
+	if modified {
+		return fmt.Sprintf("%s (%s, modified)", v, rev)
+	}
+	return fmt.Sprintf("%s (%s)", v, rev)
+}
+
 func newVersionCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "version",
 		Short: "Print the tfplanlens version",
 		Args:  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, _ []string) {
-			fmt.Fprintln(cmd.OutOrStdout(), version)
+			fmt.Fprintln(cmd.OutOrStdout(), versionString())
 		},
 	}
 }
