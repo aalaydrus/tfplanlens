@@ -1,5 +1,7 @@
 == Summary ==
 Plan: normal | applyable: yes | errored: no
+Executed from (apply account): unresolved
+NOTICE: Apply account unresolved (set --tfapply-account-id): cross-account flags are off.
 Actions: create 1, update 1, replace 1, delete 0, read 0, no-op 0, forget 0
 Known after apply: 0 attribute(s)
 By type: aws_instance 2, aws_security_group 1
@@ -7,7 +9,7 @@ By module: root 3
 
 == Danger ==
 ! REPLACE aws_security_group.web
-    type: aws_security_group | account: unresolved (alias: default)
+    type: aws_security_group | target account: unresolved (alias: default) (source: unresolved)
     why: Attribute change forces replacement: description
     HIGH RISK: resource also drifted outside Terraform
 
@@ -23,7 +25,7 @@ By module: root 3
     Deleted outside Terraform
 
 == Changes by account ==
-aws: unresolved (alias: default)
+aws: target account unresolved (alias: default) (source: unresolved)
     create 1, update 1, replace 1
     -/+ aws_security_group.web  (replace)
         description: "web" -> "web v2"  [forces replacement]

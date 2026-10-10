@@ -1,5 +1,12 @@
 {
   "schema_version": 1,
+  "apply_account": {
+    "source": "unresolved",
+    "resolved": false
+  },
+  "notices": [
+    "Apply account unresolved (set --tfapply-account-id): cross-account flags are off."
+  ],
   "summary": {
     "mode": "normal",
     "applyable": true,
@@ -27,7 +34,8 @@
       "root": 4
     },
     "known_after_apply": 0,
-    "drift_count": 0
+    "drift_count": 0,
+    "warnings": 0
   },
   "findings": [],
   "drift": [],
@@ -37,7 +45,7 @@
       "provider": "aws",
       "account": "unresolved (alias: default)",
       "resolved": false,
-      "source": "none",
+      "source": "unresolved",
       "default": true,
       "cross_account": false,
       "counts": {
@@ -67,7 +75,9 @@
       "action": "no-op",
       "provider": "aws",
       "account": "unresolved (alias: default)",
+      "account_source": "unresolved",
       "cross_account": false,
+      "warnings": [],
       "stateful": true,
       "moved_from": "aws_s3_bucket.old_name",
       "import": false,
@@ -83,7 +93,9 @@
       "action": "update",
       "provider": "aws",
       "account": "unresolved (alias: default)",
+      "account_source": "unresolved",
       "cross_account": false,
+      "warnings": [],
       "stateful": false,
       "moved_from": "aws_vpc.main",
       "import": false,
@@ -105,7 +117,9 @@
       "action": "no-op",
       "provider": "aws",
       "account": "unresolved (alias: default)",
+      "account_source": "unresolved",
       "cross_account": false,
+      "warnings": [],
       "stateful": false,
       "import": true,
       "import_id": "legacy",
@@ -121,7 +135,9 @@
       "action": "update",
       "provider": "aws",
       "account": "unresolved (alias: default)",
+      "account_source": "unresolved",
       "cross_account": false,
+      "warnings": [],
       "stateful": false,
       "import": true,
       "import_id": "i-0123456789abcdef0",
@@ -144,7 +160,9 @@
       "action": "forget",
       "provider": "aws",
       "account": "unresolved (alias: default)",
+      "account_source": "unresolved",
       "cross_account": false,
+      "warnings": [],
       "stateful": true,
       "reason": "delete_because_no_resource_config",
       "import": false,

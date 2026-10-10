@@ -16,7 +16,7 @@ const plansDir = "../../testdata/plans"
 
 var fixtureNames = []string{
 	"basic-create", "deletes-and-replaces", "for-each-shift", "long-user-data",
-	"iam-policy-change", "drift", "multi-account", "moved-import-removed", "sensitive",
+	"iam-policy-change", "drift", "multi-account", "moved-import-removed", "sensitive", "runner-cross-account",
 }
 
 func load(t *testing.T, name string) (*tfjson.Plan, []byte) {

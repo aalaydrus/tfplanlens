@@ -1,5 +1,7 @@
 == Summary ==
 Plan: normal | applyable: yes | errored: no
+Executed from (apply account): unresolved
+NOTICE: Apply account unresolved (set --tfapply-account-id): cross-account flags are off.
 Actions: create 0, update 0, replace 6, delete 6, read 0, no-op 0, forget 0
 Known after apply: 0 attribute(s)
 By type: aws_instance 3, aws_db_instance 1, aws_ebs_volume 1, aws_eip 1, aws_iam_user 1, aws_lambda_function 1, aws_lb …
@@ -7,48 +9,48 @@ By module: root 11, module.gone 1
 
 == Danger ==
 ! DELETE aws_sqs_queue.removed
-    type: aws_sqs_queue | account: unresolved (alias: default)
+    type: aws_sqs_queue | target account: unresolved (alias: default) (source: unresolved)
     why: Removed from config
 ! DELETE aws_sns_topic.switched
-    type: aws_sns_topic | account: unresolved (alias: default)
+    type: aws_sns_topic | target account: unresolved (alias: default) (source: unresolved)
     why: Resource switched between count/for_each/single
     WARNING: count/for_each was added or removed on this resource; instances are being destroyed rather than moved
 ! DELETE aws_instance.counted[2]
-    type: aws_instance | account: unresolved (alias: default)
+    type: aws_instance | target account: unresolved (alias: default) (source: unresolved)
     why: count shrank; index 2 no longer exists
 ! DELETE aws_iam_user.keyed["bob"]
-    type: aws_iam_user | account: unresolved (alias: default)
+    type: aws_iam_user | target account: unresolved (alias: default) (source: unresolved)
     why: for_each key removed: bob
 ! DELETE module.gone.aws_s3_bucket.data [STATEFUL]
-    type: aws_s3_bucket | account: unresolved (alias: default)
+    type: aws_s3_bucket | target account: unresolved (alias: default) (source: unresolved)
     why: Whole module removed or its call changed
 ! DELETE aws_lambda_function.orphan
-    type: aws_lambda_function | account: unresolved (alias: default)
+    type: aws_lambda_function | target account: unresolved (alias: default) (source: unresolved)
     why: Moved to an address that no longer exists
 ! REPLACE aws_db_instance.main [STATEFUL]
-    type: aws_db_instance | account: unresolved (alias: default)
+    type: aws_db_instance | target account: unresolved (alias: default) (source: unresolved)
     why: Attribute change forces replacement: storage_encrypted
 ! REPLACE aws_instance.tainted
-    type: aws_instance | account: unresolved (alias: default)
+    type: aws_instance | target account: unresolved (alias: default) (source: unresolved)
     why: Resource is tainted
 ! REPLACE aws_ebs_volume.requested [STATEFUL]
-    type: aws_ebs_volume | account: unresolved (alias: default)
+    type: aws_ebs_volume | target account: unresolved (alias: default) (source: unresolved)
     why: Replacement requested with -replace
 ! REPLACE aws_lb.triggered
-    type: aws_lb | account: unresolved (alias: default)
+    type: aws_lb | target account: unresolved (alias: default) (source: unresolved)
     why: replace_triggered_by dependency changed
 ! REPLACE aws_eip.mystery
-    type: aws_eip | account: unresolved (alias: default)
+    type: aws_eip | target account: unresolved (alias: default) (source: unresolved)
     why: some_future_reason
 ! REPLACE aws_instance.create_before_destroy
-    type: aws_instance | account: unresolved (alias: default)
+    type: aws_instance | target account: unresolved (alias: default) (source: unresolved)
     why: Attribute change forces replacement: ami
 
 == Drift ==
 No changes made outside Terraform.
 
 == Changes by account ==
-aws: unresolved (alias: default)
+aws: target account unresolved (alias: default) (source: unresolved)
     replace 6, delete 6
     - aws_sqs_queue.removed  (delete)
     - aws_sns_topic.switched  (delete)

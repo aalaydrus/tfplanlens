@@ -1,5 +1,7 @@
 == Summary ==
 Plan: normal | applyable: yes | errored: no
+Executed from (apply account): unresolved
+NOTICE: Apply account unresolved (set --tfapply-account-id): cross-account flags are off.
 Actions: create 0, update 2, replace 0, delete 0, read 0, no-op 0, forget 0
 Known after apply: 0 attribute(s)
 By type: aws_iam_policy 1, aws_iam_role 1
@@ -12,7 +14,7 @@ No deletes or replacements.
 No changes made outside Terraform.
 
 == Changes by account ==
-aws: unresolved (alias: default)
+aws: target account unresolved (alias: default) (source: unresolved)
     update 2
     ~ aws_iam_role.app  (update)
         assume_role_policy: 5 lines changed of 15 (+4 -1)

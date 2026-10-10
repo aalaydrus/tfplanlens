@@ -18,10 +18,12 @@ const DefaultPath = ".tfplanlens.yaml"
 type Config struct {
 	// Accounts maps a provider alias (or full provider config key) to an
 	// account ID.
-	Accounts      map[string]string `yaml:"accounts"`
-	StatefulTypes []string          `yaml:"stateful_types"`
-	LongValueKeys []string          `yaml:"long_value_keys"`
-	IgnoreTypes   []string          `yaml:"ignore_types"`
+	Accounts map[string]string `yaml:"accounts"`
+	// TFApplyAccountID is the account terraform apply runs from.
+	TFApplyAccountID string   `yaml:"tfapply_account_id"`
+	StatefulTypes    []string `yaml:"stateful_types"`
+	LongValueKeys    []string `yaml:"long_value_keys"`
+	IgnoreTypes      []string `yaml:"ignore_types"`
 }
 
 // Load reads path. An empty path means DefaultPath, which is optional; an
@@ -50,4 +52,18 @@ func Parse(data []byte) (*Config, error) {
 		return nil, fmt.Errorf("parsing config: %w", err)
 	}
 	return &c, nil
+}
+
+// SaveApplyAccount records tfapply_account_id in the config file at path,
+// creating it if needed. Existing content, comments included, is preserved.
+func SaveApplyAccount(path, id string) error {
+	data, err := os.ReadFile(path)
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return err
+	}
+	if len(data) > 0 && data[len(data)-1] != '\n' {
+		data = append(data, '\n')
+	}
+	data = append(data, fmt.Sprintf("tfapply_account_id: %q\n", id)...)
+	return os.WriteFile(path, data, 0o644)
 }

@@ -81,10 +81,21 @@ func (r *renderer) summary(a *analyze.Analysis) {
 	s := a.Summary
 	r.heading("Summary")
 	r.line("Plan: %s | applyable: %s | errored: %s", s.Mode, yesno(s.Applyable), yesno(s.Errored))
+	if aa := a.ApplyAccount; aa.Resolved {
+		r.line("Executed from (apply account): %s (source: %s)", aa.ID, aa.Source)
+	} else {
+		r.line("Executed from (apply account): %s", r.c(yellow+bold, "unresolved"))
+	}
+	for _, n := range a.Notices {
+		r.line("%s %s", r.c(yellow+bold, "NOTICE:"), n)
+	}
 	ac := s.Actions
 	r.line("Actions: create %d, update %d, replace %d, delete %d, read %d, no-op %d, forget %d",
 		ac.Create, ac.Update, ac.Replace, ac.Delete, ac.Read, ac.NoOp, ac.Forget)
 	r.line("Known after apply: %d attribute(s)", s.KnownAfterApply)
+	if s.Warnings > 0 {
+		r.line("Warnings: %d", s.Warnings)
+	}
 	if s.Hidden > 0 {
 		r.line("Hidden by ignore_types: %d change(s)", s.Hidden)
 	}
@@ -131,7 +142,7 @@ func (r *renderer) danger(a *analyze.Analysis) {
 			badge = " " + r.c(red+bold, "[STATEFUL]")
 		}
 		r.line("%s %s%s", r.c(red+bold, "! "+strings.ToUpper(f.Action)), f.Address, badge)
-		r.line("    type: %s | account: %s", f.Type, f.Account)
+		r.line("    type: %s | target account: %s (source: %s)", f.Type, f.Account, f.AccountSource)
 		r.line("    why: %s", f.ReasonText)
 		if f.IndexShift {
 			r.line("    %s", r.c(red+bold, "WARNING: "+f.Warning))
@@ -181,9 +192,9 @@ func (r *renderer) byAccount(a *analyze.Analysis) {
 		}
 		cross := ""
 		if g.Cross {
-			cross = " " + r.c(yellow+bold, "[DIFFERENT ACCOUNT than default provider]")
+			cross = " " + r.c(yellow+bold, "[DIFFERENT from apply account]")
 		}
-		r.line("%s: %s%s", r.c(bold, g.Key), g.Account, cross)
+		r.line("%s: target account %s (source: %s)%s", r.c(bold, g.Key), g.Account, g.Source, cross)
 		r.line("    %s", countsLine(g.Counts))
 		n := 0
 		for _, addr := range g.Addresses {
@@ -212,7 +223,7 @@ func countListed(g analyze.Group, by map[string]*analyze.Change) int {
 }
 
 func listed(c *analyze.Change) bool {
-	return c.Action != "no-op" || c.MovedFrom != "" || c.Import
+	return c.Action != "no-op" || c.MovedFrom != "" || c.Import || len(c.Warnings) > 0
 }
 
 func countsLine(c analyze.ActionCounts) string {
@@ -262,6 +273,9 @@ func (r *renderer) change(c *analyze.Change) {
 		badge = " [STATEFUL]"
 	}
 	r.line("    %s %s%s  (%s)", symbols[c.Action], c.Address, badge, label)
+	for _, w := range c.Warnings {
+		r.line("        %s %s", r.c(yellow+bold, "WARNING:"), w.Message)
+	}
 	r.attrs(c.Attrs, "        ")
 }
 
@@ -314,7 +328,7 @@ func (r *renderer) byModule(a *analyze.Analysis) {
 	idx := map[string]*mod{}
 	var mods []*mod
 	for _, ch := range a.Changes {
-		if ch.Action == "no-op" && ch.MovedFrom == "" && !ch.Import {
+		if !listed(&ch) {
 			continue
 		}
 		m := idx[ch.Module]

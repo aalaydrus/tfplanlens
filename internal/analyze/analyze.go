@@ -11,10 +11,25 @@ import (
 	"github.com/aalaydrus/tfplanlens/internal/plan"
 )
 
-// Analyze builds the Analysis for p. cfg may be nil.
-func Analyze(p *plan.Plan, cfg *config.Config) *Analysis {
+// Options are inputs that do not come from the plan or the config file.
+type Options struct {
+	// ApplyAccount is the account terraform apply runs from; ApplySource says
+	// where it came from (SourceFlag, SourceEnv, SourceConfig, SourcePrompt).
+	// Empty means unresolved.
+	ApplyAccount string
+	ApplySource  string
+	// AccountOverrides maps a provider alias or config key to an account ID
+	// (--account alias=id). They beat every other source.
+	AccountOverrides map[string]string
+}
+
+// Analyze builds the Analysis for p. cfg and opts may be nil.
+func Analyze(p *plan.Plan, cfg *config.Config, opts *Options) *Analysis {
 	if cfg == nil {
 		cfg = &config.Config{}
+	}
+	if opts == nil {
+		opts = &Options{}
 	}
 	stateful := toSet(builtinStateful, cfg.StatefulTypes)
 	ignored := toSet(cfg.IgnoreTypes)
@@ -25,6 +40,13 @@ func Analyze(p *plan.Plan, cfg *config.Config) *Analysis {
 		Drift:         []DriftItem{},
 		Groups:        []Group{},
 		Changes:       []Change{},
+		Notices:       []string{},
+	}
+	a.ApplyAccount = ApplyAccount{Source: SourceUnresolved}
+	if opts.ApplyAccount != "" {
+		a.ApplyAccount = ApplyAccount{ID: opts.ApplyAccount, Source: opts.ApplySource, Resolved: true}
+	} else {
+		a.Notices = append(a.Notices, "Apply account unresolved (set --tfapply-account-id): cross-account flags are off.")
 	}
 	a.Summary = Summary{
 		Mode:             string(p.Mode),
@@ -61,24 +83,26 @@ func Analyze(p *plan.Plan, cfg *config.Config) *Analysis {
 
 	groups := map[string]*Group{}
 	for _, c := range visible {
-		acct := resolveAccount(p, cfg, c.ProviderKey)
+		acct := resolveAccount(p, cfg, opts, c.ProviderKey).crossFrom(opts.ApplyAccount)
 		ch := Change{
-			Address:      c.Address,
-			Type:         c.Type,
-			Module:       moduleName(c.ModuleAddress),
-			Mode:         c.Mode,
-			Action:       string(c.Action),
-			Provider:     c.ProviderKey,
-			Account:      acct.label,
-			CrossAccount: acct.cross,
-			Stateful:     stateful[c.Type],
-			Reason:       c.Reason,
-			ReplacePaths: c.ReplacePaths,
-			MovedFrom:    c.PreviousAddress,
-			Import:       c.Importing,
-			ImportID:     c.ImportID,
-			StateOnly:    c.Action == plan.ActionForget,
-			Attrs:        []Attr{},
+			Address:       c.Address,
+			Type:          c.Type,
+			Module:        moduleName(c.ModuleAddress),
+			Mode:          c.Mode,
+			Action:        string(c.Action),
+			Provider:      c.ProviderKey,
+			Account:       acct.label,
+			AccountSource: acct.source,
+			CrossAccount:  acct.cross,
+			Warnings:      []Warning{},
+			Stateful:      stateful[c.Type],
+			Reason:        c.Reason,
+			ReplacePaths:  c.ReplacePaths,
+			MovedFrom:     c.PreviousAddress,
+			Import:        c.Importing,
+			ImportID:      c.ImportID,
+			StateOnly:     c.Action == plan.ActionForget,
+			Attrs:         []Attr{},
 		}
 		if c.Action == plan.ActionDelete || c.Action == plan.ActionReplace {
 			ch.ReasonText = ReasonText(c.Reason, c.Index, c.HasIndex, c.ReplacePaths)
@@ -87,6 +111,10 @@ func Analyze(p *plan.Plan, cfg *config.Config) *Analysis {
 		a.Summary.KnownAfterApply += ch.KnownAfterApply
 		if c.Action == plan.ActionUpdate || c.Action == plan.ActionReplace {
 			ch.Attrs = diffAttrs(c.Before, c.After, c.BeforeSensitive, c.AfterSensitive, c.AfterUnknown, c.ReplacePaths, cfg.LongValueKeys)
+		}
+		if active(c) && acct.resolved {
+			ch.Warnings = arnWarnings(c, acct)
+			a.Summary.Warnings += len(ch.Warnings)
 		}
 		a.Changes = append(a.Changes, ch)
 
@@ -112,7 +140,7 @@ func Analyze(p *plan.Plan, cfg *config.Config) *Analysis {
 		if c.Action == plan.ActionDelete || c.Action == plan.ActionReplace {
 			f := Finding{
 				Address: c.Address, Type: c.Type, Action: string(c.Action),
-				Provider: c.ProviderKey, Account: acct.label, Stateful: ch.Stateful,
+				Provider: c.ProviderKey, Account: acct.label, AccountSource: acct.source, Stateful: ch.Stateful,
 				Reason: c.Reason, ReasonText: ch.ReasonText, ReplacePaths: c.ReplacePaths,
 				DriftAlso: driftAddr[c.Address],
 			}
@@ -220,40 +248,66 @@ type account struct {
 	resolved, cross                bool
 }
 
-// resolveAccount applies SPEC 5.5: literal assume_role ARN, then the config
-// accounts mapping, then an "unresolved" label.
-func resolveAccount(p *plan.Plan, cfg *config.Config, key string) account {
+// resolveAccount finds the target account for a provider config key
+// (SPEC 5.5), recording which source decided it.
+func resolveAccount(p *plan.Plan, cfg *config.Config, opts *Options, key string) account {
 	name, alias, _ := strings.Cut(key, ".")
-	acct := lookup(p, cfg, key, name, alias)
-	if alias != "" {
-		if def := lookup(p, cfg, name, name, ""); def.label != acct.label {
-			acct.cross = true
-		}
-	}
-	return acct
-}
-
-func lookup(p *plan.Plan, cfg *config.Config, key, name, alias string) account {
-	acct := account{provider: name, alias: alias, source: "none"}
-	if pr, ok := p.Providers[key]; ok {
+	acct := account{provider: name, alias: alias, source: SourceUnresolved}
+	pr, known := p.Providers[key]
+	if known {
 		acct.provider, acct.alias = pr.Name, pr.Alias
-		if id := ParseARNAccount(pr.AssumeRoleARN); id != "" {
-			acct.label, acct.resolved, acct.source = id, true, "role_arn"
-			return acct
-		}
 	}
-	for _, k := range []string{acct.alias, key} {
-		if id := cfg.Accounts[k]; k != "" && id != "" {
-			acct.label, acct.resolved, acct.source = id, true, "config"
-			return acct
+	names := []string{key}
+	if acct.alias != "" {
+		names = []string{key, acct.alias}
+	} else {
+		names = []string{key, "default"}
+	}
+	set := func(id, source string) account {
+		acct.label, acct.resolved, acct.source = id, true, source
+		return acct
+	}
+	lookupMap := func(m map[string]string) string {
+		for _, n := range names {
+			if id := m[n]; id != "" {
+				return id
+			}
 		}
+		return ""
+	}
+	switch {
+	case lookupMap(opts.AccountOverrides) != "": // a. --account flag
+		return set(lookupMap(opts.AccountOverrides), SourceFlag)
+	case lookupMap(cfg.Accounts) != "": // b. accounts: mapping
+		return set(lookupMap(cfg.Accounts), SourceConfig)
+	}
+	if id := ParseARNAccount(pr.AssumeRoleARN); id != "" { // c. role_arn
+		if pr.RoleARNVia == plan.ViaVariable {
+			return set(id, SourceRoleARNVariable)
+		}
+		return set(id, SourceRoleARN)
+	}
+	if len(pr.AllowedAccountIDs) == 1 && validAccountID(pr.AllowedAccountIDs[0]) { // d.
+		return set(pr.AllowedAccountIDs[0], SourceAllowedAccountID)
+	}
+	if len(pr.CallerIdentityIDs) == 1 && validAccountID(pr.CallerIdentityIDs[0]) { // e.
+		return set(pr.CallerIdentityIDs[0], SourceCallerIdentity)
+	}
+	if !pr.AssumeRole && opts.ApplyAccount != "" { // f. runs as the apply account
+		return set(opts.ApplyAccount, SourceApplyAccount)
 	}
 	shown := acct.alias
 	if shown == "" {
 		shown = "default"
 	}
-	acct.label = "unresolved (alias: " + shown + ")"
+	acct.label = "unresolved (alias: " + shown + ")" // g.
 	return acct
+}
+
+// crossFrom sets the cross-account flag once the apply account is known.
+func (a account) crossFrom(apply string) account {
+	a.cross = a.resolved && apply != "" && a.label != apply
+	return a
 }
 
 func toSet(lists ...[]string) map[string]bool {

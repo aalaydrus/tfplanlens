@@ -1,0 +1,330 @@
+{
+  "format_version": "1.2",
+  "terraform_version": "1.9.5",
+  "variables": {
+    "staging_role_arn": {
+      "value": "arn:aws:iam::222222222222:role/tf-deployer"
+    }
+  },
+  "prior_state": {
+    "format_version": "1.0",
+    "terraform_version": "1.9.5",
+    "values": {
+      "root_module": {
+        "resources": [
+          {
+            "address": "data.aws_caller_identity.current",
+            "mode": "data",
+            "type": "aws_caller_identity",
+            "name": "current",
+            "provider_name": "registry.terraform.io/hashicorp/aws",
+            "schema_version": 0,
+            "values": {
+              "account_id": "999999999999",
+              "arn": "arn:aws:sts::999999999999:assumed-role/automation-runner/ci",
+              "id": "999999999999",
+              "user_id": "AROAEXAMPLE:ci"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "planned_values": {
+    "root_module": {}
+  },
+  "resource_changes": [
+    {
+      "address": "aws_s3_bucket.artifacts",
+      "mode": "managed",
+      "type": "aws_s3_bucket",
+      "name": "artifacts",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "before": null,
+        "after": {
+          "bucket": "acme-artifacts"
+        },
+        "after_unknown": {
+          "arn": true,
+          "id": true
+        },
+        "before_sensitive": {},
+        "after_sensitive": {}
+      }
+    },
+    {
+      "address": "aws_iam_role.deployer",
+      "mode": "managed",
+      "type": "aws_iam_role",
+      "name": "deployer",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "update"
+        ],
+        "before": {
+          "name": "deployer",
+          "arn": "arn:aws:iam::111111111111:role/deployer",
+          "max_session_duration": 3600
+        },
+        "after": {
+          "name": "deployer",
+          "arn": "arn:aws:iam::111111111111:role/deployer",
+          "max_session_duration": 7200
+        },
+        "after_unknown": {},
+        "before_sensitive": {},
+        "after_sensitive": {}
+      }
+    },
+    {
+      "address": "aws_db_instance.prod",
+      "mode": "managed",
+      "type": "aws_db_instance",
+      "name": "prod",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "delete"
+        ],
+        "before": {
+          "identifier": "prod",
+          "arn": "arn:aws:rds:us-east-1:111111111111:db:prod"
+        },
+        "after": null,
+        "after_unknown": {},
+        "before_sensitive": {},
+        "after_sensitive": {}
+      },
+      "action_reason": "delete_because_no_resource_config"
+    },
+    {
+      "address": "aws_instance.web",
+      "mode": "managed",
+      "type": "aws_instance",
+      "name": "web",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "delete",
+          "create"
+        ],
+        "before": {
+          "ami": "ami-old",
+          "instance_type": "t3.micro"
+        },
+        "after": {
+          "ami": "ami-new",
+          "instance_type": "t3.micro"
+        },
+        "after_unknown": {},
+        "before_sensitive": {},
+        "after_sensitive": {},
+        "replace_paths": [
+          [
+            "ami"
+          ]
+        ]
+      },
+      "action_reason": "replace_because_cannot_update"
+    },
+    {
+      "address": "aws_ssm_parameter.config",
+      "mode": "managed",
+      "type": "aws_ssm_parameter",
+      "name": "config",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "update"
+        ],
+        "before": {
+          "name": "/app/config",
+          "kms_key_arn": "arn:aws:kms:us-east-1:111111111111:key/1111aaaa",
+          "description": "old"
+        },
+        "after": {
+          "name": "/app/config",
+          "kms_key_arn": "arn:aws:kms:us-east-1:111111111111:key/1111aaaa",
+          "description": "new"
+        },
+        "after_unknown": {},
+        "before_sensitive": {},
+        "after_sensitive": {}
+      }
+    },
+    {
+      "address": "aws_sqs_queue.jobs",
+      "mode": "managed",
+      "type": "aws_sqs_queue",
+      "name": "jobs",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "create"
+        ],
+        "before": null,
+        "after": {
+          "name": "jobs"
+        },
+        "after_unknown": {
+          "arn": true,
+          "id": true
+        },
+        "before_sensitive": {},
+        "after_sensitive": {}
+      }
+    },
+    {
+      "address": "aws_sns_topic.alerts",
+      "mode": "managed",
+      "type": "aws_sns_topic",
+      "name": "alerts",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "update"
+        ],
+        "before": {
+          "name": "alerts",
+          "tags": {}
+        },
+        "after": {
+          "name": "alerts",
+          "tags": {
+            "team": "sre"
+          }
+        },
+        "after_unknown": {},
+        "before_sensitive": {},
+        "after_sensitive": {}
+      }
+    }
+  ],
+  "configuration": {
+    "provider_config": {
+      "aws": {
+        "name": "aws",
+        "full_name": "registry.terraform.io/hashicorp/aws",
+        "expressions": {
+          "region": {
+            "constant_value": "us-east-1"
+          }
+        }
+      },
+      "aws.prod": {
+        "name": "aws",
+        "full_name": "registry.terraform.io/hashicorp/aws",
+        "expressions": {
+          "region": {
+            "constant_value": "us-east-1"
+          },
+          "assume_role": [
+            {
+              "role_arn": {
+                "constant_value": "arn:aws:iam::111111111111:role/tf-deployer"
+              }
+            }
+          ]
+        },
+        "alias": "prod"
+      },
+      "aws.staging": {
+        "name": "aws",
+        "full_name": "registry.terraform.io/hashicorp/aws",
+        "expressions": {
+          "region": {
+            "constant_value": "us-east-1"
+          },
+          "assume_role": [
+            {
+              "role_arn": {
+                "references": [
+                  "var.staging_role_arn"
+                ]
+              }
+            }
+          ]
+        },
+        "alias": "staging"
+      },
+      "aws.sandbox": {
+        "name": "aws",
+        "full_name": "registry.terraform.io/hashicorp/aws",
+        "expressions": {
+          "region": {
+            "constant_value": "us-west-2"
+          }
+        },
+        "alias": "sandbox"
+      }
+    },
+    "root_module": {
+      "resources": [
+        {
+          "address": "data.aws_caller_identity.current",
+          "mode": "data",
+          "type": "aws_caller_identity",
+          "name": "current",
+          "provider_config_key": "aws"
+        },
+        {
+          "address": "aws_s3_bucket.artifacts",
+          "mode": "managed",
+          "type": "aws_s3_bucket",
+          "name": "artifacts",
+          "provider_config_key": "aws"
+        },
+        {
+          "address": "aws_iam_role.deployer",
+          "mode": "managed",
+          "type": "aws_iam_role",
+          "name": "deployer",
+          "provider_config_key": "aws.prod"
+        },
+        {
+          "address": "aws_db_instance.prod",
+          "mode": "managed",
+          "type": "aws_db_instance",
+          "name": "prod",
+          "provider_config_key": "aws.prod"
+        },
+        {
+          "address": "aws_instance.web",
+          "mode": "managed",
+          "type": "aws_instance",
+          "name": "web",
+          "provider_config_key": "aws.staging"
+        },
+        {
+          "address": "aws_ssm_parameter.config",
+          "mode": "managed",
+          "type": "aws_ssm_parameter",
+          "name": "config",
+          "provider_config_key": "aws.staging"
+        },
+        {
+          "address": "aws_sqs_queue.jobs",
+          "mode": "managed",
+          "type": "aws_sqs_queue",
+          "name": "jobs",
+          "provider_config_key": "aws.sandbox"
+        },
+        {
+          "address": "aws_sns_topic.alerts",
+          "mode": "managed",
+          "type": "aws_sns_topic",
+          "name": "alerts",
+          "provider_config_key": "aws.sandbox"
+        }
+      ]
+    }
+  },
+  "applyable": true,
+  "complete": true,
+  "errored": false
+}

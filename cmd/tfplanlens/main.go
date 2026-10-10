@@ -37,6 +37,11 @@ type reportOptions struct {
 	failOn  string
 	maxLine int
 	noColor bool
+
+	applyAccount        string
+	accounts            []string
+	noPrompt            bool
+	requireApplyAccount bool
 }
 
 func main() {
@@ -102,6 +107,10 @@ func newReportCmd() *cobra.Command {
 	f.StringVar(&o.failOn, "fail-on", "", "comma-separated rules, e.g. delete,replace,drift,replace:aws_db_instance")
 	f.IntVar(&o.maxLine, "max-line", 120, "truncation width for terminal output")
 	f.BoolVar(&o.noColor, "no-color", false, "disable colored output")
+	f.StringVar(&o.applyAccount, "tfapply-account-id", "", "12-digit ID of the account terraform apply runs from (env TFPLANLENS_TFAPPLY_ACCOUNT_ID, config tfapply_account_id)")
+	f.StringArrayVar(&o.accounts, "account", nil, "target account for a provider alias, alias=id (repeatable; overrides every other source)")
+	f.BoolVar(&o.noPrompt, "no-prompt", false, "never ask interactively for the apply account")
+	f.BoolVar(&o.requireApplyAccount, "require-apply-account", false, "exit 2 if the apply account is unresolved (for CI)")
 	return cmd
 }
 
@@ -145,6 +154,19 @@ func runReport(cmd *cobra.Command, path string, o *reportOptions) error {
 	if err != nil {
 		return err
 	}
+	overrides, err := parseAccountOverrides(o.accounts)
+	if err != nil {
+		return err
+	}
+	applyID, applySource, err := resolveApplyAccount(o, cfg, terminal{
+		in:        cmd.InOrStdin(),
+		prompt:    cmd.ErrOrStderr(),
+		stdinTTY:  isTerminal(cmd.InOrStdin()) && path != "-",
+		stdoutTTY: isTerminal(cmd.OutOrStdout()),
+	}, cmd.ErrOrStderr())
+	if err != nil {
+		return err
+	}
 	var in io.Reader = cmd.InOrStdin()
 	if path != "-" {
 		f, err := os.Open(path)
@@ -158,7 +180,7 @@ func runReport(cmd *cobra.Command, path string, o *reportOptions) error {
 	if err != nil {
 		return err
 	}
-	a := analyze.Analyze(p, cfg)
+	a := analyze.Analyze(p, cfg, &analyze.Options{ApplyAccount: applyID, ApplySource: applySource, AccountOverrides: overrides})
 
 	for i, f := range formats {
 		var w io.Writer = cmd.OutOrStdout()

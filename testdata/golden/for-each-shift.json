@@ -1,5 +1,12 @@
 {
   "schema_version": 1,
+  "apply_account": {
+    "source": "unresolved",
+    "resolved": false
+  },
+  "notices": [
+    "Apply account unresolved (set --tfapply-account-id): cross-account flags are off."
+  ],
   "summary": {
     "mode": "normal",
     "applyable": true,
@@ -24,7 +31,8 @@
       "root": 4
     },
     "known_after_apply": 0,
-    "drift_count": 0
+    "drift_count": 0,
+    "warnings": 0
   },
   "findings": [
     {
@@ -33,6 +41,7 @@
       "action": "delete",
       "provider": "aws",
       "account": "unresolved (alias: default)",
+      "account_source": "unresolved",
       "stateful": false,
       "reason": "delete_because_each_key",
       "reason_text": "for_each key removed: carol",
@@ -45,6 +54,7 @@
       "action": "delete",
       "provider": "aws",
       "account": "unresolved (alias: default)",
+      "account_source": "unresolved",
       "stateful": false,
       "reason": "delete_because_count_index",
       "reason_text": "count shrank; index 2 no longer exists",
@@ -58,6 +68,7 @@
       "action": "delete",
       "provider": "aws",
       "account": "unresolved (alias: default)",
+      "account_source": "unresolved",
       "stateful": true,
       "reason": "delete_because_count_index",
       "reason_text": "count shrank; index 1 no longer exists",
@@ -72,7 +83,7 @@
       "provider": "aws",
       "account": "unresolved (alias: default)",
       "resolved": false,
-      "source": "none",
+      "source": "unresolved",
       "default": true,
       "cross_account": false,
       "counts": {
@@ -104,7 +115,9 @@
       "action": "delete",
       "provider": "aws",
       "account": "unresolved (alias: default)",
+      "account_source": "unresolved",
       "cross_account": false,
+      "warnings": [],
       "stateful": false,
       "reason": "delete_because_each_key",
       "reason_text": "for_each key removed: carol",
@@ -121,7 +134,9 @@
       "action": "no-op",
       "provider": "aws",
       "account": "unresolved (alias: default)",
+      "account_source": "unresolved",
       "cross_account": false,
+      "warnings": [],
       "stateful": false,
       "import": false,
       "removed_from_state_only": false,
@@ -136,7 +151,9 @@
       "action": "no-op",
       "provider": "aws",
       "account": "unresolved (alias: default)",
+      "account_source": "unresolved",
       "cross_account": false,
+      "warnings": [],
       "stateful": false,
       "import": false,
       "removed_from_state_only": false,
@@ -151,7 +168,9 @@
       "action": "update",
       "provider": "aws",
       "account": "unresolved (alias: default)",
+      "account_source": "unresolved",
       "cross_account": false,
+      "warnings": [],
       "stateful": false,
       "import": false,
       "removed_from_state_only": false,
@@ -173,7 +192,9 @@
       "action": "delete",
       "provider": "aws",
       "account": "unresolved (alias: default)",
+      "account_source": "unresolved",
       "cross_account": false,
+      "warnings": [],
       "stateful": false,
       "reason": "delete_because_count_index",
       "reason_text": "count shrank; index 2 no longer exists",
@@ -190,7 +211,9 @@
       "action": "delete",
       "provider": "aws",
       "account": "unresolved (alias: default)",
+      "account_source": "unresolved",
       "cross_account": false,
+      "warnings": [],
       "stateful": true,
       "reason": "delete_because_count_index",
       "reason_text": "count shrank; index 1 no longer exists",
@@ -207,7 +230,9 @@
       "action": "no-op",
       "provider": "aws",
       "account": "unresolved (alias: default)",
+      "account_source": "unresolved",
       "cross_account": false,
+      "warnings": [],
       "stateful": true,
       "import": false,
       "removed_from_state_only": false,

@@ -1,5 +1,7 @@
 == Summary ==
 Plan: normal | applyable: yes | errored: no
+Executed from (apply account): unresolved
+NOTICE: Apply account unresolved (set --tfapply-account-id): cross-account flags are off.
 Actions: create 2, update 2, replace 0, delete 0, read 1, no-op 1, forget 0
 Known after apply: 4 attribute(s)
 By type: aws_instance 2, aws_caller_identity 1, aws_s3_bucket 1, aws_security_group 1
@@ -12,7 +14,7 @@ No deletes or replacements.
 No changes made outside Terraform.
 
 == Changes by account ==
-aws: unresolved (alias: default)
+aws: target account unresolved (alias: default) (source: unresolved)
     create 2, update 2, read 1, no-op 1
     + aws_s3_bucket.logs [STATEFUL]  (create)
     + aws_instance.web  (create)
