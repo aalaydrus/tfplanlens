@@ -84,7 +84,11 @@ jobs:
             echo "nothing to commit"
           else
             git commit -m "chore: smoke test outputs [skip ci]"
-            git push origin "HEAD:${{ github.head_ref || github.ref_name }}"
+            # If someone pushed while this ran, the branch moved on: skip rather
+            # than fail. That push starts a newer run that regenerates the outputs.
+            if ! git push origin "HEAD:${{ github.head_ref || github.ref_name }}"; then
+              echo "::warning::branch moved while the smoke test ran; outputs not committed (a newer run will)"
+            fi
           fi
 
       - name: Post markdown reports and screenshots on the PR
