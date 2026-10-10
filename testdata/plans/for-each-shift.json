@@ -1,0 +1,197 @@
+{
+  "format_version": "1.2",
+  "terraform_version": "1.9.5",
+  "planned_values": {
+    "root_module": {}
+  },
+  "resource_changes": [
+    {
+      "address": "aws_iam_user.team[\"carol\"]",
+      "mode": "managed",
+      "type": "aws_iam_user",
+      "name": "team",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "delete"
+        ],
+        "before": {
+          "name": "carol"
+        },
+        "after": null,
+        "after_unknown": {},
+        "before_sensitive": {},
+        "after_sensitive": {}
+      },
+      "index": "carol",
+      "action_reason": "delete_because_each_key"
+    },
+    {
+      "address": "aws_iam_user.team[\"alice\"]",
+      "mode": "managed",
+      "type": "aws_iam_user",
+      "name": "team",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "no-op"
+        ],
+        "before": {
+          "name": "alice"
+        },
+        "after": {
+          "name": "alice"
+        },
+        "after_unknown": {},
+        "before_sensitive": {},
+        "after_sensitive": {}
+      },
+      "index": "alice"
+    },
+    {
+      "address": "aws_instance.fleet[0]",
+      "mode": "managed",
+      "type": "aws_instance",
+      "name": "fleet",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "no-op"
+        ],
+        "before": {
+          "ami": "ami-0abc1234",
+          "instance_type": "t3.micro",
+          "tags": {
+            "Name": "a"
+          }
+        },
+        "after": {
+          "ami": "ami-0abc1234",
+          "instance_type": "t3.micro",
+          "tags": {
+            "Name": "a"
+          }
+        },
+        "after_unknown": {},
+        "before_sensitive": {},
+        "after_sensitive": {}
+      },
+      "index": 0
+    },
+    {
+      "address": "aws_instance.fleet[1]",
+      "mode": "managed",
+      "type": "aws_instance",
+      "name": "fleet",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "update"
+        ],
+        "before": {
+          "ami": "ami-0abc1234",
+          "instance_type": "t3.micro",
+          "tags": {
+            "Name": "b"
+          }
+        },
+        "after": {
+          "ami": "ami-0abc1234",
+          "instance_type": "t3.micro",
+          "tags": {
+            "Name": "c"
+          }
+        },
+        "after_unknown": {},
+        "before_sensitive": {},
+        "after_sensitive": {}
+      },
+      "index": 1
+    },
+    {
+      "address": "aws_instance.fleet[2]",
+      "mode": "managed",
+      "type": "aws_instance",
+      "name": "fleet",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "delete"
+        ],
+        "before": {
+          "ami": "ami-0abc1234",
+          "instance_type": "t3.micro",
+          "tags": {
+            "Name": "c"
+          }
+        },
+        "after": null,
+        "after_unknown": {},
+        "before_sensitive": {},
+        "after_sensitive": {}
+      },
+      "index": 2,
+      "action_reason": "delete_because_count_index"
+    },
+    {
+      "address": "aws_s3_bucket.shards[1]",
+      "mode": "managed",
+      "type": "aws_s3_bucket",
+      "name": "shards",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "delete"
+        ],
+        "before": {
+          "bucket": "shard-1"
+        },
+        "after": null,
+        "after_unknown": {},
+        "before_sensitive": {},
+        "after_sensitive": {}
+      },
+      "index": 1,
+      "action_reason": "delete_because_count_index"
+    },
+    {
+      "address": "aws_s3_bucket.shards[0]",
+      "mode": "managed",
+      "type": "aws_s3_bucket",
+      "name": "shards",
+      "provider_name": "registry.terraform.io/hashicorp/aws",
+      "change": {
+        "actions": [
+          "no-op"
+        ],
+        "before": {
+          "bucket": "shard-0"
+        },
+        "after": {
+          "bucket": "shard-0"
+        },
+        "after_unknown": {},
+        "before_sensitive": {},
+        "after_sensitive": {}
+      },
+      "index": 0
+    }
+  ],
+  "configuration": {
+    "provider_config": {
+      "aws": {
+        "name": "aws",
+        "full_name": "registry.terraform.io/hashicorp/aws",
+        "expressions": {
+          "region": {
+            "constant_value": "us-east-1"
+          }
+        }
+      }
+    },
+    "root_module": {}
+  },
+  "applyable": true,
+  "complete": true,
+  "errored": false
+}
