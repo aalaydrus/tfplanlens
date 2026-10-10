@@ -52,7 +52,7 @@ A resource whose own ARN-typed attributes (`arn`, `*_arn`, `*_arns`) name a diff
 ```
 tfplanlens report <plan.json|-> [flags]
 
---format text|json          output format (repeatable; html and markdown are coming)
+--format text|html|markdown|json   output format (repeatable)
 --out <path>                write to a file instead of stdout
 --config <path>             config file (default .tfplanlens.yaml if present)
 --fail-on <rules>           delete, replace, drift, or kind:type, e.g. replace:aws_db_instance
@@ -65,6 +65,21 @@ tfplanlens report <plan.json|-> [flags]
 ```
 
 Exit codes: `0` ok, `1` a `--fail-on` rule matched, `2` error.
+
+## Output formats
+
+| Format | What you get |
+|---|---|
+| `text` | colored terminal report: Summary, Danger, Drift, Changes by account, Changes by module |
+| `markdown` | for PR comments: summary table, Danger expanded, the rest in `<details>` per account then module; capped at 60,000 characters |
+| `html` | one self-contained file (no CDN, works offline, dark mode): Danger panel, tiles, chart, searchable and groupable table, per-resource detail drawers |
+| `json` | the analysis as stable JSON, see [docs/json-schema.md](docs/json-schema.md) |
+
+Every format shows the apply account and each resource's target account with the source that decided it.
+
+## Releases
+
+Tagging `v*` runs GoReleaser (`.goreleaser.yaml`): binaries for linux, darwin and windows (amd64, arm64), checksums, and a Homebrew formula pushed to `aalaydrus/homebrew-tap` when the `HOMEBREW_TAP_GITHUB_TOKEN` secret is set.
 
 ## License
 

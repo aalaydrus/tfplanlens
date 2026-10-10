@@ -47,12 +47,12 @@ jobs:
       - uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
-          version: "~> v2"
+          version: "~> v2.9"
           args: check
       - uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
-          version: "~> v2"
+          version: "~> v2.9"
           args: release --snapshot --clean --skip=publish
       - name: Built binary reports its version
         run: |
