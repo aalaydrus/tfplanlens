@@ -34,3 +34,7 @@ go.work.sum
 
 # GoReleaser output
 dist/
+
+node_modules
+work/
+/tfplanlens

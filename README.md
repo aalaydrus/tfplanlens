@@ -81,6 +81,16 @@ Every format shows the apply account and each resource's target account with the
 
 Tagging `v*` runs GoReleaser (`.goreleaser.yaml`): binaries for linux, darwin and windows (amd64, arm64), checksums, and a Homebrew formula pushed to `aalaydrus/homebrew-tap` when the `HOMEBREW_TAP_GITHUB_TOKEN` secret is set.
 
+## Smoke tests on real plans
+
+`.github/workflows/smoke.yml` runs tfplanlens against real Terraform plans (`scripts/smoke-plan.sh` applies `testdata/real/<scenario>/v1`, swaps in `v2`, and runs `terraform plan`; scenarios use only the built-in `terraform_data` resource, so no providers or credentials are needed). It renders every format, takes screenshots (`scripts/screenshot.mjs`), and commits the outputs under `docs/smoke` and `docs/screenshots`. To run it locally you need Terraform >= 1.7:
+
+```sh
+go build -o tfplanlens ./cmd/tfplanlens
+scripts/smoke-plan.sh complex
+scripts/smoke-report.sh complex testdata/plans/real/complex-tf*.json
+```
+
 ## License
 
 MIT

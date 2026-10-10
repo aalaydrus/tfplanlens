@@ -14,7 +14,7 @@ By module: root 4
 ! DELETE aws_instance.fleet[2]
     type: aws_instance | target account: unresolved (alias: default) (source: unresolved)
     why: count shrank; index 2 no longer exists
-    WARNING: likely count/for_each index shift: sibling instances also changing (aws_instance.fleet[1])
+    WARNING: likely count index shift: other instances of this resource are also changing (aws_instance.fleet[1])
 ! DELETE aws_s3_bucket.shards[1] [STATEFUL]
     type: aws_s3_bucket | target account: unresolved (alias: default) (source: unresolved)
     why: count shrank; index 1 no longer exists
