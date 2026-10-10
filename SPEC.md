@@ -39,25 +39,22 @@
 ## 4. CLI
 
 ```
-tfplanlens report <plan.json> [flags]    # main command
+tfplanlens report <plan.json|-> [flags]    # main command
 tfplanlens version
 ```
 
-Input may be a file path or `-` for stdin.
+Input may be a file path or `-` for stdin. Settings can also live in `tfplanlens.config.yaml` (5.9); flags override it.
 
 Flags for `report`:
-- `--format text|html|markdown|json` (repeatable; default `text`)
-- `--out <path>` (for html, markdown, json; default stdout for text and markdown)
-- `--config <path>` (default `.tfplanlens.yaml` if present)
-- `--fail-on <rules>` comma-separated, e.g. `delete,replace,drift,replace:aws_db_instance`
-- `--max-line <n>` truncation width for terminal output (default 120)
-- `--no-color`
+- `-f, --format text|html|markdown|json` (repeatable; default `text`)
+- `-o, --out <path>` (for html, markdown, json; default stdout)
+- `-c, --config <path>` (default `./tfplanlens.config.yaml` if present)
+- `--fail-on <rules>` comma-separated, e.g. `delete,replace,drift,unresolved,replace:aws_db_instance`
 - `--tfapply-account-id <id>`: the 12-digit account terraform apply runs from (see 5.5)
 - `--account <alias>=<id>` (repeatable): target account for a provider alias; beats every other source (see 5.5)
-- `--no-prompt`: never ask interactively for the apply account
-- `--require-apply-account`: exit `2` instead of continuing when the apply account is unresolved (for CI)
+- `--no-color`
 
-Exit codes: `0` ok, `1` a `--fail-on` rule matched, `2` error (bad input, unsupported format).
+Exit codes: `0` ok, `1` a `--fail-on` rule matched, `2` error (bad input, unsupported format, invalid config).
 
 ## 5. Features for v0.1
 
@@ -106,18 +103,18 @@ Group `resource_changes` by `provider_config_key`. Show per-group counts, and fl
 **Apply account** precedence, highest first:
 1. `--tfapply-account-id <12-digit id>`
 2. env var `TFPLANLENS_TFAPPLY_ACCOUNT_ID`
-3. `tfapply_account_id` in `.tfplanlens.yaml`
-4. Interactive prompt: "Which account ID does terraform apply run from?", validated as 12 digits, with an offer to save the answer to the config file. Only when stdin and stdout are both terminals and `--no-prompt` is not set. The question goes to stderr, never into the report.
-5. Unresolved: print a warning on stderr and continue. Cross-account flags are off and providers without `assume_role` stay unresolved. With `--require-apply-account`, exit `2` instead.
+3. `tfapply_account_id` in `tfplanlens.config.yaml`
+4. **Inferred** from the plan: the target account of the default (unaliased) provider, found with the target-account sources below except "runs as the apply account", and only if that provider has **no** `assume_role` (a provider that assumes a role says nothing about where the runner lives). With several default providers, `aws` is preferred. The source is recorded as `inferred`, with the underlying source (`config`, `allowed_account_ids` or `caller_identity`) as `via`.
+5. Unknown: the report says so in one notice. Cross-account flags are off and providers without `assume_role` stay unresolved.
 
-An invalid value (not 12 digits) from the flag, env var or config is an error (exit `2`). The source used is recorded and shown (`flag`, `env`, `config`, `prompt`, `unresolved`).
+Nothing is prompted for and nothing is written to stderr. The backend configuration is not part of `terraform show -json`, so it cannot be consulted. An invalid value (not 12 digits) from the flag, env var or config is an error (exit `2`). `--fail-on unresolved` exits `1` when the apply account or any provider's target account is unresolved (for CI). The source used is recorded and shown (`flag`, `env`, `config`, `inferred`, `unresolved`).
 
 **Target account** is resolved per provider config key, first match wins, and the source is recorded and shown in every report format:
 
 | | Source | Recorded as |
 |---|---|---|
 | a | `--account <alias>=<id>` (repeatable; matches the alias or the full key such as `aws.prod`; `default` matches the unaliased provider) | `flag` |
-| b | `accounts:` mapping in `.tfplanlens.yaml` (same keys) | `config` |
+| b | `accounts:` mapping in `tfplanlens.config.yaml` (same keys) | `config` |
 | c | `assume_role.role_arn`, literal, or a plain variable reference resolved through the plan's `variables`; the account ID is parsed from the ARN | `role_arn`, `role_arn_variable` |
 | d | `allowed_account_ids`, when it holds exactly one value (literal or resolved through `variables`) | `allowed_account_ids` |
 | e | `account_id` of an `aws_caller_identity` data source in `prior_state` that uses this provider, when exactly one distinct value | `caller_identity` |
@@ -142,12 +139,16 @@ A provider that has `assume_role` but whose role ARN cannot be resolved never fa
 - **markdown**: for PR comments. Summary table, Danger section expanded, everything else inside `<details>` blocks per account then module. Hard cap 60,000 characters (GitHub comment limit is 65,536). If exceeded, truncate and add a note.
 - **json**: a stable, documented schema of the analysis result (versioned with `"schema_version": 1`).
 
-### 5.9 Config file `.tfplanlens.yaml`
+### 5.9 Config file `tfplanlens.config.yaml`
+Optional, read from the current directory (or `--config`). Every key is optional, flags override it, and unknown keys or invalid values are errors. The repository ships a commented template with every key.
 ```yaml
-tfapply_account_id: "999999999999"   # account terraform apply runs from (5.5)
-accounts:                # provider alias (or key such as aws.prod) -> target account
+tfapply_account_id: "999999999999"   # account terraform apply runs from (5.5); else inferred
+accounts:                            # provider alias (or key such as aws.prod) -> target account
   prod-alias: "111111111111"
   shared-alias: "222222222222"
+format: [text]                       # default output format(s)
+fail_on: [delete, "replace:aws_db_instance"]   # default --fail-on rules
+max_line: 120                        # terminal truncation width
 stateful_types:         # added to the built-in list
   - aws_rds_cluster
 long_value_keys:        # added to the built-in list

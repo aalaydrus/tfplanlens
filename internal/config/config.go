@@ -1,3 +1,4 @@
+// Package config loads tfplanlens.config.yaml.
 package config
 
 import (
@@ -12,18 +13,34 @@ import (
 )
 
 // DefaultPath is read when --config is not given and the file exists.
-const DefaultPath = ".tfplanlens.yaml"
+const DefaultPath = "tfplanlens.config.yaml"
 
-// Config is the contents of .tfplanlens.yaml (SPEC 5.9).
+// DefaultMaxLine is the terminal truncation width when max_line is unset.
+const DefaultMaxLine = 120
+
+// Formats are the valid output formats.
+var Formats = []string{"text", "html", "markdown", "json"}
+
+// Config is the contents of tfplanlens.config.yaml (SPEC 5.9). Every key is
+// optional; command-line flags override the file.
 type Config struct {
-	// Accounts maps a provider alias (or full provider config key) to an
-	// account ID.
+	// TFApplyAccountID is the account terraform apply runs from. When unset it
+	// is inferred from the plan's default provider.
+	TFApplyAccountID string `yaml:"tfapply_account_id"`
+	// Accounts maps a provider alias (or full provider config key such as
+	// aws.prod) to its account ID.
 	Accounts map[string]string `yaml:"accounts"`
-	// TFApplyAccountID is the account terraform apply runs from.
-	TFApplyAccountID string   `yaml:"tfapply_account_id"`
-	StatefulTypes    []string `yaml:"stateful_types"`
-	LongValueKeys    []string `yaml:"long_value_keys"`
-	IgnoreTypes      []string `yaml:"ignore_types"`
+
+	// Format is the default output format(s); the --format flag overrides it.
+	Format []string `yaml:"format"`
+	// FailOn is the default --fail-on rules; the --fail-on flag overrides it.
+	FailOn []string `yaml:"fail_on"`
+	// MaxLine is the terminal truncation width (default 120).
+	MaxLine int `yaml:"max_line"`
+
+	StatefulTypes []string `yaml:"stateful_types"`
+	LongValueKeys []string `yaml:"long_value_keys"`
+	IgnoreTypes   []string `yaml:"ignore_types"`
 }
 
 // Load reads path. An empty path means DefaultPath, which is optional; an
@@ -40,10 +57,15 @@ func Load(path string) (*Config, error) {
 		}
 		return nil, fmt.Errorf("reading config: %w", err)
 	}
-	return Parse(data)
+	c, err := Parse(data)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", path, err)
+	}
+	return c, nil
 }
 
-// Parse decodes config YAML, rejecting unknown keys so typos are caught.
+// Parse decodes config YAML, rejecting unknown keys so typos are caught, and
+// validates the values.
 func Parse(data []byte) (*Config, error) {
 	var c Config
 	dec := yaml.NewDecoder(bytes.NewReader(data))
@@ -51,19 +73,26 @@ func Parse(data []byte) (*Config, error) {
 	if err := dec.Decode(&c); err != nil && !errors.Is(err, io.EOF) {
 		return nil, fmt.Errorf("parsing config: %w", err)
 	}
-	return &c, nil
+	return &c, c.validate()
 }
 
-// SaveApplyAccount records tfapply_account_id in the config file at path,
-// creating it if needed. Existing content, comments included, is preserved.
-func SaveApplyAccount(path, id string) error {
-	data, err := os.ReadFile(path)
-	if err != nil && !errors.Is(err, fs.ErrNotExist) {
-		return err
+func (c *Config) validate() error {
+	for _, f := range c.Format {
+		if !contains(Formats, f) {
+			return fmt.Errorf("format %q is not one of %v", f, Formats)
+		}
 	}
-	if len(data) > 0 && data[len(data)-1] != '\n' {
-		data = append(data, '\n')
+	if c.MaxLine < 0 {
+		return fmt.Errorf("max_line must not be negative, got %d", c.MaxLine)
 	}
-	data = append(data, fmt.Sprintf("tfapply_account_id: %q\n", id)...)
-	return os.WriteFile(path, data, 0o644)
+	return nil
+}
+
+func contains(list []string, s string) bool {
+	for _, x := range list {
+		if x == s {
+			return true
+		}
+	}
+	return false
 }

@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -56,9 +55,6 @@ func TestGolden(t *testing.T) {
 				args := []string{"report", "../../testdata/plans/" + gc.plan + ".json", "--format", format, "--no-color"}
 				root.SetArgs(append(args, gc.args...))
 				if err := root.Execute(); err != nil {
-					if errors.Is(err, errNotImplemented) {
-						t.Skip("format not implemented yet")
-					}
 					t.Fatalf("%v\n%s", err, errb.String())
 				}
 				golden := filepath.Join("../../testdata/golden", gc.name+"."+ext)

@@ -134,13 +134,13 @@ func TestTargetAccountSources(t *testing.T) {
 }
 
 func TestUnresolvedApplyAccount(t *testing.T) {
-	a := Analyze(load(t, "runner-cross-account"), nil, nil)
+	// multi-account: the default provider says nothing about the account.
+	a := Analyze(load(t, "multi-account"), nil, nil)
 	g := groupsByKey(a)
-	// Without an apply account the no-assume_role alias cannot be resolved,
-	// and nothing is flagged as cross-account.
-	if g["aws.sandbox"].Resolved || g["aws.sandbox"].Source != SourceUnresolved || g["aws.sandbox"].Account != "unresolved (alias: sandbox)" {
-		t.Errorf("sandbox: %+v", g["aws.sandbox"])
+	if g["aws.mystery"].Resolved || g["aws.mystery"].Source != SourceUnresolved || g["aws.mystery"].Account != "unresolved (alias: mystery)" {
+		t.Errorf("mystery: %+v", g["aws.mystery"])
 	}
+	// Without an apply account nothing is flagged as cross-account.
 	for k, grp := range g {
 		if grp.Cross {
 			t.Errorf("%s flagged cross-account with unknown apply account", k)
@@ -148,6 +148,61 @@ func TestUnresolvedApplyAccount(t *testing.T) {
 	}
 	if a.ApplyAccount.Resolved || a.ApplyAccount.Source != SourceUnresolved || len(a.Notices) != 1 {
 		t.Errorf("apply account %+v notices %v", a.ApplyAccount, a.Notices)
+	}
+}
+
+// With no apply account given, it is the account of the default provider.
+func TestApplyAccountInferredFromDefaultProvider(t *testing.T) {
+	a := Analyze(load(t, "runner-cross-account"), nil, nil)
+	if got := a.ApplyAccount; got.ID != "999999999999" || got.Source != SourceInferred || got.Via != SourceCallerIdentity || !got.Resolved {
+		t.Fatalf("apply account %+v", got)
+	}
+	if got := a.ApplyAccount.Describe(); got != "source: inferred from the default provider via caller_identity" {
+		t.Errorf("describe %q", got)
+	}
+	g := groupsByKey(a)
+	if g["aws.sandbox"].Account != "999999999999" || g["aws.sandbox"].Source != SourceApplyAccount || !g["aws.prod"].Cross || g["aws.sandbox"].Cross {
+		t.Errorf("groups %+v", g)
+	}
+	if len(a.Notices) != 0 {
+		t.Errorf("notices %v", a.Notices)
+	}
+	// An explicit apply account wins over the inferred one.
+	b := Analyze(load(t, "runner-cross-account"), nil, &Options{ApplyAccount: "444444444444", ApplySource: SourceFlag})
+	if b.ApplyAccount.ID != "444444444444" || b.ApplyAccount.Source != SourceFlag || b.ApplyAccount.Via != "" {
+		t.Errorf("explicit: %+v", b.ApplyAccount)
+	}
+}
+
+func TestInferApplyAccountRules(t *testing.T) {
+	provider := func(pr plan.Provider) *plan.Plan {
+		return &plan.Plan{Providers: map[string]plan.Provider{pr.Key: pr}}
+	}
+	cases := []struct {
+		name string
+		pr   plan.Provider
+		cfg  *config.Config
+		want string
+		via  string
+	}{
+		{"allowed_account_ids", plan.Provider{Key: "aws", Name: "aws", AllowedAccountIDs: []string{"123456789012"}}, nil, "123456789012", SourceAllowedAccountID},
+		{"caller identity", plan.Provider{Key: "aws", Name: "aws", CallerIdentityIDs: []string{"123456789012"}}, nil, "123456789012", SourceCallerIdentity},
+		{"accounts: default", plan.Provider{Key: "aws", Name: "aws"}, &config.Config{Accounts: map[string]string{"default": "210987654321"}}, "210987654321", SourceConfig},
+		// A default provider that assumes a role says nothing about where the
+		// runner lives.
+		{"assume_role default provider", plan.Provider{Key: "aws", Name: "aws", AssumeRole: true, AssumeRoleARN: "arn:aws:iam::111111111111:role/x", RoleARNVia: plan.ViaLiteral, CallerIdentityIDs: []string{"123456789012"}}, nil, "", ""},
+		{"ambiguous caller identity", plan.Provider{Key: "aws", Name: "aws", CallerIdentityIDs: []string{"123456789012", "210987654321"}}, nil, "", ""},
+		{"nothing known", plan.Provider{Key: "aws", Name: "aws"}, nil, "", ""},
+	}
+	for _, c := range cases {
+		cfg := c.cfg
+		if cfg == nil {
+			cfg = &config.Config{}
+		}
+		id, via := inferApplyAccount(provider(c.pr), cfg, &Options{})
+		if id != c.want || via != c.via {
+			t.Errorf("%s: %q via %q, want %q via %q", c.name, id, via, c.want, c.via)
+		}
 	}
 }
 

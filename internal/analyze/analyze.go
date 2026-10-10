@@ -14,8 +14,8 @@ import (
 // Options are inputs that do not come from the plan or the config file.
 type Options struct {
 	// ApplyAccount is the account terraform apply runs from; ApplySource says
-	// where it came from (SourceFlag, SourceEnv, SourceConfig, SourcePrompt).
-	// Empty means unresolved.
+	// where it came from (SourceFlag, SourceEnv, SourceConfig). Empty means
+	// "not given": it is then inferred from the plan's default provider.
 	ApplyAccount string
 	ApplySource  string
 	// AccountOverrides maps a provider alias or config key to an account ID
@@ -43,10 +43,20 @@ func Analyze(p *plan.Plan, cfg *config.Config, opts *Options) *Analysis {
 		Notices:       []string{},
 	}
 	a.ApplyAccount = ApplyAccount{Source: SourceUnresolved}
-	if opts.ApplyAccount != "" {
+	switch {
+	case opts.ApplyAccount != "":
 		a.ApplyAccount = ApplyAccount{ID: opts.ApplyAccount, Source: opts.ApplySource, Resolved: true}
-	} else {
-		a.Notices = append(a.Notices, "Apply account unresolved (set --tfapply-account-id): cross-account flags are off.")
+	default:
+		if id, via := inferApplyAccount(p, cfg, opts); id != "" {
+			a.ApplyAccount = ApplyAccount{ID: id, Source: SourceInferred, Via: via, Resolved: true}
+		}
+	}
+	// From here on the effective apply account is the one in the analysis.
+	eff := *opts
+	eff.ApplyAccount = a.ApplyAccount.ID
+	opts = &eff
+	if !a.ApplyAccount.Resolved {
+		a.Notices = append(a.Notices, "Apply account unknown: set tfapply_account_id in tfplanlens.config.yaml (it cannot be read from the plan). Cross-account flags are off.")
 	}
 	switch p.Mode {
 	case plan.ModeRefreshOnly:
@@ -123,8 +133,10 @@ func Analyze(p *plan.Plan, cfg *config.Config, opts *Options) *Analysis {
 			ch.Attrs = diffAttrs(c.Before, c.After, c.BeforeSensitive, c.AfterSensitive, c.AfterUnknown, c.ReplacePaths, cfg.LongValueKeys)
 		}
 		if active(c) && acct.resolved {
-			ch.Warnings = arnWarnings(c, acct)
-			a.Summary.Warnings += len(ch.Warnings)
+			if w := arnWarnings(c, acct); len(w) > 0 { // never nil: JSON arrays are [] not null
+				ch.Warnings = w
+				a.Summary.Warnings += len(w)
+			}
 		}
 		a.Changes = append(a.Changes, ch)
 
@@ -342,4 +354,36 @@ func sortedKeys[V any](m map[string]V) []string {
 	}
 	sort.Strings(keys)
 	return keys
+}
+
+// inferApplyAccount assumes terraform runs as the default (unaliased)
+// provider. Only a default provider WITHOUT assume_role counts: one that
+// assumes a role says nothing about where the runner lives. The account comes
+// from the usual sources (accounts: mapping, a single allowed_account_ids, an
+// aws_caller_identity in prior_state). The backend is not in the plan JSON, so
+// it cannot be consulted.
+func inferApplyAccount(p *plan.Plan, cfg *config.Config, opts *Options) (id, via string) {
+	keys := map[string]bool{}
+	for k, pr := range p.Providers {
+		if pr.Alias == "" && !strings.Contains(k, ".") && !pr.AssumeRole {
+			keys[k] = true
+		}
+	}
+	for _, c := range p.Changes {
+		if !strings.Contains(c.ProviderKey, ".") && !p.Providers[c.ProviderKey].AssumeRole {
+			keys[c.ProviderKey] = true
+		}
+	}
+	ordered := sortedKeys(keys)
+	// Prefer "aws" when several default providers exist.
+	sort.SliceStable(ordered, func(i, j int) bool { return ordered[i] == "aws" && ordered[j] != "aws" })
+	// A copy without an apply account, so "runs as the apply account" cannot
+	// resolve itself.
+	probe := &Options{AccountOverrides: opts.AccountOverrides}
+	for _, k := range ordered {
+		if acct := resolveAccount(p, cfg, probe, k); acct.resolved {
+			return acct.label, acct.source
+		}
+	}
+	return "", ""
 }

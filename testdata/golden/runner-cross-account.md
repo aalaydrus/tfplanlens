@@ -4,7 +4,7 @@
 | | |
 |---|---|
 | Plan | normal, applyable: yes, errored: no |
-| Executed from (apply account) | **unresolved** |
+| Executed from (apply account) | `999999999999` (source: inferred from the default provider via caller_identity) |
 | create | 2 |
 | update | 3 |
 | replace | 1 |
@@ -12,8 +12,6 @@
 | Drift | 0 |
 | Known after apply | 4 attribute(s) |
 | Warnings | 1 |
-
-> **Notice:** Apply account unresolved (set --tfapply-account-id): cross-account flags are off.
 
 ### Danger
 
@@ -30,7 +28,7 @@
 
 </details>
 
-<details><summary><b>aws.prod</b> &mdash; target account 111111111111 (source: role_arn) &mdash; update 1, delete 1</summary>
+<details><summary><b>aws.prod</b> &mdash; target account 111111111111 (source: role_arn) &mdash; <b>differs from apply account</b> &mdash; update 1, delete 1</summary>
 
 - `aws_iam_role.deployer` (update)
   - `max_session_duration`: `3600` → `7200`
@@ -38,7 +36,7 @@
 
 </details>
 
-<details><summary><b>aws.sandbox</b> &mdash; target account unresolved (alias: sandbox) (source: unresolved) &mdash; create 1, update 1</summary>
+<details><summary><b>aws.sandbox</b> &mdash; target account 999999999999 (source: apply_account) &mdash; create 1, update 1</summary>
 
 - `aws_sqs_queue.jobs` (create, 2 known after apply)
 - `aws_sns_topic.alerts` (update)
@@ -46,7 +44,7 @@
 
 </details>
 
-<details><summary><b>aws.staging</b> &mdash; target account 222222222222 (source: role_arn_variable) &mdash; update 1, replace 1</summary>
+<details><summary><b>aws.staging</b> &mdash; target account 222222222222 (source: role_arn_variable) &mdash; <b>differs from apply account</b> &mdash; update 1, replace 1</summary>
 
 - `aws_instance.web` (replace)
   - `ami`: `"ami-old"` → `"ami-new"` (forces replacement)
@@ -67,8 +65,8 @@
 | delete | `aws_db_instance.prod` | `111111111111` (role_arn) |
 | replace | `aws_instance.web` | `222222222222` (role_arn_variable) |
 | update | `aws_ssm_parameter.config` | `222222222222` (role_arn_variable) |
-| create, 2 known after apply | `aws_sqs_queue.jobs` | `unresolved (alias: sandbox)` (unresolved) |
-| update | `aws_sns_topic.alerts` | `unresolved (alias: sandbox)` (unresolved) |
+| create, 2 known after apply | `aws_sqs_queue.jobs` | `999999999999` (apply_account) |
+| update | `aws_sns_topic.alerts` | `999999999999` (apply_account) |
 
 </details>
 

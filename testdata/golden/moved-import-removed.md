@@ -14,7 +14,7 @@
 | Drift | 0 |
 | Known after apply | 0 attribute(s) |
 
-> **Notice:** Apply account unresolved (set --tfapply-account-id): cross-account flags are off.
+> **Notice:** Apply account unknown: set tfapply_account_id in tfplanlens.config.yaml (it cannot be read from the plan). Cross-account flags are off.
 
 ### Danger
 

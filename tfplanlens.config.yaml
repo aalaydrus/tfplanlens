@@ -1,0 +1,44 @@
+# tfplanlens settings. Every key is optional; command-line flags override this
+# file. tfplanlens reads ./tfplanlens.config.yaml when it exists, or the file
+# given with --config. Copy this file next to your Terraform code and
+# uncomment what you need.
+
+# --- Accounts -------------------------------------------------------------
+# Account IDs default to what the plan's own provider configuration says
+# (assume_role, allowed_account_ids, an aws_caller_identity data source).
+# Fill in what the plan cannot tell: it does not contain the backend.
+
+# The account `terraform apply` runs from. If omitted it is assumed to be the
+# account of the default (unaliased) provider when that provider has no
+# assume_role; otherwise it is reported as unknown.
+# tfapply_account_id: "999999999999"
+
+# Target account per provider alias (or provider key such as aws.prod). These
+# beat what the plan says about that provider.
+# accounts:
+#   prod: "111111111111"
+#   shared: "222222222222"
+
+# --- Output ---------------------------------------------------------------
+# Default output format(s): text, html, markdown, json. (-f overrides)
+# format: [text]
+
+# Exit 1 when a rule matches. (--fail-on overrides)
+# Rules: delete, replace, drift, unresolved (an account that could not be
+# determined), or kind:type such as replace:aws_db_instance.
+# fail_on: [delete, "replace:aws_db_instance"]
+
+# Terminal truncation width (default 120).
+# max_line: 120
+
+# --- Report content -------------------------------------------------------
+# Resource types treated as stateful, added to the built-in list
+# (databases, buckets, volumes, KMS keys, Route53 zones, EFS, DynamoDB, ...).
+# stateful_types: [aws_rds_cluster]
+
+# Attribute names decoded and diffed as long values, added to the built-in
+# list (user_data, policy, assume_role_policy, container_definitions, ...).
+# long_value_keys: [custom_script]
+
+# Resource types hidden from the report (never from --fail-on).
+# ignore_types: []

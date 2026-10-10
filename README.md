@@ -17,16 +17,16 @@ terraform plan -out plan.bin
 terraform show -json plan.bin > plan.json
 
 # 3. Read it
-./tfplanlens report plan.json --tfapply-account-id 123456789012
+tfplanlens report plan.json
 
 # More: a self-contained HTML page, a PR comment, or fail CI on dangerous plans
-./tfplanlens report plan.json --format html --out report.html
-./tfplanlens report plan.json --format markdown --out report.md
-./tfplanlens report plan.json --fail-on delete,replace:aws_db_instance
-terraform show -json plan.bin | ./tfplanlens report -       # stdin works too
+tfplanlens report plan.json -f html -o report.html
+tfplanlens report plan.json -f markdown -o report.md
+tfplanlens report plan.json --fail-on delete,replace:aws_db_instance
+terraform show -json plan.bin | tfplanlens report -       # stdin works too
 ```
 
-`--tfapply-account-id` is the account `terraform apply` runs from (see [Accounts](#accounts-where-it-runs-vs-where-resources-land)). Without it tfplanlens still works and warns that account resolution is limited. Exit codes: `0` ok, `1` a `--fail-on` rule matched, `2` error.
+`--tfapply-account-id` is the account `terraform apply` runs from. You can leave it out: it is inferred from the plan's default provider when possible (see [Accounts](#accounts-where-it-runs-vs-where-resources-land)), and settings can live in a [config file](#config-file). Exit codes: `0` ok, `1` a `--fail-on` rule matched, `2` error.
 
 ## Why not just read `terraform plan`?
 
@@ -83,6 +83,8 @@ Plans are often applied from a runner in an automation account that assumes role
 - **Apply account** ("executed from"): where `terraform apply` runs.
 - **Target account**, per provider, with the source that decided it. Every resource whose target differs from the apply account is flagged.
 
+You usually do not need to configure anything: both default to what the plan's own provider configuration says. The plan JSON does not include the backend, so anything it cannot tell you goes in `tfplanlens.config.yaml` (see [Config file](#config-file)).
+
 ### Apply account
 
 Highest precedence first:
@@ -91,11 +93,11 @@ Highest precedence first:
 |---|---|---|
 | 1 | flag | `--tfapply-account-id 999999999999` |
 | 2 | env var | `TFPLANLENS_TFAPPLY_ACCOUNT_ID=999999999999` |
-| 3 | config file | `tfapply_account_id: "999999999999"` in `.tfplanlens.yaml` |
-| 4 | prompt | asks, and offers to save to `.tfplanlens.yaml`; only when stdin and stdout are terminals and `--no-prompt` is not set |
-| 5 | unresolved | warning on stderr, report continues |
+| 3 | config file | `tfapply_account_id: "999999999999"` |
+| 4 | inferred | the account of the **default (unaliased) provider**, if that provider has no `assume_role` (found as in the target-account table below) |
+| 5 | unknown | the report says so in one notice; cross-account flags are off |
 
-`--require-apply-account` exits `2` instead of continuing when it is unresolved (use it in CI). `--no-prompt` disables the prompt.
+Nothing is asked and nothing is written to stderr. Use `--fail-on unresolved` in CI if an unknown account should fail the build.
 
 ### Target account
 
@@ -104,7 +106,7 @@ Resolved per provider, first match wins; the report shows which source was used:
 | | Source | Shown as |
 |---|---|---|
 | a | `--account alias=id` (repeatable; overrides everything below) | `flag` |
-| b | `accounts:` in `.tfplanlens.yaml` | `config` |
+| b | `accounts:` in the config file | `config` |
 | c | `assume_role.role_arn`, literal or resolved through the plan's `variables` | `role_arn`, `role_arn_variable` |
 | d | a single value in `allowed_account_ids` | `allowed_account_ids` |
 | e | `account_id` of an `aws_caller_identity` data source in `prior_state` | `caller_identity` |
@@ -113,24 +115,42 @@ Resolved per provider, first match wins; the report shows which source was used:
 
 A resource whose own ARN-typed attributes (`arn`, `*_arn`, `*_arns`) name a different account than its provider's target gets a warning.
 
-## Flags
+## Usage
 
 ```
 tfplanlens report <plan.json|-> [flags]
+tfplanlens version
 
---format text|html|markdown|json   output format (repeatable)
---out <path>                write to a file instead of stdout
---config <path>             config file (default .tfplanlens.yaml if present)
---fail-on <rules>           delete, replace, drift, or kind:type, e.g. replace:aws_db_instance
---max-line <n>              terminal truncation width (default 120)
---no-color
---tfapply-account-id <id>   account terraform apply runs from
---account <alias>=<id>      target account for a provider alias (repeatable)
---no-prompt                 never ask for the apply account
---require-apply-account     exit 2 if the apply account is unresolved
+  -f, --format <text|html|markdown|json>   output format; repeatable (default text)
+  -o, --out <path>                         write to a file instead of stdout
+  -c, --config <path>                      config file (default ./tfplanlens.config.yaml if present)
+      --fail-on <rules>                    exit 1 on: delete, replace, drift, unresolved, or kind:type
+      --tfapply-account-id <id>            account terraform apply runs from
+      --account <alias=id>                 target account for a provider alias; repeatable
+      --no-color
 ```
 
 Exit codes: `0` ok, `1` a `--fail-on` rule matched, `2` error.
+
+`--fail-on` takes comma-separated rules: `delete`, `replace`, `drift`, `unresolved` (any account the report could not determine), and `kind:type` to scope the first three, e.g. `replace:aws_db_instance`.
+
+## Config file
+
+Everything else lives in an optional `tfplanlens.config.yaml` in the directory you run from (or the file given with `-c`). Flags override it. [tfplanlens.config.yaml](tfplanlens.config.yaml) in this repo is a commented template with every key; copy it next to your Terraform code.
+
+```yaml
+tfapply_account_id: "999999999999"   # where terraform apply runs (else inferred from the default provider)
+accounts:                            # provider alias or key (aws.prod) -> account
+  prod: "111111111111"
+format: [text]                       # default output format(s)
+fail_on: [delete, "replace:aws_db_instance"]
+max_line: 120                        # terminal truncation width
+stateful_types: [aws_rds_cluster]    # added to the built-in list
+long_value_keys: [custom_script]     # added to the built-in list
+ignore_types: []                     # hidden from the report, never from --fail-on
+```
+
+Unknown keys and invalid values are errors, so a typo cannot silently do nothing.
 
 ## Output formats
 

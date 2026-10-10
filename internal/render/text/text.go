@@ -82,7 +82,7 @@ func (r *renderer) summary(a *analyze.Analysis) {
 	r.heading("Summary")
 	r.line("Plan: %s | applyable: %s | errored: %s", s.Mode, yesno(s.Applyable), yesno(s.Errored))
 	if aa := a.ApplyAccount; aa.Resolved {
-		r.line("Executed from (apply account): %s (source: %s)", aa.ID, aa.Source)
+		r.line("Executed from (apply account): %s (%s)", aa.ID, aa.Describe())
 	} else {
 		r.line("Executed from (apply account): %s", r.c(yellow+bold, "unresolved"))
 	}

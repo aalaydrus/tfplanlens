@@ -3,7 +3,6 @@ package config
 import (
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 )
 
@@ -40,27 +39,35 @@ func TestLoadDefaultMissingIsEmptyButExplicitMissingFails(t *testing.T) {
 	}
 }
 
-func TestSaveApplyAccountCreatesAndPreserves(t *testing.T) {
-	path := filepath.Join(t.TempDir(), "c.yaml")
-	if err := SaveApplyAccount(path, "123456789012"); err != nil {
+func TestParseSettings(t *testing.T) {
+	c, err := Parse([]byte("format: [html, markdown]\nfail_on: [delete, \"replace:aws_db_instance\"]\nmax_line: 90\n"))
+	if err != nil {
 		t.Fatal(err)
 	}
-	c, err := Load(path)
-	if err != nil || c.TFApplyAccountID != "123456789012" {
-		t.Fatalf("%+v %v", c, err)
+	if len(c.Format) != 2 || c.Format[1] != "markdown" || len(c.FailOn) != 2 || c.MaxLine != 90 {
+		t.Errorf("%+v", c)
 	}
+	if _, err := Parse([]byte("")); err != nil {
+		t.Errorf("an empty file is a valid config: %v", err)
+	}
+	if _, err := Parse([]byte("# only comments\n")); err != nil {
+		t.Errorf("comments only: %v", err)
+	}
+}
 
-	// No trailing newline in the existing file must not glue lines together.
-	path = filepath.Join(t.TempDir(), "d.yaml")
-	if err := os.WriteFile(path, []byte("# keep me\nignore_types: [aws_x]"), 0o644); err != nil {
-		t.Fatal(err)
+func TestParseRejectsBadValues(t *testing.T) {
+	for name, y := range map[string]string{
+		"format":   "format: [pdf]\n",
+		"negative": "max_line: -5\n",
+	} {
+		if _, err := Parse([]byte(y)); err == nil {
+			t.Errorf("%s should fail", name)
+		}
 	}
-	if err := SaveApplyAccount(path, "123456789012"); err != nil {
-		t.Fatal(err)
-	}
-	raw, _ := os.ReadFile(path)
-	c, err = Load(path)
-	if err != nil || c.TFApplyAccountID != "123456789012" || len(c.IgnoreTypes) != 1 || !strings.HasPrefix(string(raw), "# keep me") {
-		t.Errorf("%q %+v %v", raw, c, err)
+}
+
+func TestDefaultConfigFileName(t *testing.T) {
+	if DefaultPath != "tfplanlens.config.yaml" {
+		t.Errorf("DefaultPath = %q", DefaultPath)
 	}
 }

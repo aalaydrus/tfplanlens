@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"runtime/debug"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -19,7 +20,8 @@ import (
 	"github.com/aalaydrus/tfplanlens/internal/render/text"
 )
 
-// version is overridden at release time via -ldflags.
+// version is overridden at release time via -ldflags. Local builds keep "dev"
+// and report the git revision they were built from (see versionString).
 var version = "dev"
 
 // Exit codes (SPEC section 4).
@@ -29,21 +31,14 @@ const (
 	exitError  = 2
 )
 
-// errNotImplemented is returned by commands whose analysis is not built yet.
-var errNotImplemented = errors.New("not implemented")
-
 type reportOptions struct {
-	formats []string
-	out     string
-	config  string
-	failOn  string
-	maxLine int
-	noColor bool
-
-	applyAccount        string
-	accounts            []string
-	noPrompt            bool
-	requireApplyAccount bool
+	formats      []string
+	out          string
+	config       string
+	failOn       string
+	noColor      bool
+	applyAccount string
+	accounts     []string
 }
 
 func main() {
@@ -77,8 +72,43 @@ func newRootCmd(stdin io.Reader, stdout, stderr io.Writer) *cobra.Command {
 	root.SetIn(stdin)
 	root.SetOut(stdout)
 	root.SetErr(stderr)
+	root.CompletionOptions.DisableDefaultCmd = true
 	root.AddCommand(newReportCmd(), newVersionCmd())
 	return root
+}
+
+// versionString is the injected release version, or for a local build
+// ("dev") the short git revision stamped by the Go toolchain, e.g.
+// "dev (8814cf7)" or "dev (8814cf7, modified)".
+func versionString() string {
+	info, _ := debug.ReadBuildInfo()
+	return formatVersion(version, info)
+}
+
+func formatVersion(v string, info *debug.BuildInfo) string {
+	if v != "dev" || info == nil {
+		return v
+	}
+	var rev string
+	modified := false
+	for _, s := range info.Settings {
+		switch s.Key {
+		case "vcs.revision":
+			rev = s.Value
+		case "vcs.modified":
+			modified = s.Value == "true"
+		}
+	}
+	if rev == "" {
+		return v
+	}
+	if len(rev) > 7 {
+		rev = rev[:7]
+	}
+	if modified {
+		return fmt.Sprintf("%s (%s, modified)", v, rev)
+	}
+	return fmt.Sprintf("%s (%s)", v, rev)
 }
 
 func newVersionCmd() *cobra.Command {
@@ -87,7 +117,7 @@ func newVersionCmd() *cobra.Command {
 		Short: "Print the tfplanlens version",
 		Args:  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, _ []string) {
-			fmt.Fprintln(cmd.OutOrStdout(), version)
+			fmt.Fprintln(cmd.OutOrStdout(), versionString())
 		},
 	}
 }
@@ -97,22 +127,28 @@ func newReportCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "report <plan.json|->",
 		Short: "Analyze a `terraform show -json` plan and print a report",
-		Args:  cobra.ExactArgs(1),
+		Long: `Analyze a ` + "`terraform show -json`" + ` plan and print a report. Pass - to read stdin.
+
+Settings come from ./` + config.DefaultPath + ` when it exists; flags override it.
+Accounts default to what the plan's own provider configuration says; set
+tfapply_account_id and accounts: in the config file to fill in the rest.`,
+		Example: `  tfplanlens report plan.json
+  tfplanlens report plan.json -f html -o report.html
+  terraform show -json plan.out | tfplanlens report - -f markdown
+  tfplanlens report plan.json --fail-on delete,replace:aws_db_instance`,
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runReport(cmd, args[0], &o)
 		},
 	}
 	f := cmd.Flags()
-	f.StringSliceVar(&o.formats, "format", []string{"text"}, "output format: text|html|markdown|json (repeatable)")
-	f.StringVar(&o.out, "out", "", "output path (html, markdown, json)")
-	f.StringVar(&o.config, "config", "", "config file (default .tfplanlens.yaml if present)")
-	f.StringVar(&o.failOn, "fail-on", "", "comma-separated rules, e.g. delete,replace,drift,replace:aws_db_instance")
-	f.IntVar(&o.maxLine, "max-line", 120, "truncation width for terminal output")
+	f.StringSliceVarP(&o.formats, "format", "f", nil, "text, html, markdown or json; repeatable (default text)")
+	f.StringVarP(&o.out, "out", "o", "", "write to this file instead of stdout")
+	f.StringVarP(&o.config, "config", "c", "", "config file (default ./"+config.DefaultPath+" if present)")
+	f.StringVar(&o.failOn, "fail-on", "", "exit 1 when a rule matches: delete, replace, drift, unresolved, or kind:type, comma-separated")
+	f.StringVar(&o.applyAccount, "tfapply-account-id", "", "account terraform apply runs from (env TFPLANLENS_TFAPPLY_ACCOUNT_ID)")
+	f.StringArrayVar(&o.accounts, "account", nil, "target account for a provider alias, alias=id; repeatable")
 	f.BoolVar(&o.noColor, "no-color", false, "disable colored output")
-	f.StringVar(&o.applyAccount, "tfapply-account-id", "", "12-digit ID of the account terraform apply runs from (env TFPLANLENS_TFAPPLY_ACCOUNT_ID, config tfapply_account_id)")
-	f.StringArrayVar(&o.accounts, "account", nil, "target account for a provider alias, alias=id (repeatable; overrides every other source)")
-	f.BoolVar(&o.noPrompt, "no-prompt", false, "never ask interactively for the apply account")
-	f.BoolVar(&o.requireApplyAccount, "require-apply-account", false, "exit 2 if the apply account is unresolved (for CI)")
 	return cmd
 }
 
@@ -134,11 +170,19 @@ func (e *failOnError) Error() string {
 }
 
 func runReport(cmd *cobra.Command, path string, o *reportOptions) error {
-	rules, err := analyze.ParseRules(o.failOn)
+	cfg, err := config.Load(o.config)
 	if err != nil {
 		return err
 	}
+
+	// Flags override the config file, which overrides the defaults.
 	formats := o.formats
+	if len(formats) == 0 {
+		formats = cfg.Format
+	}
+	if len(formats) == 0 {
+		formats = []string{"text"}
+	}
 	for _, f := range formats {
 		switch f {
 		case "text", "json", "markdown", "html":
@@ -149,24 +193,28 @@ func runReport(cmd *cobra.Command, path string, o *reportOptions) error {
 	if len(formats) > 1 && o.out != "" {
 		return errors.New("--out cannot be combined with several --format values yet")
 	}
-
-	cfg, err := config.Load(o.config)
+	failOn := o.failOn
+	if !cmd.Flags().Changed("fail-on") {
+		failOn = strings.Join(cfg.FailOn, ",")
+	}
+	rules, err := analyze.ParseRules(failOn)
 	if err != nil {
 		return err
 	}
+	maxLine := cfg.MaxLine
+	if maxLine == 0 {
+		maxLine = config.DefaultMaxLine
+	}
+
 	overrides, err := parseAccountOverrides(o.accounts)
 	if err != nil {
 		return err
 	}
-	applyID, applySource, err := resolveApplyAccount(o, cfg, terminal{
-		in:        cmd.InOrStdin(),
-		prompt:    cmd.ErrOrStderr(),
-		stdinTTY:  isTerminal(cmd.InOrStdin()) && path != "-",
-		stdoutTTY: isTerminal(cmd.OutOrStdout()),
-	}, cmd.ErrOrStderr())
+	applyID, applySource, err := explicitApplyAccount(o, cfg)
 	if err != nil {
 		return err
 	}
+
 	var in io.Reader = cmd.InOrStdin()
 	if path != "-" {
 		f, err := os.Open(path)
@@ -195,7 +243,7 @@ func runReport(cmd *cobra.Command, path string, o *reportOptions) error {
 		}
 		switch f {
 		case "text":
-			err = text.Render(w, a, text.Options{Color: useColor(cmd.OutOrStdout(), o.noColor), MaxLine: o.maxLine})
+			err = text.Render(w, a, text.Options{Color: useColor(cmd.OutOrStdout(), o.noColor), MaxLine: maxLine})
 		case "json":
 			err = jsonout.Render(w, a)
 		case "markdown":
@@ -214,7 +262,7 @@ func runReport(cmd *cobra.Command, path string, o *reportOptions) error {
 	}
 
 	// --fail-on is evaluated on the whole plan, including ignored types.
-	if m := analyze.CheckFailOn(p, rules); len(m) > 0 {
+	if m := analyze.CheckFailOn(p, a, rules); len(m) > 0 {
 		return &failOnError{matches: m}
 	}
 	return nil
