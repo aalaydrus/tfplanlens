@@ -193,3 +193,22 @@ func TestBadAccountFlag(t *testing.T) {
 		}
 	}
 }
+
+// Found by the real-plan smoke test: /dev/null is a character device, so the
+// old check treated `tfplanlens ... </dev/null` as interactive and prompted.
+func TestDevNullIsNotATerminal(t *testing.T) {
+	f, err := os.Open(os.DevNull)
+	if err != nil {
+		t.Skip(err)
+	}
+	defer f.Close()
+	if isTerminal(f) {
+		t.Error("/dev/null must not count as a terminal")
+	}
+	if isTerminal(strings.NewReader("")) || isTerminal(&bytes.Buffer{}) {
+		t.Error("non-files are never terminals")
+	}
+	if useColor(f, false) {
+		t.Error("no colour when output is /dev/null")
+	}
+}
