@@ -20,6 +20,17 @@ permissions:
 jobs:
   smoke:
     runs-on: ubuntu-latest
+    # floci: a local AWS emulator, so the aws-assume-role scenario can run the
+    # real AWS provider (with assume_role) without any AWS credentials. It only
+    # needs the Docker socket for services we do not use, but probes it at start.
+    services:
+      floci:
+        image: floci/floci:2.2.0
+        ports:
+          - 4566:4566
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock
+        options: --user root
     env:
       # Pull requests from forks get a read-only token: skip the commit-back.
       CAN_PUSH: ${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository }}
@@ -48,13 +59,22 @@ jobs:
       - name: Build tfplanlens
         run: go build -o tfplanlens ./cmd/tfplanlens
 
+      - name: Wait for floci
+        run: |
+          for i in $(seq 1 30); do
+            if (exec 3<>/dev/tcp/localhost/4566) 2>/dev/null; then echo "floci is up"; exit 0; fi
+            sleep 2
+          done
+          echo "floci did not start on :4566" >&2
+          exit 1
+
       - name: Generate real plans
         run: |
           set -eu
           # Every scenario directory under testdata/real. Most use only the
-          # built-in terraform_data resource; drift, refresh-only and
-          # module-provider also install the credential-free hashicorp/local
-          # provider from the registry.
+          # built-in terraform_data resource; some also install the
+          # credential-free hashicorp/local provider, and aws-assume-role runs
+          # the real AWS provider against floci.
           for dir in testdata/real/*/; do
             scripts/smoke-plan.sh "$(basename "$dir")" "$RUNNER_TEMP/work"
           done

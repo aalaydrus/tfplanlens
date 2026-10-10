@@ -1,0 +1,55 @@
+== Summary ==
+Plan: normal | applyable: yes | errored: no
+Executed from (apply account): 111111111111 (source: flag)
+Actions: create 1, update 5, replace 1, delete 0, read 0, no-op 0, forget 0
+Known after apply: 19 attribute(s)
+Warnings: 2
+By type: aws_sqs_queue 4, aws_sns_topic 1, aws_sns_topic_subscription 1, aws_ssm_parameter 1
+By module: root 6, module.net 1
+
+== Danger ==
+! REPLACE module.net.aws_sqs_queue.inner
+    type: aws_sqs_queue | target account: 111111111111 (source: role_arn)
+    why: Attribute change forces replacement: name
+
+== Drift ==
+No changes made outside Terraform.
+
+== Changes by account ==
+aws: target account 999999999999 (source: caller_identity) [DIFFERENT from apply account]
+    create 1, update 1
+    + aws_sns_topic_subscription.cross  (create, 6 known after apply)
+        WARNING: topic_arn is in account 111111111111 but provider aws targets 999999999999 (caller_identity)
+    ~ aws_sqs_queue.runner  (update)
+        tags.env: (absent) -> "v2"
+        tags_all.env: (absent) -> "v2"
+
+aws.audit: target account 999999999999 (source: allowed_account_ids) [DIFFERENT from apply account]
+    update 1
+    ~ aws_sqs_queue.audit  (update)
+        visibility_timeout_seconds: 30 -> 60
+
+aws.prod: target account 111111111111 (source: role_arn)
+    update 1, replace 1
+    ~ aws_sns_topic.prod  (update)
+        display_name: "" -> "prod v2"
+    -/+ module.net.aws_sqs_queue.inner  (replace, 12 known after apply)
+        kms_master_key_id: "" -> null
+        name: "net-inner-v1" -> "net-inner-v2"  [forces replacement]
+        tags: {} -> null
+
+aws.sandbox: target account 111111111111 (source: apply_account)
+    update 1
+    ~ aws_ssm_parameter.sandbox  (update, 1 known after apply)
+        WARNING: arn is in account 999999999999 but provider aws.sandbox targets 111111111111 (apply_account)
+        value: (sensitive value changed)
+
+aws.staging: target account 222222222222 (source: role_arn_variable) [DIFFERENT from apply account]
+    update 1
+    ~ aws_sqs_queue.staging  (update)
+        tags.env: (absent) -> "v2"
+        tags_all.env: (absent) -> "v2"
+
+== Changes by module ==
+module.net: replace 1
+root: create 1, update 5

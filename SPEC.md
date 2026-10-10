@@ -206,14 +206,14 @@ Internal model: `Analysis{ Summary, Findings[], Drift[], Groups[], Changes[] }`.
 - [x] `tfplanlens report fixture.json` runs on all fixtures with no errors.
 - [x] Every `action_reason` is rendered with a plain-English explanation.
 - [x] A 400-line `user_data` change is displayed as only its changed lines plus context.
-- [ ] Deletes and replaces appear in the Danger section before anything else in text, html and markdown.
+- [x] Deletes and replaces appear in the Danger section before any change listing in text, html and markdown.
 - [x] Resources are grouped by account, with an `unresolved` fallback.
 - [x] `--fail-on delete` exits `1` when any delete exists, and `0` otherwise.
 - [x] HTML report opens offline and is a single file.
 - [x] Markdown output stays under 60,000 characters on `large.json`.
 - [x] README and LICENSE (MIT) are present.
 
-Each tick is backed by a test or check listed in [docs/acceptance.md](docs/acceptance.md). Criterion 4 is left unticked: Danger is the first section after a short summary (SPEC 5.8 order), not literally before anything else; see the open question there.
+Each tick is backed by a test or check listed in [docs/acceptance.md](docs/acceptance.md).
 
 ## 10. Roadmap (do not build in v0.1)
 
