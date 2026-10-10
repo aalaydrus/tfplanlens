@@ -48,6 +48,12 @@ func Analyze(p *plan.Plan, cfg *config.Config, opts *Options) *Analysis {
 	} else {
 		a.Notices = append(a.Notices, "Apply account unresolved (set --tfapply-account-id): cross-account flags are off.")
 	}
+	switch p.Mode {
+	case plan.ModeRefreshOnly:
+		a.Notices = append(a.Notices, "Refresh-only plan: applying only updates state to match what exists; it creates, changes and destroys nothing.")
+	case plan.ModeDestroy:
+		a.Notices = append(a.Notices, "Destroy plan: applying destroys every resource listed under Danger.")
+	}
 	a.Summary = Summary{
 		Mode:             string(p.Mode),
 		Applyable:        p.Applyable,
@@ -106,6 +112,10 @@ func Analyze(p *plan.Plan, cfg *config.Config, opts *Options) *Analysis {
 		}
 		if c.Action == plan.ActionDelete || c.Action == plan.ActionReplace {
 			ch.ReasonText = ReasonText(c.Reason, c.Index, c.HasIndex, c.ReplacePaths)
+			if c.Reason == "" && p.Mode == plan.ModeDestroy && c.Action == plan.ActionDelete {
+				// Terraform reports no action_reason on a destroy plan: say why.
+				ch.ReasonText = "Destroy plan: every resource is being destroyed"
+			}
 		}
 		ch.KnownAfterApply = countUnknown(c.AfterUnknown)
 		a.Summary.KnownAfterApply += ch.KnownAfterApply

@@ -18,14 +18,25 @@ type realAnalysis struct {
 		Actions map[string]int
 		Known   int `json:"known_after_apply"`
 	} `json:"summary"`
+	Notices  []string `json:"notices"`
 	Findings []struct {
-		Address, Action, Reason, ReasonText string
-		ReplacePaths                        []string `json:"replace_paths"`
+		Address, Action, Reason string
+		ReasonText              string   `json:"reason_text"`
+		ReplacePaths            []string `json:"replace_paths"`
+		IndexShift              bool     `json:"index_shift"`
 	} `json:"findings"`
+	Drift []struct {
+		Address  string
+		Action   string
+		HighRisk bool `json:"high_risk"`
+		Note     string
+	} `json:"drift"`
 	Changes []struct {
 		Address   string
 		Action    string
 		MovedFrom string `json:"moved_from"`
+		Import    bool   `json:"import"`
+		ImportID  string `json:"import_id"`
 		StateOnly bool   `json:"removed_from_state_only"`
 		Attrs     []struct {
 			Path string
@@ -211,6 +222,213 @@ func TestRealComplexPlan(t *testing.T) {
 				if strings.Contains(out, "(absent)") && strings.Contains(out, "output[") {
 					t.Errorf("%s output has spurious output[...] -> (absent) lines", format)
 				}
+			}
+		})
+	}
+}
+
+func findings(a realAnalysis) map[string]string {
+	m := map[string]string{}
+	for _, f := range a.Findings {
+		m[f.Address] = f.Action + ":" + f.Reason
+	}
+	return m
+}
+
+func TestRealDestroyPlan(t *testing.T) {
+	for _, plan := range realPlans(t, "destroy") {
+		t.Run(filepath.Base(plan), func(t *testing.T) {
+			a, outs := analyzeReal(t, plan)
+			if a.Summary.Mode != "destroy" || a.Summary.Actions["delete"] != 4 {
+				t.Errorf("mode %q, actions %v", a.Summary.Mode, a.Summary.Actions)
+			}
+			if len(a.Findings) != 4 {
+				t.Fatalf("%d findings, want 4", len(a.Findings))
+			}
+			for _, f := range a.Findings {
+				if !strings.Contains(f.ReasonText, "Destroy plan") {
+					t.Errorf("%s: reason %q (Terraform sends no action_reason on a destroy plan)", f.Address, f.ReasonText)
+				}
+			}
+			if len(a.Notices) == 0 || !strings.Contains(outs["text"], "Destroy plan: applying destroys") {
+				t.Error("destroy notice missing")
+			}
+			if strings.Contains(outs["text"], "no reason reported") {
+				t.Error("destroy plan deletes look like missing data")
+			}
+			if code, _, _ := runCLI("report", plan, "--no-prompt", "--fail-on", "delete"); code != exitFailOn {
+				t.Errorf("--fail-on delete: exit %d", code)
+			}
+			if code, _, _ := runCLI("report", plan, "--no-prompt", "--fail-on", "replace,drift"); code != exitOK {
+				t.Errorf("--fail-on replace,drift: exit %d", code)
+			}
+		})
+	}
+}
+
+func TestRealImportPlan(t *testing.T) {
+	for _, plan := range realPlans(t, "import") {
+		t.Run(filepath.Base(plan), func(t *testing.T) {
+			a, outs := analyzeReal(t, plan)
+			imp := a.Changes[a.change(t, "terraform_data.imp")]
+			if !imp.Import || imp.ImportID == "" || imp.Action != "update" {
+				t.Errorf("imp: %+v", imp)
+			}
+			if other := a.Changes[a.change(t, "terraform_data.other")]; other.Import {
+				t.Error("other must not be an import")
+			}
+			if !strings.Contains(outs["text"], "import + update") || !strings.Contains(outs["markdown"], "import + update") {
+				t.Errorf("import label missing:\n%s", outs["text"])
+			}
+			if len(a.Findings) != 0 {
+				t.Errorf("import + update is not dangerous: %v", findings(a))
+			}
+		})
+	}
+}
+
+// Every action_reason keyword here comes from a real plan.
+func TestRealReasonsPlan(t *testing.T) {
+	for _, plan := range realPlans(t, "reasons") {
+		t.Run(filepath.Base(plan), func(t *testing.T) {
+			a, outs := analyzeReal(t, plan)
+			want := map[string]string{
+				"terraform_data.follower":               "replace:replace_by_triggers",
+				"terraform_data.requested":              "replace:replace_by_request",
+				"terraform_data.tainted":                "replace:replace_because_tainted",
+				"terraform_data.single":                 "delete:delete_because_wrong_repetition",
+				"module.gone.terraform_data.inner":      "delete:delete_because_no_resource_config",
+				`module.mods["b"].terraform_data.inner`: "delete:delete_because_no_module",
+			}
+			got := findings(a)
+			if len(got) != len(want) {
+				t.Errorf("findings %v", got)
+			}
+			for k, v := range want {
+				if got[k] != v {
+					t.Errorf("%s = %q, want %q", k, got[k], v)
+				}
+			}
+			for _, f := range a.Findings {
+				if f.ReasonText == "" || f.ReasonText == f.Reason {
+					t.Errorf("%s: reason %q is not plain English", f.Address, f.ReasonText)
+				}
+				if f.Address == "terraform_data.single" && !f.IndexShift {
+					t.Error("count/for_each switch should warn")
+				}
+			}
+			// An implicit single -> count move is a move, not delete + create.
+			if c := a.Changes[a.change(t, "terraform_data.counted[0]")]; c.MovedFrom != "terraform_data.counted" || c.Action != "no-op" {
+				t.Errorf("counted[0]: %+v", c)
+			}
+			for _, text := range []string{outs["text"], outs["markdown"]} {
+				for _, phrase := range []string{"replace_triggered_by dependency changed", "Replacement requested with -replace", "Resource is tainted",
+					"Resource switched between count/for_each/single", "Whole module removed or its call changed"} {
+					if !strings.Contains(text, phrase) {
+						t.Errorf("missing %q", phrase)
+					}
+				}
+			}
+		})
+	}
+}
+
+func TestRealDriftPlan(t *testing.T) {
+	for _, plan := range realPlans(t, "drift") {
+		t.Run(filepath.Base(plan), func(t *testing.T) {
+			a, outs := analyzeReal(t, plan)
+			if a.Summary.Mode != "normal" || len(a.Drift) != 2 {
+				t.Fatalf("mode %q, drift %d", a.Summary.Mode, len(a.Drift))
+			}
+			for _, d := range a.Drift {
+				if d.Action != "delete" || d.Note != "Deleted outside Terraform" {
+					t.Errorf("drift %+v", d)
+				}
+			}
+			if !strings.Contains(outs["text"], "- local_file.config") {
+				t.Errorf("a resource deleted outside Terraform should use the delete symbol:\n%s", outs["text"])
+			}
+			if code, _, _ := runCLI("report", plan, "--no-prompt", "--fail-on", "drift"); code != exitFailOn {
+				t.Errorf("--fail-on drift: exit %d", code)
+			}
+		})
+	}
+}
+
+// A refresh-only plan has no resource_changes at all in the real JSON.
+func TestRealRefreshOnlyPlan(t *testing.T) {
+	for _, plan := range realPlans(t, "refresh-only") {
+		t.Run(filepath.Base(plan), func(t *testing.T) {
+			a, outs := analyzeReal(t, plan)
+			if a.Summary.Mode != "refresh-only" || len(a.Changes) != 0 || len(a.Drift) != 2 {
+				t.Errorf("mode %q, changes %d, drift %d", a.Summary.Mode, len(a.Changes), len(a.Drift))
+			}
+			for action, n := range a.Summary.Actions {
+				if n != 0 {
+					t.Errorf("%s = %d in a refresh-only plan", action, n)
+				}
+			}
+			if len(a.Notices) == 0 || !strings.Contains(outs["text"], "Refresh-only plan: applying only updates state") {
+				t.Error("refresh-only notice missing")
+			}
+			if code, _, _ := runCLI("report", plan, "--no-prompt", "--fail-on", "drift"); code != exitFailOn {
+				t.Errorf("--fail-on drift: exit %d", code)
+			}
+			if code, _, _ := runCLI("report", plan, "--no-prompt", "--fail-on", "delete,replace"); code != exitOK {
+				t.Errorf("--fail-on delete,replace: exit %d (drift is not a planned delete)", code)
+			}
+		})
+	}
+}
+
+// For a module handed `providers = { local = local.alt }`, Terraform writes
+// the RESOLVED root key ("local.alt") as the module resource's
+// provider_config_key (not a module-prefixed "net:local"), so account
+// resolution sees the right provider.
+func TestRealModuleProviderPlan(t *testing.T) {
+	for _, plan := range realPlans(t, "module-provider") {
+		t.Run(filepath.Base(plan), func(t *testing.T) {
+			t.Setenv(envApplyAccount, "")
+			code, out, errs := runCLI("report", plan, "--format", "json", "--no-prompt", "--tfapply-account-id", "111111111111", "--account", "alt=222222222222")
+			if code != exitOK {
+				t.Fatalf("exit %d: %s", code, errs)
+			}
+			var a struct {
+				Groups []struct {
+					Key, Account, Source string
+					Cross                bool `json:"cross_account"`
+					Addresses            []string
+				}
+			}
+			if err := json.Unmarshal([]byte(out), &a); err != nil {
+				t.Fatal(err)
+			}
+			byKey := map[string][]string{}
+			for _, g := range a.Groups {
+				byKey[g.Key] = g.Addresses
+				switch g.Key {
+				case "local":
+					if g.Account != "111111111111" || g.Source != "apply_account" || g.Cross {
+						t.Errorf("default group: %+v", g)
+					}
+				case "local.alt":
+					if g.Account != "222222222222" || g.Source != "flag" || !g.Cross {
+						t.Errorf("alt group: %+v", g)
+					}
+				default:
+					t.Errorf("unexpected group %q", g.Key)
+				}
+			}
+			if !strings.Contains(strings.Join(byKey["local.alt"], " "), "module.net.local_file.inner") {
+				t.Errorf("module resource not grouped under local.alt: %v", byKey)
+			}
+			if strings.Contains(strings.Join(byKey["local"], " "), "module.net") {
+				t.Error("module resource landed in the default provider group")
+			}
+			// Without any account information the alias is unresolved, not a guess.
+			_, text, _ := runCLI("report", plan, "--no-color", "--no-prompt")
+			if !strings.Contains(text, "local.alt: target account unresolved (alias: alt)") {
+				t.Errorf("alias fallback label missing:\n%s", text)
 			}
 		})
 	}
