@@ -77,9 +77,18 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
 .hidden { display: none !important; }
 @media (max-width: 700px) {
   main, header { padding-left: 12px; padding-right: 12px; }
-  /* Keep Action, Resource and Target account; Type and Module are in the drawer. */
-  th:nth-child(3), td:nth-child(3), th:nth-child(5), td:nth-child(5) { display: none; }
-  td.addr { overflow-wrap: anywhere; word-break: normal; min-width: 9em; font-size: 11px; }
   .controls input[type="search"] { min-width: 0; width: 100%; }
+  /* Stack each row: action and account on one line, the address on its own
+     full-width line, so long addresses are not squeezed into a narrow column. */
+  table, tbody { display: block; }
+  thead { display: none; }
+  tr.row { display: grid; grid-template-columns: auto 1fr; grid-template-areas: "a c" "r r"; gap: 0 12px; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  tr.row td { border: 0; padding: 1px 0; }
+  tr.row td:nth-child(1) { grid-area: a; }
+  tr.row td:nth-child(4) { grid-area: c; text-align: right; }
+  tr.row td.addr { grid-area: r; overflow-wrap: anywhere; word-break: normal; font-size: 12px; }
+  tr.row td:nth-child(3), tr.row td:nth-child(5) { display: none; }
+  tr.group { display: block; }
+  tr.group td { display: block; }
 }
 @media print { #drawer, .controls, #theme { display: none; } }
