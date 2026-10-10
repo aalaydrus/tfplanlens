@@ -47,13 +47,13 @@ Account `source` values: `flag`, `config`, `role_arn`, `role_arn_variable`,
 `account_source`, `cross_account`, `warnings` (`kind`, `path`, `message`;
 currently `arn_account_mismatch`), `stateful`, `reason`, `reason_text`, `replace_paths`,
 `moved_from`, `import`, `import_id`, `removed_from_state_only`, `attrs`,
-`known_after_apply`. `attrs` is filled for `update` and `replace` only.
+`known_after_apply`. `attrs` is filled for `update` and `replace` only, and never lists attributes
+that are known after apply: those are only counted in `known_after_apply`.
 
 ## `attrs[]`
 `path` (`a.b[0].c`), `kind`, and `forces_replacement`.
 
 - `value`: `before` / `after` hold the JSON values (absent = not present).
-- `unknown`: the new value is known after apply; `before` may be set.
 - `sensitive`: neither value is ever included.
 - `long`: `diff` holds `header`, `lines` (changed lines plus 2 lines of
   context, capped at 60), `added`, `removed`, `total_lines`, `truncated_lines`.

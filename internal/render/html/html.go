@@ -99,7 +99,7 @@ func buildView(a *analyze.Analysis) *view {
 	)
 
 	// Horizontal bar chart in inline SVG.
-	const labelW, maxW, rowH = 70, 360, 24
+	const labelW, maxW, rowH = 70, 230, 24
 	top := 1
 	for _, t := range counts {
 		top = max(top, t.Count)

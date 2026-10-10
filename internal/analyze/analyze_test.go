@@ -319,3 +319,79 @@ func TestParseRules(t *testing.T) {
 		}
 	}
 }
+
+// Found by the real-plan smoke test: known-after-apply attributes were listed
+// with their (often huge) old values.
+func TestUnknownAttributesAreCountedNotListed(t *testing.T) {
+	attrs := diffAttrs(
+		map[string]any{"id": "old-id", "output": strings.Repeat("x", 500), "name": "a"},
+		map[string]any{"name": "b"},
+		nil, nil, map[string]any{"id": true, "output": true}, nil, nil)
+	if len(attrs) != 1 || attrs[0].Path != "name" {
+		t.Errorf("attrs = %+v, want only name", attrs)
+	}
+}
+
+// Found by the real-plan smoke test: output = [a, b, c] becoming unknown also
+// reported output[0], output[1], output[2] as "-> (absent)".
+func TestMarkedLeafCollapsesTheOtherSidesChildren(t *testing.T) {
+	attrs := diffAttrs(
+		map[string]any{"output": []any{"a", "b", "c"}, "input": []any{"a", "b"}},
+		map[string]any{"input": []any{"a", "x"}},
+		nil, nil, map[string]any{"output": true}, nil, nil)
+	if len(attrs) != 1 || attrs[0].Path != "input[1]" {
+		t.Errorf("attrs = %+v, want only input[1]", attrs)
+	}
+}
+
+// Found by the real-plan smoke test: terraform_data.output mirrors a
+// sensitive input but Terraform does not mark the copy sensitive, so the
+// secret was printed in clear.
+func TestSecretCopiedIntoUnmarkedAttributeIsMasked(t *testing.T) {
+	attrs := diffAttrs(
+		map[string]any{"input": "hunter2", "output": "hunter2", "note": "hi"},
+		map[string]any{"input": "hunter3", "output": "hunter3", "note": "bye"},
+		map[string]any{"input": true}, map[string]any{"input": true}, nil, nil, nil)
+	for _, at := range attrs {
+		if at.Before != nil || at.After != nil {
+			if at.Path != "note" {
+				t.Errorf("%s printed values: %s -> %s", at.Path, at.Before, at.After)
+			}
+		}
+		if strings.Contains(string(at.Before)+string(at.After), "hunter") {
+			t.Errorf("secret leaked via %s", at.Path)
+		}
+	}
+	kinds := map[string]string{}
+	for _, at := range attrs {
+		kinds[at.Path] = at.Kind
+	}
+	if kinds["input"] != "sensitive" || kinds["output"] != "sensitive" || kinds["note"] != "value" {
+		t.Errorf("kinds = %v", kinds)
+	}
+	// Short values are not matched: a sensitive "1" must not mask every "1".
+	short := diffAttrs(
+		map[string]any{"pw": "1", "count": "1"}, map[string]any{"pw": "2", "count": "2"},
+		map[string]any{"pw": true}, map[string]any{"pw": true}, nil, nil, nil)
+	for _, at := range short {
+		if at.Path == "count" && at.Kind != "value" {
+			t.Errorf("short secret over-masked: %+v", at)
+		}
+	}
+}
+
+func TestKnownAfterApplyCountShownInLabel(t *testing.T) {
+	c := Change{Action: "update", KnownAfterApply: 2}
+	if got := c.Label(); got != "update, 2 known after apply" {
+		t.Errorf("label %q", got)
+	}
+}
+
+func TestForEachRenameWarningIsNotCalledAnIndexShift(t *testing.T) {
+	a := Analyze(load(t, "for-each-shift"), nil, nil)
+	for _, f := range a.Findings {
+		if f.Reason == "delete_because_each_key" && f.IndexShift && strings.Contains(f.Warning, "index") {
+			t.Errorf("for_each warning mentions an index shift: %s", f.Warning)
+		}
+	}
+}

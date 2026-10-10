@@ -240,7 +240,12 @@ func indexShift(c plan.Change, siblings map[string][]plan.Change) (bool, string)
 	if len(changing) > len(shown) {
 		more = fmt.Sprintf(", +%d more", len(changing)-len(shown))
 	}
-	return true, "likely count/for_each index shift: sibling instances also changing (" + strings.Join(shown, ", ") + more + ")"
+	if c.Reason == "delete_because_each_key" {
+		// for_each keys do not shift; a removed key next to a new one is more
+		// likely a rename that will destroy and recreate the resource.
+		return true, "for_each key removed while sibling instances change (possible key rename: " + strings.Join(shown, ", ") + more + ")"
+	}
+	return true, "likely count index shift: other instances of this resource are also changing (" + strings.Join(shown, ", ") + more + ")"
 }
 
 type account struct {

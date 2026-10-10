@@ -237,11 +237,6 @@ func attrLines(at analyze.Attr, indent string) []string {
 	switch at.Kind {
 	case "sensitive":
 		return []string{indent + "- " + code(at.Path) + ": (sensitive value changed)" + force}
-	case "unknown":
-		if len(at.Before) > 0 {
-			return []string{indent + "- " + code(at.Path) + ": " + code(string(at.Before)) + " → (known after apply)" + force}
-		}
-		return []string{indent + "- " + code(at.Path) + ": (known after apply)" + force}
 	case "long":
 		out := []string{indent + "- " + code(at.Diff.Header) + force}
 		diff := append([]string{}, at.Diff.Lines...)
