@@ -33,7 +33,7 @@ terraform: target account 111111111111 (source: apply_account)
     -/+ terraform_data.db  (replace, 2 known after apply)
         triggers_replace: "a" -> "b"  [forces replacement]
     ~ terraform_data.lb  (update, 2 known after apply)
-        input[1]: "dfdc3db0-5b7e-3f07-da6e-d1160306aa62" -> "27eef6d8-8f97-ce26-f3f9-81b211a1b9dd"
+        input[1]: "a12338ec-a4c6-002e-d128-528133f3e243" -> "f8c617e6-2660-def6-c6a9-8b0342fa351d"
     x terraform_data.legacy  (removed from state only)
     - terraform_data.subnet["b"]  (delete)
     + terraform_data.subnet["d"]  (create, 2 known after apply)
