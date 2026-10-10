@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
 	"testing"
 	"time"
@@ -81,8 +82,54 @@ func TestVersion(t *testing.T) {
 	if code := run([]string{"version"}, strings.NewReader(""), &out, &out); code != exitOK {
 		t.Fatalf("exit %d", code)
 	}
-	if strings.TrimSpace(out.String()) != version {
-		t.Errorf("got %q", out.String())
+	if got := strings.TrimSpace(out.String()); !strings.HasPrefix(got, version) {
+		t.Errorf("got %q", got)
+	}
+}
+
+func TestFormatVersion(t *testing.T) {
+	stamped := func(rev, modified string) *debug.BuildInfo {
+		return &debug.BuildInfo{Settings: []debug.BuildSetting{{Key: "vcs.revision", Value: rev}, {Key: "vcs.modified", Value: modified}}}
+	}
+	cases := []struct {
+		name, v string
+		info    *debug.BuildInfo
+		want    string
+	}{
+		{"release build keeps its version", "0.1.0", stamped("8814cf78ccac", "false"), "0.1.0"},
+		{"local clean build shows the revision", "dev", stamped("8814cf78ccacf67c4ed02c2b12918c8d066b0d90", "false"), "dev (8814cf7)"},
+		{"local dirty build says so", "dev", stamped("8814cf78ccac", "true"), "dev (8814cf7, modified)"},
+		{"no VCS info", "dev", &debug.BuildInfo{}, "dev"},
+		{"no build info", "dev", nil, "dev"},
+	}
+	for _, c := range cases {
+		if got := formatVersion(c.v, c.info); got != c.want {
+			t.Errorf("%s: %q, want %q", c.name, got, c.want)
+		}
+	}
+}
+
+// SPEC 9: `report` runs on every fixture, in every format, with no errors.
+// This covers the hand-written fixtures and the real Terraform plans.
+func TestEveryPlanEveryFormat(t *testing.T) {
+	t.Setenv(envApplyAccount, "")
+	var plans []string
+	for _, pattern := range []string{"../../testdata/plans/*.json", "../../testdata/plans/real/*.json"} {
+		m, err := filepath.Glob(pattern)
+		if err != nil {
+			t.Fatal(err)
+		}
+		plans = append(plans, m...)
+	}
+	if len(plans) < 15 {
+		t.Fatalf("only %d plans found", len(plans))
+	}
+	for _, plan := range plans {
+		for _, format := range []string{"text", "markdown", "json", "html"} {
+			if code, out, errs := runCLI("report", plan, "--format", format, "--no-color"); code != exitOK || out == "" {
+				t.Errorf("%s --format %s: exit %d, %d bytes: %s", filepath.Base(plan), format, code, len(out), errs)
+			}
+		}
 	}
 }
 

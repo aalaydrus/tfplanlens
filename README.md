@@ -9,8 +9,8 @@ Read a Terraform plan the way a reviewer needs to, so a clean-looking plan stops
 ## Quickstart (about 30 seconds)
 
 ```sh
-# 1. Build it (Go 1.23+). Tagged releases and a Homebrew formula are not published yet.
-go build -o tfplanlens ./cmd/tfplanlens
+# 1. Install it from a clone (Go 1.23+); see "Install" below
+go install ./cmd/tfplanlens
 
 # 2. Turn a plan into JSON
 terraform plan -out plan.bin
@@ -27,6 +27,19 @@ terraform show -json plan.bin | tfplanlens report -       # stdin works too
 ```
 
 `--tfapply-account-id` is the account `terraform apply` runs from. You can leave it out: it is inferred from the plan's default provider when possible (see [Accounts](#accounts-where-it-runs-vs-where-resources-land)), and settings can live in a [config file](#config-file). Exit codes: `0` ok, `1` a `--fail-on` rule matched, `2` error.
+
+## Install
+
+tfplanlens is installed from a local clone; there are no published releases and no Homebrew formula.
+
+```sh
+git clone https://github.com/aalaydrus/tfplanlens
+cd tfplanlens
+go install ./cmd/tfplanlens        # installs to $(go env GOPATH)/bin (or $GOBIN)
+tfplanlens version                 # e.g. "dev (8814cf7)": the git revision it was built from
+```
+
+Make sure `$(go env GOPATH)/bin` is on your `PATH`. To update, `git pull` and run `go install ./cmd/tfplanlens` again. To build a binary in place instead: `go build -o tfplanlens ./cmd/tfplanlens`.
 
 ## Why not just read `terraform plan`?
 
@@ -165,7 +178,7 @@ Every format shows the apply account and each resource's target account with the
 
 ## Releases
 
-Tagging `v*` runs GoReleaser (`.goreleaser.yaml`): binaries for linux, darwin and windows (amd64, arm64), checksums, and a Homebrew formula pushed to `aalaydrus/homebrew-tap` when the `HOMEBREW_TAP_GITHUB_TOKEN` secret is set.
+There are no published releases. `.goreleaser.yaml` and `.github/workflows/release.yml` are in place (binaries for linux, darwin and windows, checksums, and an optional Homebrew formula if a tap and token are ever configured), but nothing is tagged. A tag `v*` would run them; CI already runs `goreleaser check` and a snapshot build on every pull request.
 
 ## Smoke tests on real plans
 
