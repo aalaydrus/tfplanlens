@@ -1,0 +1,25 @@
+== Summary ==
+Plan: normal | applyable: yes | errored: no
+Actions: create 1, update 2, replace 0, delete 0, read 0, no-op 0, forget 0
+Known after apply: 0 attribute(s)
+By type: aws_db_instance 1, aws_secretsmanager_secret_version 1, aws_ssm_parameter 1
+By module: root 3
+
+== Danger ==
+No deletes or replacements.
+
+== Drift ==
+No changes made outside Terraform.
+
+== Changes by account ==
+aws: unresolved (alias: default)
+    create 1, update 2
+    ~ aws_db_instance.main [STATEFUL]  (update)
+        password: (sensitive value changed)
+    + aws_secretsmanager_secret_version.s  (create)
+    ~ aws_ssm_parameter.mixed  (update)
+        tags.k: "v1" -> "v2"
+        value: (sensitive value changed)
+
+== Changes by module ==
+root: create 1, update 2

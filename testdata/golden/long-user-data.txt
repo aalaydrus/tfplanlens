@@ -1,0 +1,82 @@
+== Summary ==
+Plan: normal | applyable: yes | errored: no
+Actions: create 0, update 3, replace 0, delete 0, read 0, no-op 0, forget 0
+Known after apply: 0 attribute(s)
+By type: aws_instance 2, aws_launch_template 1
+By module: root 3
+
+== Danger ==
+No deletes or replacements.
+
+== Drift ==
+No changes made outside Terraform.
+
+== Changes by account ==
+aws: unresolved (alias: default)
+    update 3
+    ~ aws_instance.app  (update)
+        user_data_base64: 4 lines changed of 412 (+2 -2)
+          @@ -99,5 +99,5 @@
+           echo 'step 97: configuring subsystem 97' >> /var/log/boot.log
+           echo 'step 98: configuring subsystem 98' >> /var/log/boot.log
+          -echo 'step 99: configuring subsystem 99' >> /var/log/boot.log
+          +echo 'step 99: configuring subsystem 99 (patched)' >> /var/log/boot.log
+           echo 'step 100: configuring subsystem 100' >> /var/log/boot.log
+           echo 'step 101: configuring subsystem 101' >> /var/log/boot.log
+          @@ -249,4 +249,5 @@
+           echo 'step 247: configuring subsystem 247' >> /var/log/boot.log
+           echo 'step 248: configuring subsystem 248' >> /var/log/boot.log
+          +systemctl enable --now node_exporter
+           echo 'step 249: configuring subsystem 249' >> /var/log/boot.log
+           echo 'step 250: configuring subsystem 250' >> /var/log/boot.log
+          @@ -298,5 +299,4 @@
+           echo 'step 296: configuring subsystem 296' >> /var/log/boot.log
+           echo 'step 297: configuring subsystem 297' >> /var/log/boot.log
+          -echo 'step 298: configuring subsystem 298' >> /var/log/boot.log
+           echo 'step 299: configuring subsystem 299' >> /var/log/boot.log
+           echo 'step 300: configuring subsystem 300' >> /var/log/boot.log
+    ~ aws_launch_template.gz  (update)
+        user_data: 4 lines changed of 412 (+2 -2)
+          @@ -99,5 +99,5 @@
+           echo 'step 97: configuring subsystem 97' >> /var/log/boot.log
+           echo 'step 98: configuring subsystem 98' >> /var/log/boot.log
+          -echo 'step 99: configuring subsystem 99' >> /var/log/boot.log
+          +echo 'step 99: configuring subsystem 99 (patched)' >> /var/log/boot.log
+           echo 'step 100: configuring subsystem 100' >> /var/log/boot.log
+           echo 'step 101: configuring subsystem 101' >> /var/log/boot.log
+          @@ -249,4 +249,5 @@
+           echo 'step 247: configuring subsystem 247' >> /var/log/boot.log
+           echo 'step 248: configuring subsystem 248' >> /var/log/boot.log
+          +systemctl enable --now node_exporter
+           echo 'step 249: configuring subsystem 249' >> /var/log/boot.log
+           echo 'step 250: configuring subsystem 250' >> /var/log/boot.log
+          @@ -298,5 +299,4 @@
+           echo 'step 296: configuring subsystem 296' >> /var/log/boot.log
+           echo 'step 297: configuring subsystem 297' >> /var/log/boot.log
+          -echo 'step 298: configuring subsystem 298' >> /var/log/boot.log
+           echo 'step 299: configuring subsystem 299' >> /var/log/boot.log
+           echo 'step 300: configuring subsystem 300' >> /var/log/boot.log
+    ~ aws_instance.plain  (update)
+        user_data: 4 lines changed of 412 (+2 -2)
+          @@ -99,5 +99,5 @@
+           echo 'step 97: configuring subsystem 97' >> /var/log/boot.log
+           echo 'step 98: configuring subsystem 98' >> /var/log/boot.log
+          -echo 'step 99: configuring subsystem 99' >> /var/log/boot.log
+          +echo 'step 99: configuring subsystem 99 (patched)' >> /var/log/boot.log
+           echo 'step 100: configuring subsystem 100' >> /var/log/boot.log
+           echo 'step 101: configuring subsystem 101' >> /var/log/boot.log
+          @@ -249,4 +249,5 @@
+           echo 'step 247: configuring subsystem 247' >> /var/log/boot.log
+           echo 'step 248: configuring subsystem 248' >> /var/log/boot.log
+          +systemctl enable --now node_exporter
+           echo 'step 249: configuring subsystem 249' >> /var/log/boot.log
+           echo 'step 250: configuring subsystem 250' >> /var/log/boot.log
+          @@ -298,5 +299,4 @@
+           echo 'step 296: configuring subsystem 296' >> /var/log/boot.log
+           echo 'step 297: configuring subsystem 297' >> /var/log/boot.log
+          -echo 'step 298: configuring subsystem 298' >> /var/log/boot.log
+           echo 'step 299: configuring subsystem 299' >> /var/log/boot.log
+           echo 'step 300: configuring subsystem 300' >> /var/log/boot.log
+
+== Changes by module ==
+root: update 3

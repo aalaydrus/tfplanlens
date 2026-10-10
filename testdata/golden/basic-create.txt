@@ -1,0 +1,26 @@
+== Summary ==
+Plan: normal | applyable: yes | errored: no
+Actions: create 2, update 2, replace 0, delete 0, read 1, no-op 1, forget 0
+Known after apply: 4 attribute(s)
+By type: aws_instance 2, aws_caller_identity 1, aws_s3_bucket 1, aws_security_group 1
+By module: root 5
+
+== Danger ==
+No deletes or replacements.
+
+== Drift ==
+No changes made outside Terraform.
+
+== Changes by account ==
+aws: unresolved (alias: default)
+    create 2, update 2, read 1, no-op 1
+    + aws_s3_bucket.logs [STATEFUL]  (create)
+    + aws_instance.web  (create)
+    ~ aws_instance.api  (update)
+        instance_type: "t3.micro" -> "t3.small"
+    ~ aws_security_group.web  (update)
+        tags.b: (absent) -> "2"
+    <= data.aws_caller_identity.current  (read)
+
+== Changes by module ==
+root: create 2, update 2, read 1

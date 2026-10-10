@@ -1,0 +1,165 @@
+{
+  "schema_version": 1,
+  "summary": {
+    "mode": "normal",
+    "applyable": true,
+    "errored": false,
+    "terraform_version": "1.9.5",
+    "total": 6,
+    "actions": {
+      "create": 2,
+      "update": 2,
+      "replace": 0,
+      "delete": 0,
+      "read": 1,
+      "no_op": 1,
+      "forget": 0
+    },
+    "by_type": {
+      "aws_caller_identity": 1,
+      "aws_instance": 2,
+      "aws_s3_bucket": 1,
+      "aws_security_group": 1
+    },
+    "by_module": {
+      "root": 5
+    },
+    "known_after_apply": 4,
+    "drift_count": 0
+  },
+  "findings": [],
+  "drift": [],
+  "groups": [
+    {
+      "key": "aws",
+      "provider": "aws",
+      "account": "unresolved (alias: default)",
+      "resolved": false,
+      "source": "none",
+      "default": true,
+      "cross_account": false,
+      "counts": {
+        "create": 2,
+        "update": 2,
+        "replace": 0,
+        "delete": 0,
+        "read": 1,
+        "no_op": 1,
+        "forget": 0
+      },
+      "addresses": [
+        "aws_s3_bucket.logs",
+        "aws_instance.web",
+        "aws_instance.api",
+        "aws_security_group.web",
+        "data.aws_caller_identity.current",
+        "aws_vpc.main"
+      ]
+    }
+  ],
+  "changes": [
+    {
+      "address": "aws_s3_bucket.logs",
+      "type": "aws_s3_bucket",
+      "module": "root",
+      "mode": "managed",
+      "action": "create",
+      "provider": "aws",
+      "account": "unresolved (alias: default)",
+      "cross_account": false,
+      "stateful": true,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [],
+      "known_after_apply": 2
+    },
+    {
+      "address": "aws_instance.web",
+      "type": "aws_instance",
+      "module": "root",
+      "mode": "managed",
+      "action": "create",
+      "provider": "aws",
+      "account": "unresolved (alias: default)",
+      "cross_account": false,
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [],
+      "known_after_apply": 2
+    },
+    {
+      "address": "aws_instance.api",
+      "type": "aws_instance",
+      "module": "root",
+      "mode": "managed",
+      "action": "update",
+      "provider": "aws",
+      "account": "unresolved (alias: default)",
+      "cross_account": false,
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [
+        {
+          "path": "instance_type",
+          "kind": "value",
+          "before": "t3.micro",
+          "after": "t3.small"
+        }
+      ],
+      "known_after_apply": 0
+    },
+    {
+      "address": "aws_security_group.web",
+      "type": "aws_security_group",
+      "module": "root",
+      "mode": "managed",
+      "action": "update",
+      "provider": "aws",
+      "account": "unresolved (alias: default)",
+      "cross_account": false,
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [
+        {
+          "path": "tags.b",
+          "kind": "value",
+          "after": "2"
+        }
+      ],
+      "known_after_apply": 0
+    },
+    {
+      "address": "data.aws_caller_identity.current",
+      "type": "aws_caller_identity",
+      "module": "root",
+      "mode": "data",
+      "action": "read",
+      "provider": "aws",
+      "account": "unresolved (alias: default)",
+      "cross_account": false,
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [],
+      "known_after_apply": 0
+    },
+    {
+      "address": "aws_vpc.main",
+      "type": "aws_vpc",
+      "module": "root",
+      "mode": "managed",
+      "action": "no-op",
+      "provider": "aws",
+      "account": "unresolved (alias: default)",
+      "cross_account": false,
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [],
+      "known_after_apply": 0
+    }
+  ]
+}
