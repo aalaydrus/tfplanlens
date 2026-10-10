@@ -33,7 +33,7 @@
 - `terraform_data.db` (replace, 2 known after apply)
   - `triggers_replace`: `"a"` → `"b"` (forces replacement)
 - `terraform_data.lb` (update, 2 known after apply)
-  - `input[1]`: `"550c3939-e4dc-ab62-29ae-9afcefef90cd"` → `"77acb222-d218-a4f3-2e76-eadc1dc5c1c7"`
+  - `input[1]`: `"1e1186d4-7412-edaf-fa09-0f3f237d6f27"` → `"8071d48d-b169-4fab-1d37-18df598648e5"`
 - `terraform_data.legacy` (removed from state only)
 - `terraform_data.subnet["b"]` (delete)
 - `terraform_data.subnet["d"]` (create, 2 known after apply)
