@@ -2,13 +2,79 @@
 
 Read a Terraform plan the way a reviewer needs to, so a clean-looking plan stops failing at apply.
 
-`tfplanlens` analyzes `terraform show -json` output offline: no AWS credentials, no Terraform binary, no network. See [SPEC.md](SPEC.md) for the full design.
+`tfplanlens` analyzes the JSON from `terraform show -json` **offline**: no AWS credentials, no Terraform binary, no network, no LLM. The output is deterministic. It puts deletes and replaces first with a plain-English reason, shrinks huge values to the lines that changed, never prints sensitive values, and shows which account each resource really lands in.
+
+![tfplanlens HTML report for a real plan: Danger panel, summary tiles, chart and a filterable table](docs/readme/html-report.png)
+
+## Quickstart (about 30 seconds)
 
 ```sh
-terraform plan -out plan.out
-terraform show -json plan.out > plan.json
-tfplanlens report plan.json --tfapply-account-id 999999999999
+# 1. Build it (Go 1.23+). Tagged releases and a Homebrew formula are not published yet.
+go build -o tfplanlens ./cmd/tfplanlens
+
+# 2. Turn a plan into JSON
+terraform plan -out plan.bin
+terraform show -json plan.bin > plan.json
+
+# 3. Read it
+./tfplanlens report plan.json --tfapply-account-id 123456789012
+
+# More: a self-contained HTML page, a PR comment, or fail CI on dangerous plans
+./tfplanlens report plan.json --format html --out report.html
+./tfplanlens report plan.json --format markdown --out report.md
+./tfplanlens report plan.json --fail-on delete,replace:aws_db_instance
+terraform show -json plan.bin | ./tfplanlens report -       # stdin works too
 ```
+
+`--tfapply-account-id` is the account `terraform apply` runs from (see [Accounts](#accounts-where-it-runs-vs-where-resources-land)). Without it tfplanlens still works and warns that account resolution is limited. Exit codes: `0` ok, `1` a `--fail-on` rule matched, `2` error.
+
+## Why not just read `terraform plan`?
+
+You can, and for a small plan you should. It gets hard when the plan is big or noisy:
+
+- **The dangerous lines are buried.** A delete or a forced replacement is one line among hundreds. tfplanlens lists every delete and replace first, with the reason in plain English ("count shrank; index 2 no longer exists", "for_each key removed: b", "Resource is tainted", "Attribute change forces replacement: triggers_replace"), a **STATEFUL** badge for databases, buckets, volumes and the like, and a warning when a `count`/`for_each` change looks like an accidental index shift.
+- **Long values bury everything else.** In one real plan I measured (the `complex` scenario in `testdata/real`), Terraform's output was 105 lines, 25,835 characters, with a single line of **14,705 characters**: a base64 `user_data` shown before and after. The tfplanlens text report for the same plan was 58 lines (57 with an apply account given; longest 114 characters) and shows the decoded change as 2 removed and 2 added lines out of 401, with 2 lines of context. That is a summary, not a replacement: it does not list unchanged attributes or every create.
+- **Known-after-apply noise.** Computed attributes that will change are counted per resource, not printed.
+- **Secrets can leak through copies.** In that same real plan, Terraform marked a variable's `input` sensitive, but the computed `output` copy (the old secret) was printed in clear by `terraform plan` itself. tfplanlens masks any value equal to a sensitive sibling in the same resource. It is a heuristic and only covers copies within one resource.
+- **Which account is this going to?** With role-assuming providers, the account a resource lands in is not the one you run from. tfplanlens shows both, and where each answer came from.
+- **Drift, moves, imports and `removed` blocks** are called out instead of looking like deletes and creates.
+
+## What a report looks like
+
+The HTML report is one file with no external requests (works offline, dark mode). Each resource opens a drawer with its attribute diffs; this is the decoded 400-line `user_data` change:
+
+![Detail drawer showing a decoded user_data diff: 2 lines removed, 2 added, of 401](docs/readme/html-drawer-user-data.png)
+
+The markdown report is built for PR comments: a summary table, the Danger section expanded, everything else in collapsible `<details>` per account then module, capped at 60,000 characters. This is the top of the one produced for that same plan (the full report is in [docs/readme/sample-pr-comment.md](docs/readme/sample-pr-comment.md)):
+
+<details>
+<summary>Sample PR comment (summary and Danger section)</summary>
+
+**tfplanlens plan report**
+
+| | |
+|---|---|
+| Plan | normal, applyable: yes, errored: no |
+| Executed from (apply account) | `111111111111` (source: flag) |
+| create | 1 |
+| update | 4 |
+| replace | 1 |
+| delete | 3 |
+| no-op | 6 |
+| forget | 1 |
+| Drift | 0 |
+| Known after apply | 10 attribute(s) |
+
+**Danger**
+
+| Action | Resource | Why | Target account |
+|---|---|---|---|
+| **REPLACE** | `terraform_data.db` | `Attribute change forces replacement: triggers_replace` | `111111111111` (source: apply_account) |
+| **DELETE** | `terraform_data.subnet["b"]` | `for_each key removed: b`<br>**WARNING:** `for_each key removed while sibling instances change (possible key rename: terraform_data.subnet["d"])` | `111111111111` (source: apply_account) |
+| **DELETE** | `terraform_data.worker[2]` | `count shrank; index 2 no longer exists` | `111111111111` (source: apply_account) |
+| **DELETE** | `terraform_data.worker[3]` | `count shrank; index 3 no longer exists` | `111111111111` (source: apply_account) |
+
+</details>
 
 ## Accounts: where it runs vs where resources land
 
