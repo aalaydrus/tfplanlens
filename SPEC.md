@@ -224,7 +224,7 @@ Each tick is backed by a test or check listed in [docs/acceptance.md](docs/accep
 - Terminal UI with expand/collapse and filters (`tfplanlens tui`). Implemented on `golang.org/x/term` rather than Bubble Tea: linking Bubble Tea makes every command, including `report`, query the terminal for its background color at startup (its `init()`), which stalled `report` for 5 seconds and printed escape codes on terminals that do not answer.
 
 **v0.3**
-- Multi-plan input (Terragrunt or monorepo), merged into one report (`tfplanlens report a.json b.json ...`, implemented).
+- Multi-plan input (several root modules, e.g. a monorepo), merged into one report (`tfplanlens report a.json b.json ...`, implemented).
 - Opt-in `--aws` mode: read-only checks for external references to replaced or deleted resources (security group attachments, role trust, KMS grants, DNS records).
 - Plan-to-plan diff: "what changed since the last time I reviewed this plan?" (`tfplanlens diff old.json new.json`, implemented)
 

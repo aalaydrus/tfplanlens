@@ -84,7 +84,7 @@ func splitLabel(s string) (path, label string, explicit bool) {
 }
 
 // genericNames are file names that say nothing about which unit a plan is
-// (Terragrunt and CI usually write plan.json into a directory per unit).
+// (a directory per root module, each holding a plan.json, is common).
 var genericNames = map[string]bool{"plan": true, "tfplan": true, "plan.out": true}
 
 // deriveLabels names each plan after its file, or after as many trailing

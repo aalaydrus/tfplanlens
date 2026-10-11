@@ -31,8 +31,7 @@ type Analysis struct {
 	Waves     []Wave   `json:"waves"`
 	WaveNotes []string `json:"wave_notes"`
 	Cycles    []Cycle  `json:"cycles"`
-	// Units lists the plans of a merged report (one per Terragrunt unit or
-	// root module). It is empty for a single plan.
+	// Units lists the plans of a merged report (one per root module). It is empty for a single plan.
 	Units []Unit `json:"units"`
 }
 

@@ -131,8 +131,8 @@ func newReportCmd() *cobra.Command {
 		Short: "Analyze a `terraform show -json` plan and print a report",
 		Long: `Analyze a ` + "`terraform show -json`" + ` plan and print a report. Pass - to read stdin.
 
-Pass several plans (Terragrunt units, or the root modules of a monorepo) to get
-one merged report: every address is prefixed with the plan's label, which is
+Pass several plans (the root modules of a monorepo, say) to get one merged
+report: every address is prefixed with the plan's label, which is
 its file name, its directory when the file is called plan.json, or label=path.
 Each plan is analyzed on its own, so accounts and waves stay per plan.
 
@@ -142,7 +142,7 @@ tfapply_account_id and accounts: in the config file to fill in the rest.`,
 		Example: `  tfplanlens report plan.json
   tfplanlens report plan.json -f html -o report.html
   terraform show -json plan.out | tfplanlens report - -f markdown
-  tfplanlens report live/vpc/plan.json live/app/plan.json -f html -o all.html
+  tfplanlens report network/plan.json app/plan.json -f html -o all.html
   tfplanlens report net=a.json app=b.json
   tfplanlens report plan.json --fail-on delete,replace:aws_db_instance`,
 		Args: cobra.MinimumNArgs(1),
@@ -311,7 +311,7 @@ func newTUICmd() *cobra.Command {
 		Long: `Explore a plan interactively: expand and collapse changes, search, filter by
 action, group by account or module, and see the apply/destroy waves.
 Account settings come from the same config file and flags as report.`,
-		Example: "  tfplanlens tui plan.json\n  tfplanlens tui live/vpc/plan.json live/app/plan.json",
+		Example: "  tfplanlens tui plan.json\n  tfplanlens tui network/plan.json app/plan.json",
 		Args:    cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			for _, a := range args {

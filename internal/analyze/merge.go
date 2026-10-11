@@ -14,8 +14,8 @@ func Prefix(unit, s string) string {
 	return unit + ":" + s
 }
 
-// Merge combines the analyses of several plans (Terragrunt units, or the
-// root modules of a monorepo) into one report. Each plan was analyzed on its
+// Merge combines the analyses of several plans (the root modules of a
+// monorepo, say) into one report. Each plan was analyzed on its
 // own, so accounts, waves and dependencies are right per plan; Merge only
 // prefixes addresses with the unit label ("vpc:aws_vpc.main") so identical
 // addresses in different plans stay apart, and adds the counts together.
@@ -150,7 +150,7 @@ func Merge(labels []string, as []*Analysis) *Analysis {
 		m.Waves = append(m.Waves, *waves[k])
 	}
 	if len(m.Waves) > 0 {
-		m.WaveNotes = append(m.WaveNotes, "Waves are computed inside each plan. Dependencies between plans (for example Terragrunt dependency blocks) are not in the plan JSON, so a wave can mix plans that really must run one after the other.")
+		m.WaveNotes = append(m.WaveNotes, "Waves are computed inside each plan. Dependencies between plans (for example one root module reading another's outputs) are not in the plan JSON, so a wave can mix plans that really must run one after the other.")
 	}
 	return m
 }
