@@ -19,6 +19,7 @@ open only the one ref or playbook your task points to.
 | Open a PR | [playbooks/open-a-pr.md](playbooks/open-a-pr.md) | |
 | Use tfplanlens as an agent skill | [SKILLS/README.md](SKILLS/README.md) | |
 | Contribute from a fork / write your own skills | [SKILLS/CLAUDE.md](SKILLS/CLAUDE.md), [SKILLS/KIRO.md](SKILLS/KIRO.md) | |
+| Search the docs by keyword (optional, experiment) | [refs/SEARCH_WITH_QMD.md](refs/SEARCH_WITH_QMD.md) | |
 | Check a Terraform/provider quirk or idea | [../TERRAFORM_GOTCHAS.md](../TERRAFORM_GOTCHAS.md), [../WISHLIST.md](../WISHLIST.md) | |
 
 ## Five facts that save the most tokens

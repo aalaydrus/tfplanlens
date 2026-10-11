@@ -162,3 +162,8 @@ func TestAgentSkillsHaveValidFrontmatter(t *testing.T) {
 		}
 	}
 }
+
+func fileExists(p string) bool {
+	_, err := os.Stat(p)
+	return err == nil
+}

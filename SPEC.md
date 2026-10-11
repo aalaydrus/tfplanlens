@@ -199,7 +199,7 @@ Internal model: `Analysis{ Summary, Findings[], Drift[], Groups[], Changes[] }`.
 - GitHub Actions: `go vet`, `staticcheck`, `go test ./...` on Linux, macOS and Windows.
 - `goreleaser` on tag `v*`: binaries for linux/darwin/windows (amd64, arm64), checksums, and a Homebrew tap formula.
 - A reusable GitHub Action (`action.yml`) that runs `tfplanlens report` and posts or updates a single PR comment (identified by a hidden marker).
-- README includes: 30-second quickstart, a screenshot or GIF of the HTML report, a sample PR comment, and a "why not just read terraform plan?" section.
+- README includes: a 30-second quickstart and a screenshot of the HTML report; the sample PR comment and the "why not just read terraform plan?" section are linked from it (`docs/readme/sample-pr-comment.md`, `docs/WHY.md`). The README is kept short on purpose; detail lives in `docs/`.
 
 ## 9. Acceptance criteria for v0.1
 

@@ -12,7 +12,7 @@ Precedence is flag > env > config > default; follow `explicitApplyAccount`
 
 **Config key**: `internal/config/config.go`: add the field with a `yaml` tag
 and validation in `validate()` (unknown keys are errors on purpose); example
-and comment in `tfplanlens.config.yaml`; README "Config file" section;
+and comment in `tfplanlens.config.yaml`; `docs/USAGE.md` ("Config file", flags) and the README command list if it is a headline feature;
 `config_test.go` + a precedence test next to `TestConfigFileSettingsAndFlagOverrides`.
 
 **Command**: `newRootCmd` registers commands. Reuse `loadAll`
@@ -21,5 +21,5 @@ returned (exit 2); a rule match returns `*failOnError` (exit 1) after the
 output is written.
 
 Always: help text with an example, a test that drives it through `runCLI(...)`
-(`cmd/tfplanlens/golden_test.go` has the helper), `README.md`, and
+(`cmd/tfplanlens/golden_test.go` has the helper), `docs/USAGE.md`, and
 [../refs/CLI_REFERENCE.md](../refs/CLI_REFERENCE.md).

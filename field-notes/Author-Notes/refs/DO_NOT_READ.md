@@ -6,7 +6,7 @@
 | `simulation/assets/input/terraform.tfstate` | 600 lines of state | `jq '.resources[].type' ...` |
 | `testdata/golden/*` | generated | regenerate with `-update`, read `git diff testdata` |
 | `simulation/output/*`, `docs/smoke/**` | generated (the latter by a CI bot) | `./simulation/demo.sh`; ignore |
-| `README.md` (260 lines), `SPEC.md` (230) | user/spec docs | `grep -n '^## ' FILE`, then `sed -n 'A,Bp'` |
+| `docs/USAGE.md`, `docs/ACCOUNTS.md`, `SPEC.md` (230) | user/spec docs (`README.md` is a 50-line summary) | `grep -n '^## ' FILE`, then `sed -n 'A,Bp'` |
 | `internal/render/html/report.html`, `style.css`, `app.js` | only for HTML work | |
 | `node_modules/`, `tfplanlens` (binary), `go.sum` | noise | |
 
