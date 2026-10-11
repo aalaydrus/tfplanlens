@@ -101,6 +101,14 @@ applies). A dependency cycle is flagged prominently. `count` and `for_each`
 resources are listed once with their keys, and the HTML report can group the table
 by resource.
 
+## Interactive terminal view
+
+```
+tfplanlens tui plan.json
+```
+
+An expandable tree of the changes: `→`/enter expands a resource to its reason, warnings and attribute diffs, and `count`/`for_each` instances sit under one parent row. `/` searches, `f` cycles the action filter, `g` groups by account or module, `n` shows plain no-ops, `w` switches to the waves view, `e`/`c` expand or collapse everything, `q` quits. It needs a terminal (use `report` for pipes and files) and takes the same `--config`, `--tfapply-account-id` and `--account` options as `report`.
+
 ## Accounts: where it runs vs where resources land
 
 Plans are often applied from a runner in an automation account that assumes roles into target accounts. The report shows both:
