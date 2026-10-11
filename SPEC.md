@@ -217,11 +217,11 @@ Each tick is backed by a test or check listed in [docs/acceptance.md](docs/accep
 
 ## 10. Roadmap
 
-**v0.2** (waves, cycles and instance grouping are implemented; the terminal UI is not)
+**v0.2** (implemented)
 - Apply **waves** from the configuration's references and `depends_on`: wave 1 has no dependencies, wave 2 depends only on wave 1, and so on. Note that Terraform applies in parallel, so this shows possible parallelism, not a strict order.
 - Detect and display dependency cycles.
 - Group `count` and `for_each` instances under their parent with an expandable key list.
-- Terminal UI (Bubble Tea) with expand/collapse and filters.
+- Terminal UI with expand/collapse and filters (`tfplanlens tui`). Implemented on `golang.org/x/term` rather than Bubble Tea: linking Bubble Tea makes every command, including `report`, query the terminal for its background color at startup (its `init()`), which stalled `report` for 5 seconds and printed escape codes on terminals that do not answer.
 
 **v0.3**
 - Multi-plan input (Terragrunt or monorepo), merged into one report.

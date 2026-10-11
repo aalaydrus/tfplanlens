@@ -18,6 +18,7 @@ import (
 	"github.com/aalaydrus/tfplanlens/internal/render/jsonout"
 	"github.com/aalaydrus/tfplanlens/internal/render/markdown"
 	"github.com/aalaydrus/tfplanlens/internal/render/text"
+	"github.com/aalaydrus/tfplanlens/internal/tui"
 )
 
 // version is overridden at release time via -ldflags. Local builds keep "dev"
@@ -73,7 +74,7 @@ func newRootCmd(stdin io.Reader, stdout, stderr io.Writer) *cobra.Command {
 	root.SetOut(stdout)
 	root.SetErr(stderr)
 	root.CompletionOptions.DisableDefaultCmd = true
-	root.AddCommand(newReportCmd(), newVersionCmd())
+	root.AddCommand(newReportCmd(), newTUICmd(), newVersionCmd())
 	return root
 }
 
@@ -206,29 +207,10 @@ func runReport(cmd *cobra.Command, path string, o *reportOptions) error {
 		maxLine = config.DefaultMaxLine
 	}
 
-	overrides, err := parseAccountOverrides(o.accounts)
+	p, a, err := loadAnalysis(cmd, path, cfg, o)
 	if err != nil {
 		return err
 	}
-	applyID, applySource, err := explicitApplyAccount(o, cfg)
-	if err != nil {
-		return err
-	}
-
-	var in io.Reader = cmd.InOrStdin()
-	if path != "-" {
-		f, err := os.Open(path)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-		in = f
-	}
-	p, err := plan.Load(in)
-	if err != nil {
-		return err
-	}
-	a := analyze.Analyze(p, cfg, &analyze.Options{ApplyAccount: applyID, ApplySource: applySource, AccountOverrides: overrides})
 
 	for i, f := range formats {
 		var w io.Writer = cmd.OutOrStdout()
@@ -268,6 +250,36 @@ func runReport(cmd *cobra.Command, path string, o *reportOptions) error {
 	return nil
 }
 
+// loadAnalysis reads the plan and analyzes it with the account settings from
+// the flags and config file.
+func loadAnalysis(cmd *cobra.Command, path string, cfg *config.Config, o *reportOptions) (*plan.Plan, *analyze.Analysis, error) {
+	overrides, err := parseAccountOverrides(o.accounts)
+	if err != nil {
+		return nil, nil, err
+	}
+	applyID, applySource, err := explicitApplyAccount(o, cfg)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var in io.Reader = cmd.InOrStdin()
+	if path != "-" {
+		f, err := os.Open(path)
+		if err != nil {
+			return nil, nil, err
+		}
+		defer f.Close()
+		in = f
+	}
+	p, err := plan.Load(in)
+	if err != nil {
+		return nil, nil, err
+	}
+	a := analyze.Analyze(p, cfg, &analyze.Options{ApplyAccount: applyID, ApplySource: applySource, AccountOverrides: overrides})
+
+	return p, a, nil
+}
+
 // useColor enables ANSI color only for terminals, honoring --no-color and
 // the NO_COLOR convention.
 func useColor(w io.Writer, noColor bool) bool {
@@ -275,4 +287,36 @@ func useColor(w io.Writer, noColor bool) bool {
 		return false
 	}
 	return isTerminal(w)
+}
+
+func newTUICmd() *cobra.Command {
+	var o reportOptions
+	cmd := &cobra.Command{
+		Use:   "tui <plan.json>",
+		Short: "Explore a plan interactively in the terminal",
+		Long: `Explore a plan interactively: expand and collapse changes, search, filter by
+action, group by account or module, and see the apply/destroy waves.
+Account settings come from the same config file and flags as report.`,
+		Example: "  tfplanlens tui plan.json",
+		Args:    cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if args[0] == "-" {
+				return errors.New("tui needs a plan file, not stdin (stdin is the keyboard)")
+			}
+			cfg, err := config.Load(o.config)
+			if err != nil {
+				return err
+			}
+			_, a, err := loadAnalysis(cmd, args[0], cfg, &o)
+			if err != nil {
+				return err
+			}
+			return tui.Run(a)
+		},
+	}
+	f := cmd.Flags()
+	f.StringVarP(&o.config, "config", "c", "", "config file (default ./"+config.DefaultPath+" if present)")
+	f.StringVar(&o.applyAccount, "tfapply-account-id", "", "account terraform apply runs from (env TFPLANLENS_TFAPPLY_ACCOUNT_ID)")
+	f.StringArrayVar(&o.accounts, "account", nil, "target account for a provider alias, alias=id; repeatable")
+	return cmd
 }
