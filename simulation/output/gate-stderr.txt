@@ -1,0 +1,1 @@
+fail-on: delete matched aws_sqs_queue.orders["bulk"]; replace:aws_dynamodb_table matched aws_dynamodb_table.orders

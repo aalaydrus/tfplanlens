@@ -1,0 +1,2 @@
+proposed plan, gate exit code: 1
+revised plan,  gate exit code: 0

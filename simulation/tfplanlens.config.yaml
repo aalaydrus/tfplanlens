@@ -1,0 +1,4 @@
+# tfplanlens settings for the simulation. Terraform runs from a separate CI
+# account; the resources land in the workload account the plan itself names
+# (allowed_account_ids), so no per-provider accounts are needed here.
+tfapply_account_id: "999999999999"
