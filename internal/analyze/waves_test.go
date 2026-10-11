@@ -241,3 +241,13 @@ func TestTypeOfConfigAddress(t *testing.T) {
 	}
 	_ = sort.Strings
 }
+
+func TestNoOpInstancesCarryNoWave(t *testing.T) {
+	a := Analyze(&plan.Plan{
+		Changes: []plan.Change{chg("a.x", "", "create"), chg("a.x", "", "no-op")},
+		Graph:   graph(map[string][]string{"a.x": nil}),
+	}, nil, nil)
+	if a.Changes[0].Wave != 1 || a.Changes[1].Wave != 0 || a.Changes[1].WavePhase != "" {
+		t.Errorf("%+v", a.Changes)
+	}
+}

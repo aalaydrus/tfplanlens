@@ -149,9 +149,7 @@
       "attrs": [],
       "known_after_apply": 0,
       "parent": "aws_iam_user.team",
-      "key": "alice",
-      "wave": 1,
-      "wave_phase": "destroy"
+      "key": "alice"
     },
     {
       "address": "aws_instance.fleet[0]",
@@ -170,9 +168,7 @@
       "attrs": [],
       "known_after_apply": 0,
       "parent": "aws_instance.fleet",
-      "key": "0",
-      "wave": 1,
-      "wave_phase": "apply"
+      "key": "0"
     },
     {
       "address": "aws_instance.fleet[1]",
@@ -265,9 +261,7 @@
       "attrs": [],
       "known_after_apply": 0,
       "parent": "aws_s3_bucket.shards",
-      "key": "0",
-      "wave": 1,
-      "wave_phase": "destroy"
+      "key": "0"
     }
   ],
   "parents": [
