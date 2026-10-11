@@ -672,5 +672,6 @@
     "replace_triggered_by is not part of the plan JSON: a resource replaced by a trigger is not ordered after the resource that triggered it.",
     "Resources removed from the configuration have no dependency information in the plan; their destroy order is unknown and they are shown in wave 1."
   ],
-  "cycles": []
+  "cycles": [],
+  "units": []
 }

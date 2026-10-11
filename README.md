@@ -101,6 +101,18 @@ applies). A dependency cycle is flagged prominently. `count` and `for_each`
 resources are listed once with their keys, and the HTML report can group the table
 by resource.
 
+## Several plans in one report (Terragrunt, monorepos)
+
+```
+tfplanlens report live/vpc/plan.json live/app/plan.json -f html -o all.html
+tfplanlens report net=a.json app=b.json --fail-on delete
+tfplanlens tui live/vpc/plan.json live/app/plan.json
+```
+
+Each plan is analyzed on its own (its own accounts, waves and dependencies), then merged: every address is prefixed with the plan's label (`vpc:aws_vpc.main`), so identical addresses in different plans never collide, counts are added up, and a **Plans** table shows each plan's mode, apply account and counts. A plan's label is its file name, or its directory when the file is called `plan.json`/`tfplan.json` (more path elements are added until the labels differ), or whatever you give with `label=path`. `--fail-on` is checked per plan and names the plan. In HTML and the TUI you can group by plan.
+
+Limits: dependencies *between* plans (Terragrunt `dependency` blocks) are not in the plan JSON, so waves are only exact within a plan (the report says so); text inside a warning (such as a possible key rename) names the address without the plan prefix; `-` (stdin) works only with a single plan; `diff` still compares exactly two plans.
+
 ## What changed since the last plan
 
 ```

@@ -12,7 +12,7 @@ import (
 )
 
 // Group-by modes, cycled with "g".
-var groupModes = []string{"none", "account", "module"}
+var groupModes = []string{"none", "account", "module", "unit"}
 
 // Action filters, cycled with "f".
 var actionFilters = []string{"", "create", "update", "replace", "delete", "read", "forget"}
@@ -265,6 +265,8 @@ func (m *Model) groupKey(c *analyze.Change) string {
 		return c.Account
 	case "module":
 		return c.Module
+	case "unit":
+		return c.Unit
 	}
 	return ""
 }

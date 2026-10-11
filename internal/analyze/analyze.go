@@ -46,6 +46,7 @@ func Analyze(p *plan.Plan, cfg *config.Config, opts *Options) *Analysis {
 		Waves:         []Wave{},
 		WaveNotes:     []string{},
 		Cycles:        []Cycle{},
+		Units:         []Unit{},
 	}
 	a.ApplyAccount = ApplyAccount{Source: SourceUnresolved}
 	switch {

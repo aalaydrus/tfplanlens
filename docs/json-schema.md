@@ -19,6 +19,7 @@ deterministic.
 | `waves` | array | Apply and destroy waves (possible parallelism). |
 | `wave_notes` | array | Why the waves may be a lower bound. |
 | `cycles` | array | Dependency cycles found in the configuration. |
+| `units` | array | The plans of a merged report; empty for a single plan. |
 
 ## `summary`
 `mode` (`normal` / `refresh-only` / `destroy`), `applyable`, `errored`,
@@ -61,6 +62,15 @@ that are known after apply: those are only counted in `known_after_apply`.
 - `sensitive`: neither value is ever included.
 - `long`: `diff` holds `header`, `lines` (changed lines plus 2 lines of
   context, capped at 60), `added`, `removed`, `total_lines`, `truncated_lines`.
+
+## Merged reports (`units[]`)
+With several plans, every address (`changes`, `findings`, `drift`, `groups`,
+`parents`, `waves`, `cycles`, `by_module` keys) is prefixed `label:`, and
+`changes[]`, `findings[]` and `drift[]` carry `unit` (the label). Each
+`units[]` entry has `label`, `mode`, `terraform_version`, `apply_account` and
+`actions`. `summary.mode` is `mixed` when the plans differ; the top-level
+`apply_account` is the shared one, or `{"id": "(differs per plan)", "source":
+"mixed"}`. Waves are joined by phase and number across plans.
 
 ## `parents[]`
 `address` (configuration address without keys), `kind` (`count` / `for_each`),
