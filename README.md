@@ -57,4 +57,4 @@ Working on tfplanlens with an AI agent? Point it at [`AGENTS_START_HERE.md`](fie
 
 **More:** [Usage and flags](docs/USAGE.md) · [Accounts](docs/ACCOUNTS.md) · [Why not just read `terraform plan`?](docs/WHY.md) · [JSON schema](docs/json-schema.md) · [Development](docs/DEVELOPMENT.md) · [Working notes](field-notes/) · [SPEC](SPEC.md)
 
-MIT
+MIT. [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [Third-party notices](THIRD_PARTY_NOTICES.md). Not affiliated with HashiCorp or AWS.
