@@ -61,6 +61,7 @@ func Merge(labels []string, as []*Analysis) *Analysis {
 		m.Summary.DriftCount += s.DriftCount
 		m.Summary.Warnings += s.Warnings
 		m.Summary.Hidden += s.Hidden
+		m.Summary.Redacted += s.Redacted
 		m.Summary.ApplyWaves = max(m.Summary.ApplyWaves, s.ApplyWaves)
 		m.Summary.DestroyWaves = max(m.Summary.DestroyWaves, s.DestroyWaves)
 

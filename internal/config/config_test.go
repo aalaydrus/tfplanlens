@@ -71,3 +71,25 @@ func TestDefaultConfigFileName(t *testing.T) {
 		t.Errorf("DefaultPath = %q", DefaultPath)
 	}
 }
+
+func TestRedactAndDecodeSettings(t *testing.T) {
+	var none *Config
+	if !none.RedactSecretsEnabled() || !none.DecodeValuesEnabled() {
+		t.Error("a nil config means defaults: redact and decode are on")
+	}
+	c, err := Parse([]byte(""))
+	if err != nil || !c.RedactSecretsEnabled() || !c.DecodeValuesEnabled() {
+		t.Errorf("defaults must be on: %v", err)
+	}
+	c, err = Parse([]byte("redact_secrets: false\ndecode_values: false\n"))
+	if err != nil || c.RedactSecretsEnabled() || c.DecodeValuesEnabled() {
+		t.Errorf("explicit false must switch them off: %v %+v", err, c)
+	}
+	c, err = Parse([]byte("redact_secrets: true\n"))
+	if err != nil || !c.RedactSecretsEnabled() {
+		t.Errorf("explicit true: %v", err)
+	}
+	if _, err := Parse([]byte("redact_secrets: maybe\n")); err == nil {
+		t.Error("a non-boolean value must be an error")
+	}
+}

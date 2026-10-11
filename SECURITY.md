@@ -22,7 +22,11 @@ tfplanlens reads a plan file offline and prints a report; it never contacts AWS
 or Terraform. The issues that matter most:
 
 - **A sensitive value printed** in any output format (text, markdown, HTML,
-  JSON, `diff`, `tui`). This is treated as a vulnerability.
+  JSON, `diff`, `tui`). A value Terraform marks sensitive, or one tfplanlens
+  promises to hide (see [docs/SECRETS.md](docs/SECRETS.md)), appearing in a report
+  is treated as a vulnerability.
+- **A common credential format that is shown instead of hidden.** Report it
+  privately; it will be added to the redaction patterns.
 - **Script or markup injection** through plan content in the HTML or markdown
   report (resource names, attribute values and so on).
 - **A crash, hang or runaway memory use** from a crafted plan file.
@@ -30,6 +34,8 @@ or Terraform. The issues that matter most:
 
 Not a vulnerability: a plan that contains secrets because Terraform put them
 there (see [`field-notes/TERRAFORM_GOTCHAS.md`](field-notes/TERRAFORM_GOTCHAS.md));
+a secret with an innocent name and no recognizable shape that the best-effort
+filter cannot know about (the limits are listed in [docs/SECRETS.md](docs/SECRETS.md));
 the report being wrong about a resource (open a normal issue).
 
 ## Supported versions

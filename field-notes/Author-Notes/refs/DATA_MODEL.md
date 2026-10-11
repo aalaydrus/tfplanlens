@@ -6,7 +6,7 @@ The JSON output **is** this struct; field docs are in `docs/json-schema.md`.
 Analysis
   SchemaVersion, ApplyAccount{ID,Source,Resolved,Via}, Notices[]
   Summary{Mode,Applyable,Errored,TerraformVersion,Total,Actions,ByType,ByModule,
-          KnownAfterApply,DriftCount,Warnings,ApplyWaves,DestroyWaves,Hidden}
+          KnownAfterApply,DriftCount,Warnings,ApplyWaves,DestroyWaves,Hidden,Redacted}
   Findings[]  danger: delete/replace (+ reason text, IndexShift warning, DriftAlso)
   Drift[]     out-of-band changes (+ HighRisk when also replaced/deleted)
   Groups[]    one per provider config key (target account + source + counts)

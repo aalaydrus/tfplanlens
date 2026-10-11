@@ -26,7 +26,7 @@ deterministic.
 `terraform_version`, `total`, `actions` (`create`, `update`, `replace`,
 `delete`, `read`, `no_op`, `forget`), `by_type` and `by_module` (counts of
 changes that do something; `root` is the root module), `known_after_apply`
-(attribute count), `apply_waves` and `destroy_waves` (number of waves), `drift_count`, `warnings` (per-resource warning count), `hidden` (changes removed by `ignore_types`).
+(attribute count), `redacted` (places where secret-looking values were hidden; absent when none), `apply_waves` and `destroy_waves` (number of waves), `drift_count`, `warnings` (per-resource warning count), `hidden` (changes removed by `ignore_types`).
 
 ## `findings[]`
 `address`, `type`, `action` (`delete` / `replace`), `provider`, `account`,

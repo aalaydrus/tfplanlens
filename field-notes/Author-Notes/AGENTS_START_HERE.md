@@ -51,7 +51,9 @@ dependencies on purpose (cobra, terraform-json, yaml.v3, go-difflib, x/term).
 
 - JSON arrays are `[]`, never `null` (`TestJSONArraysAreNeverNull`).
 - Sensitive values are never printed anywhere (`TestSensitiveValuesNeverPrinted`,
-  `TestSimulationNeverPrintsSecretValues`).
+  `TestSimulationNeverPrintsSecretValues`), and secret-looking values that are
+  not marked sensitive are redacted (`TestUnmarkedSecretsNeverReachAnyOutput`):
+  a new output path that shows plan values goes through `internal/redact`.
 - Danger comes before any change listing (`TestDangerBeforeAnyChangeListing`).
 - The CLI stays small: `TestCLISurfaceIsLean` lists the allowed `report` flags.
 - Say "unknown" when the plan cannot tell (backend, `local.*`, cross-plan

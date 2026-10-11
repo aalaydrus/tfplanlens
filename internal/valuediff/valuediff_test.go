@@ -121,3 +121,35 @@ func TestPolicyStatements(t *testing.T) {
 		t.Errorf("single statement object: %q", one)
 	}
 }
+
+func TestDiffWithRedactsDiffLinesAndFullValues(t *testing.T) {
+	enc := func(s string) string { return base64.StdEncoding.EncodeToString([]byte(s)) }
+	before, after := enc("echo v1\nexport TOKEN=old-secret\n"), enc("echo v2\nexport TOKEN=new-secret\n")
+	hide := func(s string) string {
+		return strings.ReplaceAll(strings.ReplaceAll(s, "old-secret", "X"), "new-secret", "X")
+	}
+
+	plain := DiffWith("user_data", before, after, Options{})
+	if !strings.Contains(strings.Join(plain.Lines, "\n"), "old-secret") {
+		t.Fatal("test is vacuous: without redaction the decoded secret is in the diff")
+	}
+	d := DiffWith("user_data", before, after, Options{Redact: hide})
+	all := strings.Join(d.Lines, "\n") + d.FullBefore + d.FullAfter
+	if strings.Contains(all, "old-secret") || strings.Contains(all, "new-secret") {
+		t.Errorf("secret survived in diff lines or in FullBefore/FullAfter (used by the HTML expand toggle):\n%s", all)
+	}
+	if !strings.Contains(all, "echo v1") || !strings.Contains(all, "echo v2") {
+		t.Errorf("ordinary lines were lost:\n%s", all)
+	}
+}
+
+func TestDiffWithNoDecodeKeepsTheValueOpaque(t *testing.T) {
+	enc := base64.StdEncoding.EncodeToString([]byte("export TOKEN=hunter2\n"))
+	d := DiffWith("user_data", enc, enc+"AAAA", Options{NoDecode: true})
+	if strings.Contains(strings.Join(d.Lines, "\n")+d.FullBefore, "hunter2") {
+		t.Error("NoDecode must not decode base64")
+	}
+	if !strings.Contains(d.FullBefore, enc) {
+		t.Errorf("FullBefore should be the raw value, got %q", d.FullBefore)
+	}
+}

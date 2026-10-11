@@ -23,6 +23,17 @@ Status: `open`, `exploring`, `hypothesis` (not yet checked), `done`.
 5. **Replace noise** (`open`). Drop `x: false -> null` lines on a replace when
    the new value is a computed-optional default.
 
+## Redaction (docs/SECRETS.md)
+
+16. **More credential formats** (`open`): Azure/GCP keys, database URLs without
+    a user, Terraform Cloud tokens, `.pem` files without a header.
+17. **Entropy check** (`hypothesis`): flag long random-looking strings in
+    attributes with innocent names. Likely too noisy; measure on real plans first.
+18. **Per-type or per-attribute allow/deny lists** in the config (`open`).
+19. **Make hidden values diffable** (`open`): `diff` cannot say a hidden value
+    changed; a keyed hash of the value would, at the cost of a new thing to protect.
+20. **`verify-offline.sh` in CI** (`open`): needs `strace`/`unshare` on the runner.
+
 ## Product
 
 6. **HTML for `diff`** (`open`). Text/markdown/JSON only today.

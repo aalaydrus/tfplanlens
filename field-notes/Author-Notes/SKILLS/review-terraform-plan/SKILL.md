@@ -69,7 +69,9 @@ Lead with the verdict in one line (what will be deleted/replaced, stateful or
 not, which accounts). Then the few findings that need a human decision, each
 with the address and the reason from the tool. Quote addresses exactly. Say
 what the tool could not determine (unresolved accounts, unknown values).
-A secret rotation shows as a replace of the secret version: it is routine, but
+If a notice says the tool "hid secret-looking values", say so: some values are
+hidden on purpose (`docs/SECRETS.md`), and never try to recover them from the
+plan file. A secret rotation shows as a replace of the secret version: it is routine, but
 the tool lists it as Danger; say that if it applies.
 
 Do not claim the plan is "safe". Say what the report shows.

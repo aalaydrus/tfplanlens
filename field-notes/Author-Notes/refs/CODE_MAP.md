@@ -25,6 +25,8 @@ internal/analyze/  plan.Plan -> Analysis (all the logic)
   merge.go         Merge several analyses (labels, Units, prefixed addresses)
 internal/valuediff/  long values: base64/gzip/JSON decode + line diff (valuediff.go),
                    IAM policy statement summary (policy.go)
+internal/redact/   hides secret-looking values (names, key material, tokens, NAME=value);
+                   used by analyze/attrs.go and valuediff.DiffWith
 internal/config/   tfplanlens.config.yaml (strict: unknown keys are errors)
 internal/render/   one package per format, all take *analyze.Analysis
   text/ markdown/ html/ (report.html, style.css, app.js embedded) jsonout/

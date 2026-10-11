@@ -31,6 +31,13 @@ simulation) and `hashicorp/local` 2.9.1, `terraform_data` (the smoke scenarios).
   expressions (and `depends_on`, `count_expression`, `for_each_expression`,
   module call `expressions`). That is where waves come from. *verified*
 
+- **Unmarked secrets are printed by Terraform itself, and tfplanlens used to
+  repeat them.** A secret in an attribute Terraform does not mark sensitive, or
+  inside `user_data`, is in the plan JSON and in `terraform plan` output;
+  tfplanlens additionally decodes base64/gzip `user_data`, which turned an
+  obscured secret into readable lines. Now redacted by name and by shape
+  (`docs/SECRETS.md`). *verified: a crafted plan, `testdata/plans/secret-lookalikes.json`*
+
 ## Noise from the AWS provider
 
 - **Drift that nobody made.** On refresh the provider fills legacy attributes:
