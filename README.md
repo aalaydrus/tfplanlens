@@ -48,6 +48,13 @@ Settings (apply account, default formats, `--fail-on` rules) go in an optional [
 
 </details>
 
+<details>
+<summary><b>For agents</b>: navigate this repo cheaply</summary>
+
+Working on tfplanlens with an AI agent? Point it at [`AGENTS_START_HERE.md`](field-notes/Author-Notes/AGENTS_START_HERE.md): a short routing page (about 4 KB) that sends each kind of task to the one file it needs, instead of reading the whole repo. There are also ready-made [skills](field-notes/Author-Notes/SKILLS/README.md) for Claude and Kiro, and notes on [searching the docs with qmd](field-notes/Author-Notes/refs/SEARCH_WITH_QMD.md) (an experiment: optional, not required).
+
+</details>
+
 **More:** [Usage and flags](docs/USAGE.md) · [Accounts](docs/ACCOUNTS.md) · [Why not just read `terraform plan`?](docs/WHY.md) · [JSON schema](docs/json-schema.md) · [Development](docs/DEVELOPMENT.md) · [Working notes](field-notes/) · [SPEC](SPEC.md)
 
 MIT
