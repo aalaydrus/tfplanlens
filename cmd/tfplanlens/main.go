@@ -13,6 +13,7 @@ import (
 
 	"github.com/aalaydrus/tfplanlens/internal/analyze"
 	"github.com/aalaydrus/tfplanlens/internal/config"
+	"github.com/aalaydrus/tfplanlens/internal/diff"
 	"github.com/aalaydrus/tfplanlens/internal/plan"
 	htmlrender "github.com/aalaydrus/tfplanlens/internal/render/html"
 	"github.com/aalaydrus/tfplanlens/internal/render/jsonout"
@@ -74,7 +75,7 @@ func newRootCmd(stdin io.Reader, stdout, stderr io.Writer) *cobra.Command {
 	root.SetOut(stdout)
 	root.SetErr(stderr)
 	root.CompletionOptions.DisableDefaultCmd = true
-	root.AddCommand(newReportCmd(), newTUICmd(), newVersionCmd())
+	root.AddCommand(newReportCmd(), newDiffCmd(), newTUICmd(), newVersionCmd())
 	return root
 }
 
@@ -155,9 +156,15 @@ tfapply_account_id and accounts: in the config file to fill in the rest.`,
 
 // failOnError is returned when a --fail-on rule matched; the report has
 // already been written.
-type failOnError struct{ matches []analyze.Match }
+type failOnError struct {
+	matches   []analyze.Match
+	newDanger []string // diff --fail-on-new-danger
+}
 
 func (e *failOnError) Error() string {
+	if len(e.newDanger) > 0 {
+		return "new danger: " + strings.Join(e.newDanger, ", ") + " deleted or replaced by the new plan only"
+	}
 	seen := map[string]bool{}
 	var parts []string
 	for _, m := range e.matches {
@@ -316,6 +323,91 @@ Account settings come from the same config file and flags as report.`,
 	}
 	f := cmd.Flags()
 	f.StringVarP(&o.config, "config", "c", "", "config file (default ./"+config.DefaultPath+" if present)")
+	f.StringVar(&o.applyAccount, "tfapply-account-id", "", "account terraform apply runs from (env TFPLANLENS_TFAPPLY_ACCOUNT_ID)")
+	f.StringArrayVar(&o.accounts, "account", nil, "target account for a provider alias, alias=id; repeatable")
+	return cmd
+}
+
+func newDiffCmd() *cobra.Command {
+	var o reportOptions
+	var failNew bool
+	cmd := &cobra.Command{
+		Use:   "diff <old-plan.json> <new-plan.json>",
+		Short: "Show what changed between two plans of the same configuration",
+		Long: `Compare two plans: what is new, what no longer changes, and what changes
+differently (action, reason, target account, attributes). Use it to review only
+what a new push changed. Resources are matched by address; a plain no-op counts
+as not changing. Account settings come from the same config file and flags as
+report, applied to both plans.`,
+		Example: `  tfplanlens diff before.json after.json
+  tfplanlens diff before.json after.json -f markdown -o diff.md
+  tfplanlens diff before.json after.json --fail-on-new-danger`,
+		Args: cobra.ExactArgs(2),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if args[0] == "-" && args[1] == "-" {
+				return errors.New("only one plan can be read from stdin")
+			}
+			if len(o.formats) > 1 {
+				return errors.New("diff takes one --format")
+			}
+			format := "text"
+			if len(o.formats) == 1 {
+				format = o.formats[0]
+			}
+			switch format {
+			case "text", "markdown", "json":
+			default:
+				return fmt.Errorf("unsupported --format %q for diff (want text, markdown or json)", format)
+			}
+			cfg, err := config.Load(o.config)
+			if err != nil {
+				return err
+			}
+			_, oldA, err := loadAnalysis(cmd, args[0], cfg, &o)
+			if err != nil {
+				return fmt.Errorf("%s: %w", args[0], err)
+			}
+			_, newA, err := loadAnalysis(cmd, args[1], cfg, &o)
+			if err != nil {
+				return fmt.Errorf("%s: %w", args[1], err)
+			}
+			res := diff.Compare(oldA, newA)
+
+			var w io.Writer = cmd.OutOrStdout()
+			var file *os.File
+			if o.out != "" {
+				if file, err = os.Create(o.out); err != nil {
+					return err
+				}
+				w = file
+			}
+			switch format {
+			case "text":
+				err = diff.RenderText(w, res)
+			case "markdown":
+				err = diff.RenderMarkdown(w, res)
+			case "json":
+				err = diff.RenderJSON(w, res)
+			}
+			if file != nil {
+				if cerr := file.Close(); err == nil {
+					err = cerr
+				}
+			}
+			if err != nil {
+				return err
+			}
+			if failNew && res.Dangerous() {
+				return &failOnError{matches: nil, newDanger: res.NewDanger}
+			}
+			return nil
+		},
+	}
+	f := cmd.Flags()
+	f.StringSliceVarP(&o.formats, "format", "f", nil, "text, markdown or json (default text)")
+	f.StringVarP(&o.out, "out", "o", "", "write to this file instead of stdout")
+	f.StringVarP(&o.config, "config", "c", "", "config file (default ./"+config.DefaultPath+" if present)")
+	f.BoolVar(&failNew, "fail-on-new-danger", false, "exit 1 when the new plan deletes or replaces something the old one did not")
 	f.StringVar(&o.applyAccount, "tfapply-account-id", "", "account terraform apply runs from (env TFPLANLENS_TFAPPLY_ACCOUNT_ID)")
 	f.StringArrayVar(&o.accounts, "account", nil, "target account for a provider alias, alias=id; repeatable")
 	return cmd

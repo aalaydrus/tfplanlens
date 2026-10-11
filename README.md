@@ -101,6 +101,16 @@ applies). A dependency cycle is flagged prominently. `count` and `for_each`
 resources are listed once with their keys, and the HTML report can group the table
 by resource.
 
+## What changed since the last plan
+
+```
+tfplanlens diff before.json after.json
+tfplanlens diff before.json after.json -f markdown -o diff.md
+tfplanlens diff before.json after.json --fail-on-new-danger
+```
+
+Compares two plans of the same configuration by resource address and tells you only what the new push changed: resources that are **only in the new plan**, ones that **no longer change**, and ones that change **differently** (action, reason, target account, and which attributes). It calls out anything the new plan now deletes or replaces that the old one did not (`--fail-on-new-danger` exits 1 on that, after printing the diff), anything that is no longer deleted or replaced, and drift that appeared or went away. A plain no-op counts as "not changing". Formats: text, markdown (for a PR comment) and json. Sensitive values are never compared, so two sensitive changes to the same attribute count as equal.
+
 ## Interactive terminal view
 
 ```

@@ -89,6 +89,19 @@ jobs:
           done
           find docs/smoke -type f | sort
 
+      - name: Plan diff of the rereview pair
+        run: |
+          set -eu
+          # Two real plans of the same state (see scripts/smoke-plan.sh, v3).
+          before=$(ls testdata/plans/real/rereview-tf*.json)
+          after=$(ls testdata/plans/real/rereview-after-tf*.json)
+          mkdir -p docs/smoke/rereview-diff
+          for spec in text:txt markdown:md json:json; do
+            ./tfplanlens diff "$before" "$after" --format "${spec%%:*}" \
+              --tfapply-account-id=111111111111 --out "docs/smoke/rereview-diff/diff.${spec##*:}" </dev/null
+          done
+          cat docs/smoke/rereview-diff/diff.txt
+
       - name: Install Playwright and screenshot
         run: |
           set -eu
