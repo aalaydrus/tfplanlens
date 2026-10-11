@@ -14,8 +14,8 @@ on:
       - "scripts/screenshot.mjs"
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
+  pull-requests: write # to post the report comments on the pull request
 
 jobs:
   smoke:
@@ -32,14 +32,11 @@ jobs:
           - /var/run/docker.sock:/var/run/docker.sock
         options: --user root
     env:
-      # Pull requests from forks get a read-only token: skip the commit-back.
-      CAN_PUSH: ${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository }}
+      # Pull requests from forks get a read-only token: skip the PR comments.
+      CAN_COMMENT: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
-          # Same-repo PRs: check out the PR branch itself (not the merge ref) so
-          # we can push to it. Fork PRs: default merge ref, read-only.
-          ref: ${{ env.CAN_PUSH == 'true' && (github.head_ref || github.ref_name) || '' }}
           fetch-depth: 0
 
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
@@ -102,35 +99,25 @@ jobs:
           done
           cat docs/smoke/rereview-diff/diff.txt
 
+      - name: Test against the freshly generated plans
+        run: |
+          set -eu
+          # The Go tests assert on addresses, actions and counts (never on bytes:
+          # resource ids differ on every run), so they must hold for whatever the
+          # newest Terraform produced. The fresh plans sit next to the committed ones.
+          go test ./cmd/tfplanlens -run 'TestReal|TestJSONArraysAreNeverNull|TestRedactionLeavesTheRealPlansAlone' -count=1
+
       - name: Install Playwright and screenshot
         run: |
           set -eu
           npm install --no-save --no-package-lock playwright
           npx playwright install --with-deps chromium
-          # Screenshots are committed, so only the two showcase scenarios.
+          # Only the two showcase scenarios.
           SCREENSHOT_SCENARIOS=simple,complex node scripts/screenshot.mjs docs/smoke docs/screenshots
           ls -la docs/screenshots
 
-      - name: Commit outputs back to the PR branch
-        if: env.CAN_PUSH == 'true'
-        run: |
-          set -eu
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add testdata/plans/real docs/smoke docs/screenshots
-          if git diff --cached --quiet; then
-            echo "nothing to commit"
-          else
-            git commit -m "chore: smoke test outputs [skip ci]"
-            # If someone pushed while this ran, the branch moved on: skip rather
-            # than fail. That push starts a newer run that regenerates the outputs.
-            if ! git push origin "HEAD:${{ github.head_ref || github.ref_name }}"; then
-              echo "::warning::branch moved while the smoke test ran; outputs not committed (a newer run will)"
-            fi
-          fi
-
       - name: Post markdown reports and screenshots on the PR
-        if: github.event_name == 'pull_request' && env.CAN_PUSH == 'true'
+        if: env.CAN_COMMENT == 'true'
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
         with:
           script: |
@@ -138,7 +125,6 @@ jobs:
             const path = require('path');
             const { owner, repo } = context.repo;
             const issue_number = context.payload.pull_request.number;
-            const branch = context.payload.pull_request.head.ref;
 
             async function upsert(tag, body) {
               const mark = `<!-- smoke-${tag} -->`;
@@ -161,17 +147,13 @@ jobs:
               await upsert(`report-${scenario}`, `**Smoke test: \`${scenario}\` scenario, tfplanlens markdown report (verbatim)**\n\n${md}`);
             }
 
-            // (b) screenshots, referenced from the committed files on the branch.
-            const raw = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/docs/screenshots`;
-            const lines = ['**Smoke test: HTML report screenshots**', ''];
-            for (const scenario of ['simple', 'complex']) {
-              lines.push(`### ${scenario}`, '', `Desktop (1280px):`, '', `![${scenario} desktop](${raw}/${scenario}-desktop.png)`, '',
-                `Phone (390px):`, '', `![${scenario} phone](${raw}/${scenario}-mobile.png)`, '');
-            }
-            lines.push('### complex: detail drawers', '',
-              `![user_data drawer](${raw}/complex-drawer-user_data.png)`, '',
-              `![creds drawer](${raw}/complex-drawer-creds.png)`, '');
-            await upsert('screenshots', lines.join('\n'));
+            // (b) screenshots are not committed any more: point at this run's artifact.
+            const run = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
+            await upsert('screenshots', [
+              '**Smoke test: HTML report screenshots**', '',
+              `The screenshots (desktop, phone and detail drawers for \`simple\` and \`complex\`) and every rendered report are in the \`smoke-outputs\` artifact of [this run](${run}).`, '',
+              'Nothing is committed back to the branch. To refresh the committed plans and reports, run `scripts/smoke-refresh.sh` and commit the result.',
+            ].join('\n'));
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
