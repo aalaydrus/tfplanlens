@@ -31,3 +31,15 @@ scripts/smoke-report.sh reasons testdata/plans/real/reasons-tf*.json
 ```
 
 The tests in `cmd/tfplanlens/real_plans_test.go` assert on these plans by address, action and count (never byte-exact: every run produces new resource UUIDs).
+
+## Workflow actions are pinned
+
+Every `uses:` in `.github/workflows` is a full commit SHA with the version in a
+comment, because a tag like `@v4` can be moved to different code by whoever owns
+that repository. `.github/dependabot.yml` opens a weekly pull request to bump the
+pins (and the Go modules); read the upstream diff before merging it. To pin a new
+action: `git ls-remote --tags https://github.com/OWNER/REPO 'refs/tags/vX*'`, then
+`uses: OWNER/REPO@<40-char sha> # vX.Y.Z`. `TestWorkflowActionsArePinnedToCommitSHAs`
+fails on an unpinned one. Still floating on purpose in the smoke test:
+`terraform_version: 1.x` and goreleaser `~> v2.9`.
+

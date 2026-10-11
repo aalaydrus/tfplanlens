@@ -35,18 +35,18 @@ jobs:
       # Pull requests from forks get a read-only token: skip the commit-back.
       CAN_PUSH: ${{ github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           # Same-repo PRs: check out the PR branch itself (not the merge ref) so
           # we can push to it. Fork PRs: default merge ref, read-only.
           ref: ${{ env.CAN_PUSH == 'true' && (github.head_ref || github.ref_name) || '' }}
           fetch-depth: 0
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with:
           go-version-file: go.mod
 
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
         with:
           terraform_version: "1.x"
           terraform_wrapper: false
@@ -131,7 +131,7 @@ jobs:
 
       - name: Post markdown reports and screenshots on the PR
         if: github.event_name == 'pull_request' && env.CAN_PUSH == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
         with:
           script: |
             const fs = require('fs');
@@ -173,7 +173,7 @@ jobs:
               `![creds drawer](${raw}/complex-drawer-creds.png)`, '');
             await upsert('screenshots', lines.join('\n'));
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
           name: smoke-outputs

@@ -1,0 +1,23 @@
+# Keeps the pinned GitHub Actions (commit SHAs, see .github/workflows) and the
+# Go modules current: Dependabot opens a pull request when a new version is
+# out. Review the diff of the pinned action before merging.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "ci"
+    groups:
+      actions:
+        patterns: ["*"]
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "deps"
+    groups:
+      go-modules:
+        patterns: ["*"]
