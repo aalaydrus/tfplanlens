@@ -1,12 +1,15 @@
 # tfplanlens
 
-Read a Terraform plan the way a reviewer needs to. Deletes and replaces first, with the reason in plain English.
+Read a Terraform plan the way a reviewer needs to: deletes and replaces first, with the reason in plain English.
 
-It works **offline** on the JSON from `terraform show -json`: no AWS credentials, no Terraform binary, no network, no LLM. Deterministic output, and sensitive values are never printed.
+It works **offline** on the JSON from `terraform show -json`: no AWS credentials, no Terraform binary, no network, no LLM. Output is deterministic and sensitive values are never printed.
 
 ![tfplanlens HTML report: Danger panel, summary tiles and a filterable table](docs/readme/html-report.png)
 
-## Quickstart
+**Where to start:** open **Quickstart** below (about 30 seconds), or look at a finished example in [`simulation/`](simulation/rundown/EXAMPLE_RUNDOWN.md) without installing anything.
+
+<details>
+<summary><b>Quickstart</b>: install and read your first plan</summary>
 
 ```sh
 git clone https://github.com/aalaydrus/tfplanlens && cd tfplanlens
@@ -17,14 +20,20 @@ terraform show -json plan.bin > plan.json
 tfplanlens report plan.json
 ```
 
-## What you get
+</details>
+
+<details>
+<summary><b>What you get</b></summary>
 
 - **Danger first**: every delete and replace with why, a STATEFUL badge, and a warning when a `count`/`for_each` change looks like an accidental shift.
 - **Which account**: where `terraform apply` runs vs where each resource lands, and how that was decided.
 - **Short**: long values become the lines that changed; unknown values are counted, not printed.
 - **Also**: drift, moves, imports, apply waves, and a diff between two plans.
 
-## Commands
+</details>
+
+<details>
+<summary><b>Commands</b></summary>
 
 ```sh
 tfplanlens report plan.json -f html -o report.html      # one offline HTML file
@@ -37,12 +46,8 @@ tfplanlens tui plan.json                                # explore interactively
 
 Settings (apply account, default formats, `--fail-on` rules) go in an optional [`tfplanlens.config.yaml`](tfplanlens.config.yaml).
 
-## Try it without AWS
+</details>
 
-[`simulation/`](simulation/) has a made-up AWS stack with real plans and every output: start with [`EXAMPLE_RUNDOWN.md`](simulation/rundown/EXAMPLE_RUNDOWN.md).
-
-## More
-
-[Usage and flags](docs/USAGE.md) · [Accounts](docs/ACCOUNTS.md) · [Why not just read `terraform plan`?](docs/WHY.md) · [JSON schema](docs/json-schema.md) · [Development and smoke tests](docs/DEVELOPMENT.md) · [Working notes](field-notes/) · [SPEC](SPEC.md)
+**More:** [Usage and flags](docs/USAGE.md) · [Accounts](docs/ACCOUNTS.md) · [Why not just read `terraform plan`?](docs/WHY.md) · [JSON schema](docs/json-schema.md) · [Development](docs/DEVELOPMENT.md) · [Working notes](field-notes/) · [SPEC](SPEC.md)
 
 MIT
