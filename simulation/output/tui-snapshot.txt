@@ -1,0 +1,21 @@
+tfplanlens  normal plan: 3 create, 3 update, 1 replace, 1 delete
+view: changes | group: none | action: all | no-ops: false
+ v -/+  aws_dynamodb_table.orders  [STATEFUL]  (apply wave 1)
+     replace, 13 known after apply; aws_dynamodb_table
+     target account 123456789012 (source: allowed_account_ids)
+     why: Attribute change forces replacement: range_key, hash_key
+     attribute[0].name: "order_id" -> "customer_id"
+     attribute[1].name: (absent) -> "order_id"
+     attribute[1].type: (absent) -> "S"
+     deletion_protection_enabled: false -> null
+     hash_key: "order_id" -> "customer_id"  [forces replacement]
+     range_key: null -> "order_id"  [forces replacement]
+     stream_enabled: false -> null
+     table_class: "STANDARD" -> null
+     tags: {} -> null
+ > ~  aws_iam_role_policy.worker  (apply wave 2)
+ > +  aws_s3_bucket_lifecycle_configuration.receipts  (apply wave 1)
+ > +  aws_sns_topic_subscription.audit  (apply wave 2)
+ > aws_sqs_queue.orders  [3 instances: 1 create, 1 update, 1 delete]
+ > ~  aws_ssm_parameter.flags  (apply wave 1)
+↑↓ move  →/enter expand  ← collapse  e/c all  / search  f action  g group  n no-ops  w waves  q quit

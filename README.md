@@ -52,6 +52,10 @@ You can, and for a small plan you should. It gets hard when the plan is big or n
 - **Which account is this going to?** With role-assuming providers, the account a resource lands in is not the one you run from. tfplanlens shows both, and where each answer came from.
 - **Drift, moves, imports and `removed` blocks** are called out instead of looking like deletes and creates.
 
+## Try it without AWS
+
+[`simulation/`](simulation/) is a made-up AWS stack with real Terraform plans (a risky pull request and its revision), every output tfplanlens produces for them, and a step-by-step walkthrough: [`simulation/rundown/EXAMPLE_RUNDOWN.md`](simulation/rundown/EXAMPLE_RUNDOWN.md). Run `simulation/demo.sh` to regenerate the outputs.
+
 ## What a report looks like
 
 The HTML report is one file with no external requests (works offline, dark mode). Each resource opens a drawer with its attribute diffs; this is the decoded 400-line `user_data` change:
