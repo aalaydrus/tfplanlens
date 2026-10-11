@@ -20,6 +20,11 @@ provider "aws" {
   }
 }
 
+variable "db_password" {
+  type      = string
+  sensitive = true
+}
+
 locals {
   # queue name => visibility timeout (seconds)
   queues = {
@@ -121,6 +126,23 @@ resource "aws_ssm_parameter" "flags" {
   value = jsonencode({ express_checkout = true })
 }
 
+resource "aws_secretsmanager_secret" "db" {
+  name                    = "orders/db-credentials"
+  description             = "Database credentials for the orders service (rotated quarterly)"
+  recovery_window_in_days = 7
+}
+
+# Every change to secret_string creates a new version of the secret (the old
+# one is kept as AWSPREVIOUS). Terraform shows that as an in-place update, even
+# though a consumer reading the secret sees a new value.
+resource "aws_secretsmanager_secret_version" "db" {
+  secret_id = aws_secretsmanager_secret.db.id
+  secret_string = jsonencode({
+    username = "orders_app"
+    password = var.db_password
+  })
+}
+
 resource "aws_iam_role" "worker" {
   name = "orders-worker"
   assume_role_policy = jsonencode({
@@ -143,6 +165,11 @@ resource "aws_iam_role_policy" "worker" {
         Effect   = "Allow"
         Action   = ["sqs:ReceiveMessage", "sqs:DeleteMessage"]
         Resource = [for q in aws_sqs_queue.orders : q.arn]
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["secretsmanager:GetSecretValue"]
+        Resource = aws_secretsmanager_secret.db.arn
       },
       {
         Effect   = "Allow"

@@ -3,9 +3,9 @@
 
 | | |
 |---|---|
-| Old plan | create 3, update 3, replace 1, delete 1 |
-| New plan | create 3, update 4, replace 0, delete 0 |
-| Unchanged | 6 resource(s) |
+| Old plan | create 3, update 4, replace 2, delete 1 |
+| New plan | create 3, update 5, replace 1, delete 0 |
+| Unchanged | 8 resource(s) |
 
 No longer deleted or replaced:
 

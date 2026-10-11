@@ -1,4 +1,4 @@
-tfplanlens  normal plan: 3 create, 3 update, 1 replace, 1 delete
+tfplanlens  normal plan: 3 create, 4 update, 2 replace, 1 delete
 view: changes | group: none | action: all | no-ops: false
  v -/+  aws_dynamodb_table.orders  [STATEFUL]  (apply wave 1)
      replace, 13 known after apply; aws_dynamodb_table
@@ -15,6 +15,8 @@ view: changes | group: none | action: all | no-ops: false
      tags: {} -> null
  > ~  aws_iam_role_policy.worker  (apply wave 2)
  > +  aws_s3_bucket_lifecycle_configuration.receipts  (apply wave 1)
+ > ~  aws_secretsmanager_secret.db  (apply wave 1)
+ > -/+  aws_secretsmanager_secret_version.db  (apply wave 2)
  > +  aws_sns_topic_subscription.audit  (apply wave 2)
  > aws_sqs_queue.orders  [3 instances: 1 create, 1 update, 1 delete]
  > ~  aws_ssm_parameter.flags  (apply wave 1)

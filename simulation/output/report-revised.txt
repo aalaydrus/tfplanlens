@@ -1,19 +1,21 @@
 == Summary ==
 Plan: normal | applyable: yes | errored: no
 Executed from (apply account): 999999999999 (source: config)
-Actions: create 3, update 4, replace 0, delete 0, read 0, no-op 8, forget 0
-Known after apply: 25 attribute(s)
-By type: aws_sqs_queue 2, aws_dynamodb_table 1, aws_iam_role_policy 1, aws_s3_bucket_lifecycle_configuration 1, aws_sns…
-By module: root 7
+Actions: create 3, update 5, replace 1, delete 0, read 0, no-op 8, forget 0
+Known after apply: 31 attribute(s)
+By type: aws_sqs_queue 2, aws_dynamodb_table 1, aws_iam_role_policy 1, aws_s3_bucket_lifecycle_configuration 1, aws_sec…
+By module: root 9
 
 == Danger ==
-No deletes or replacements.
+! REPLACE aws_secretsmanager_secret_version.db
+    type: aws_secretsmanager_secret_version | target account: 123456789012 (source: allowed_account_ids)
+    why: Attribute change forces replacement: secret_string
 
 == Drift ==
 ~ aws_iam_role.worker
     inline_policy[0].name: (absent) -> "orders-worker"
-    inline_policy[0].policy: 25 lines changed of 25 (+25 -0)
-      @@ -1,0 +1,25 @@
+    inline_policy[0].policy: 32 lines changed of 32 (+32 -0)
+      @@ -1,0 +1,32 @@
       +{
       +  "Statement": [
       +    {
@@ -30,6 +32,13 @@ No deletes or replacements.
       +    },
       +    {
       +      "Action": [
+      +        "secretsmanager:GetSecretValue"
+      +      ],
+      +      "Effect": "Allow",
+      +      "Resource": "arn:aws:secretsmanager:us-east-1:123456789012:secret:orders/db-credentials-1LFT0S"
+      +    },
+      +    {
+      +      "Action": [
       +        "dynamodb:PutItem",
       +        "dynamodb:GetItem"
       +      ],
@@ -41,13 +50,14 @@ No deletes or replacements.
       +}
       statements:
       +Allow sqs:DeleteMessage,sqs:ReceiveMessage -> arn:aws:sqs:us-east-1:123456789012:orders-bulk,arn:aws:sqs:us-east…
+      +Allow secretsmanager:GetSecretValue -> arn:aws:secretsmanager:us-east-1:123456789012:secret:orders/db-credential…
       +Allow dynamodb:GetItem,dynamodb:PutItem -> arn:aws:dynamodb:us-east-1:123456789012:table/orders
 ~ aws_s3_bucket.receipts
     versioning[0].enabled: false -> true
 
 == Changes by account ==
 aws: target account 123456789012 (source: allowed_account_ids) [DIFFERENT from apply account]
-    create 3, update 4, no-op 8
+    create 3, update 5, replace 1, no-op 8
     ~ aws_dynamodb_table.orders [STATEFUL]  (update, 4 known after apply)
         attribute[0].name: "order_id" -> "customer_id"
         attribute[1].name: (absent) -> "order_id"
@@ -60,6 +70,11 @@ aws: target account 123456789012 (source: allowed_account_ids) [DIFFERENT from a
         global_secondary_index[0].range_key: (absent) -> ""
     ~ aws_iam_role_policy.worker  (update, 1 known after apply)
     + aws_s3_bucket_lifecycle_configuration.receipts  (create, 2 known after apply)
+    ~ aws_secretsmanager_secret.db  (update)
+        description: "Database credentials for the orders service" -> "Database credentials for the orders service (rot…
+    -/+ aws_secretsmanager_secret_version.db  (replace, 6 known after apply)
+        secret_binary: (sensitive value changed)
+        secret_string: (sensitive value changed)  [forces replacement]
     + aws_sns_topic_subscription.audit  (create, 7 known after apply)
     + aws_sqs_queue.orders["audit"]  (create, 10 known after apply)
     ~ aws_sqs_queue.orders["standard"]  (update)
@@ -68,17 +83,19 @@ aws: target account 123456789012 (source: allowed_account_ids) [DIFFERENT from a
         value: (sensitive value changed)
 
 == Changes by module ==
-root: create 3, update 4
+root: create 3, update 5, replace 1
 
 == Waves ==
 Terraform applies in parallel: this shows possible parallelism, not a strict order.
 apply wave 1:
   update aws_dynamodb_table.orders
   create aws_s3_bucket_lifecycle_configuration.receipts
+  update aws_secretsmanager_secret.db
   create aws_sqs_queue.orders (2 instances)
   update aws_ssm_parameter.flags
 apply wave 2:
   update aws_iam_role_policy.worker
+  replace aws_secretsmanager_secret_version.db
   create aws_sns_topic_subscription.audit
 note: 1 reference(s) to local values are not visible in the plan JSON, so a dependency reached only through a local is …
 

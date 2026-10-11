@@ -1,6 +1,6 @@
 == Plan diff ==
-old: create 3, update 3, replace 1, delete 1
-new: create 3, update 4, replace 0, delete 0
+old: create 3, update 4, replace 2, delete 1
+new: create 3, update 5, replace 1, delete 0
 
 == No longer deleted or replaced ==
 aws_dynamodb_table.orders
@@ -26,4 +26,4 @@ aws_sqs_queue.orders["bulk"]
     attribute no longer changes: table_class
     attribute no longer changes: tags
 
-6 resource(s) change identically in both plans.
+8 resource(s) change identically in both plans.

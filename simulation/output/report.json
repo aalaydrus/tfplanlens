@@ -11,11 +11,11 @@
     "applyable": true,
     "errored": false,
     "terraform_version": "1.16.5",
-    "total": 15,
+    "total": 17,
     "actions": {
       "create": 3,
-      "update": 3,
-      "replace": 1,
+      "update": 4,
+      "replace": 2,
       "delete": 1,
       "read": 0,
       "no_op": 7,
@@ -25,14 +25,16 @@
       "aws_dynamodb_table": 1,
       "aws_iam_role_policy": 1,
       "aws_s3_bucket_lifecycle_configuration": 1,
+      "aws_secretsmanager_secret": 1,
+      "aws_secretsmanager_secret_version": 1,
       "aws_sns_topic_subscription": 1,
       "aws_sqs_queue": 3,
       "aws_ssm_parameter": 1
     },
     "by_module": {
-      "root": 8
+      "root": 10
     },
-    "known_after_apply": 34,
+    "known_after_apply": 40,
     "drift_count": 2,
     "warnings": 0,
     "apply_waves": 2,
@@ -52,6 +54,22 @@
       "replace_paths": [
         "range_key",
         "hash_key"
+      ],
+      "index_shift": false,
+      "drift_also": false
+    },
+    {
+      "address": "aws_secretsmanager_secret_version.db",
+      "type": "aws_secretsmanager_secret_version",
+      "action": "replace",
+      "provider": "aws",
+      "account": "123456789012",
+      "account_source": "allowed_account_ids",
+      "stateful": false,
+      "reason": "replace_because_cannot_update",
+      "reason_text": "Attribute change forces replacement: secret_string",
+      "replace_paths": [
+        "secret_string"
       ],
       "index_shift": false,
       "drift_also": false
@@ -86,9 +104,9 @@
           "path": "inline_policy[0].policy",
           "kind": "long",
           "diff": {
-            "header": "inline_policy[0].policy: 25 lines changed of 25 (+25 -0)",
+            "header": "inline_policy[0].policy: 32 lines changed of 32 (+32 -0)",
             "lines": [
-              "@@ -1,0 +1,25 @@",
+              "@@ -1,0 +1,32 @@",
               "+{",
               "+  \"Statement\": [",
               "+    {",
@@ -105,6 +123,13 @@
               "+    },",
               "+    {",
               "+      \"Action\": [",
+              "+        \"secretsmanager:GetSecretValue\"",
+              "+      ],",
+              "+      \"Effect\": \"Allow\",",
+              "+      \"Resource\": \"arn:aws:secretsmanager:us-east-1:123456789012:secret:orders/db-credentials-1LFT0S\"",
+              "+    },",
+              "+    {",
+              "+      \"Action\": [",
               "+        \"dynamodb:PutItem\",",
               "+        \"dynamodb:GetItem\"",
               "+      ],",
@@ -116,11 +141,12 @@
               "+}",
               "statements:",
               "+Allow sqs:DeleteMessage,sqs:ReceiveMessage -> arn:aws:sqs:us-east-1:123456789012:orders-bulk,arn:aws:sqs:us-east-1:123456789012:orders-priority,arn:aws:sqs:us-east-1:123456789012:orders-standard",
+              "+Allow secretsmanager:GetSecretValue -> arn:aws:secretsmanager:us-east-1:123456789012:secret:orders/db-credentials-1LFT0S",
               "+Allow dynamodb:GetItem,dynamodb:PutItem -> arn:aws:dynamodb:us-east-1:123456789012:table/orders"
             ],
-            "added": 25,
+            "added": 32,
             "removed": 0,
-            "total_lines": 25
+            "total_lines": 32
           }
         }
       ],
@@ -152,8 +178,8 @@
       "cross_account": true,
       "counts": {
         "create": 3,
-        "update": 3,
-        "replace": 1,
+        "update": 4,
+        "replace": 2,
         "delete": 1,
         "read": 0,
         "no_op": 7,
@@ -166,6 +192,8 @@
         "aws_s3_bucket.receipts",
         "aws_s3_bucket_lifecycle_configuration.receipts",
         "aws_s3_bucket_versioning.receipts",
+        "aws_secretsmanager_secret.db",
+        "aws_secretsmanager_secret_version.db",
         "aws_sns_topic.events",
         "aws_sns_topic_subscription.audit",
         "aws_sns_topic_subscription.standard",
@@ -347,6 +375,66 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0
+    },
+    {
+      "address": "aws_secretsmanager_secret.db",
+      "type": "aws_secretsmanager_secret",
+      "module": "root",
+      "mode": "managed",
+      "action": "update",
+      "provider": "aws",
+      "account": "123456789012",
+      "account_source": "allowed_account_ids",
+      "cross_account": true,
+      "warnings": [],
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [
+        {
+          "path": "description",
+          "kind": "value",
+          "before": "Database credentials for the orders service",
+          "after": "Database credentials for the orders service (rotated quarterly)"
+        }
+      ],
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "apply"
+    },
+    {
+      "address": "aws_secretsmanager_secret_version.db",
+      "type": "aws_secretsmanager_secret_version",
+      "module": "root",
+      "mode": "managed",
+      "action": "replace",
+      "provider": "aws",
+      "account": "123456789012",
+      "account_source": "allowed_account_ids",
+      "cross_account": true,
+      "warnings": [],
+      "stateful": false,
+      "reason": "replace_because_cannot_update",
+      "reason_text": "Attribute change forces replacement: secret_string",
+      "replace_paths": [
+        "secret_string"
+      ],
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [
+        {
+          "path": "secret_binary",
+          "kind": "sensitive"
+        },
+        {
+          "path": "secret_string",
+          "kind": "sensitive",
+          "forces_replacement": true
+        }
+      ],
+      "known_after_apply": 6,
+      "wave": 2,
+      "wave_phase": "apply"
     },
     {
       "address": "aws_sns_topic.events",
@@ -593,6 +681,14 @@
           "instances": 1
         },
         {
+          "address": "aws_secretsmanager_secret.db",
+          "action": "update",
+          "actions": {
+            "update": 1
+          },
+          "instances": 1
+        },
+        {
           "address": "aws_sqs_queue.orders",
           "action": "delete",
           "actions": {
@@ -621,6 +717,14 @@
           "action": "update",
           "actions": {
             "update": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "aws_secretsmanager_secret_version.db",
+          "action": "replace",
+          "actions": {
+            "replace": 1
           },
           "instances": 1
         },

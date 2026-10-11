@@ -30,12 +30,15 @@ mkdir -p "$work" "$out"
 cd "$work"
 
 # 1. Deploy v1: this is the production state the plans are made against.
+# The database password is a fake value; the proposed change rotates it.
+export TF_VAR_db_password=initial-password-v1
 cp "$tf/v1-deployed/main.tf" .
 terraform init -input=false -no-color ${init_args[@]+"${init_args[@]}"} >/dev/null
 terraform apply -auto-approve -input=false -no-color >/dev/null
 cp terraform.tfstate "$out/terraform.tfstate"
 
 # 2. Plan the proposed change (v2), then the revised one (v3), against the same state.
+export TF_VAR_db_password=rotated-password-v2
 for spec in v2-proposed:plan.json v3-revised:plan-revised.json; do
   cp "$tf/${spec%%:*}/main.tf" main.tf
   terraform plan -input=false -no-color -out=plan.bin >/dev/null

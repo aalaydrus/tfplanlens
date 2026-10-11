@@ -116,7 +116,7 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
 
 
 <section id="danger" class="panel danger" aria-labelledby="danger-h">
-  <h2 id="danger-h">Danger: 2 delete/replace</h2>
+  <h2 id="danger-h">Danger: 3 delete/replace</h2>
   
   
   <div class="finding">
@@ -126,6 +126,15 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
     <p class="why">Attribute change forces replacement: range_key, hash_key</p>
     
     <div class="meta">aws_dynamodb_table &middot; target account <span class="mono">123456789012</span> (source: allowed_account_ids)</div>
+  </div>
+  
+  <div class="finding">
+    <div><b class="a-replace">REPLACE</b> <span class="mono">aws_secretsmanager_secret_version.db</span>
+      
+      </div>
+    <p class="why">Attribute change forces replacement: secret_string</p>
+    
+    <div class="meta">aws_secretsmanager_secret_version &middot; target account <span class="mono">123456789012</span> (source: allowed_account_ids)</div>
   </div>
   
   <div class="finding">
@@ -141,7 +150,7 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
 
 <section aria-label="Summary">
   <div class="tiles">
-    <div class="tile"><b class="a-create">3</b><span>create</span></div><div class="tile"><b class="a-update">3</b><span>update</span></div><div class="tile"><b class="a-replace">1</b><span>replace</span></div><div class="tile"><b class="a-delete">1</b><span>delete</span></div><div class="tile"><b class="a-no-op">7</b><span>no-op</span></div><div class="tile"><b class="a-update">2</b><span>drift</span></div><div class="tile"><b class="a-read">34</b><span>known after apply</span></div><div class="tile"><b class="a-replace">0</b><span>warnings</span></div>
+    <div class="tile"><b class="a-create">3</b><span>create</span></div><div class="tile"><b class="a-update">4</b><span>update</span></div><div class="tile"><b class="a-replace">2</b><span>replace</span></div><div class="tile"><b class="a-delete">1</b><span>delete</span></div><div class="tile"><b class="a-no-op">7</b><span>no-op</span></div><div class="tile"><b class="a-update">2</b><span>drift</span></div><div class="tile"><b class="a-read">40</b><span>known after apply</span></div><div class="tile"><b class="a-replace">0</b><span>warnings</span></div>
   </div>
 </section>
 
@@ -156,12 +165,12 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
     <text x="174" y="17">3</text>
     
     <text x="0" y="41">update</text>
-    <rect class="bar" x="70" y="28" width="98" height="16" rx="3" style="fill: var(--update)"><title>update: 3</title></rect>
-    <text x="174" y="41">3</text>
+    <rect class="bar" x="70" y="28" width="131" height="16" rx="3" style="fill: var(--update)"><title>update: 4</title></rect>
+    <text x="207" y="41">4</text>
     
     <text x="0" y="65">replace</text>
-    <rect class="bar" x="70" y="52" width="32" height="16" rx="3" style="fill: var(--replace)"><title>replace: 1</title></rect>
-    <text x="108" y="65">1</text>
+    <rect class="bar" x="70" y="52" width="65" height="16" rx="3" style="fill: var(--replace)"><title>replace: 2</title></rect>
+    <text x="141" y="65">2</text>
     
     <text x="0" y="89">delete</text>
     <rect class="bar" x="70" y="76" width="32" height="16" rx="3" style="fill: var(--delete)"><title>delete: 1</title></rect>
@@ -199,8 +208,8 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
 <div class="attr">
   <div><span class="path mono">inline_policy[0].policy</span></div>
   
-    <div>inline_policy[0].policy: 25 lines changed of 25 (&#43;25 -0)</div>
-    <div class="diff mono"><div class="hunk">@@ -1,0 &#43;1,25 @@</div><div class="add">&#43;{</div><div class="add">&#43;  &#34;Statement&#34;: [</div><div class="add">&#43;    {</div><div class="add">&#43;      &#34;Action&#34;: [</div><div class="add">&#43;        &#34;sqs:ReceiveMessage&#34;,</div><div class="add">&#43;        &#34;sqs:DeleteMessage&#34;</div><div class="add">&#43;      ],</div><div class="add">&#43;      &#34;Effect&#34;: &#34;Allow&#34;,</div><div class="add">&#43;      &#34;Resource&#34;: [</div><div class="add">&#43;        &#34;arn:aws:sqs:us-east-1:123456789012:orders-bulk&#34;,</div><div class="add">&#43;        &#34;arn:aws:sqs:us-east-1:123456789012:orders-priority&#34;,</div><div class="add">&#43;        &#34;arn:aws:sqs:us-east-1:123456789012:orders-standard&#34;</div><div class="add">&#43;      ]</div><div class="add">&#43;    },</div><div class="add">&#43;    {</div><div class="add">&#43;      &#34;Action&#34;: [</div><div class="add">&#43;        &#34;dynamodb:PutItem&#34;,</div><div class="add">&#43;        &#34;dynamodb:GetItem&#34;</div><div class="add">&#43;      ],</div><div class="add">&#43;      &#34;Effect&#34;: &#34;Allow&#34;,</div><div class="add">&#43;      &#34;Resource&#34;: &#34;arn:aws:dynamodb:us-east-1:123456789012:table/orders&#34;</div><div class="add">&#43;    }</div><div class="add">&#43;  ],</div><div class="add">&#43;  &#34;Version&#34;: &#34;2012-10-17&#34;</div><div class="add">&#43;}</div><div class="ctx">statements:</div><div class="add">&#43;Allow sqs:DeleteMessage,sqs:ReceiveMessage -&gt; arn:aws:sqs:us-east-1:123456789012:orders-bulk,arn:aws:sqs:us-east-1:123456789012:orders-priority,arn:aws:sqs:us-east-1:123456789012:orders-standard</div><div class="add">&#43;Allow dynamodb:GetItem,dynamodb:PutItem -&gt; arn:aws:dynamodb:us-east-1:123456789012:table/orders</div></div>
+    <div>inline_policy[0].policy: 32 lines changed of 32 (&#43;32 -0)</div>
+    <div class="diff mono"><div class="hunk">@@ -1,0 &#43;1,32 @@</div><div class="add">&#43;{</div><div class="add">&#43;  &#34;Statement&#34;: [</div><div class="add">&#43;    {</div><div class="add">&#43;      &#34;Action&#34;: [</div><div class="add">&#43;        &#34;sqs:ReceiveMessage&#34;,</div><div class="add">&#43;        &#34;sqs:DeleteMessage&#34;</div><div class="add">&#43;      ],</div><div class="add">&#43;      &#34;Effect&#34;: &#34;Allow&#34;,</div><div class="add">&#43;      &#34;Resource&#34;: [</div><div class="add">&#43;        &#34;arn:aws:sqs:us-east-1:123456789012:orders-bulk&#34;,</div><div class="add">&#43;        &#34;arn:aws:sqs:us-east-1:123456789012:orders-priority&#34;,</div><div class="add">&#43;        &#34;arn:aws:sqs:us-east-1:123456789012:orders-standard&#34;</div><div class="add">&#43;      ]</div><div class="add">&#43;    },</div><div class="add">&#43;    {</div><div class="add">&#43;      &#34;Action&#34;: [</div><div class="add">&#43;        &#34;secretsmanager:GetSecretValue&#34;</div><div class="add">&#43;      ],</div><div class="add">&#43;      &#34;Effect&#34;: &#34;Allow&#34;,</div><div class="add">&#43;      &#34;Resource&#34;: &#34;arn:aws:secretsmanager:us-east-1:123456789012:secret:orders/db-credentials-1LFT0S&#34;</div><div class="add">&#43;    },</div><div class="add">&#43;    {</div><div class="add">&#43;      &#34;Action&#34;: [</div><div class="add">&#43;        &#34;dynamodb:PutItem&#34;,</div><div class="add">&#43;        &#34;dynamodb:GetItem&#34;</div><div class="add">&#43;      ],</div><div class="add">&#43;      &#34;Effect&#34;: &#34;Allow&#34;,</div><div class="add">&#43;      &#34;Resource&#34;: &#34;arn:aws:dynamodb:us-east-1:123456789012:table/orders&#34;</div><div class="add">&#43;    }</div><div class="add">&#43;  ],</div><div class="add">&#43;  &#34;Version&#34;: &#34;2012-10-17&#34;</div><div class="add">&#43;}</div><div class="ctx">statements:</div><div class="add">&#43;Allow sqs:DeleteMessage,sqs:ReceiveMessage -&gt; arn:aws:sqs:us-east-1:123456789012:orders-bulk,arn:aws:sqs:us-east-1:123456789012:orders-priority,arn:aws:sqs:us-east-1:123456789012:orders-standard</div><div class="add">&#43;Allow secretsmanager:GetSecretValue -&gt; arn:aws:secretsmanager:us-east-1:123456789012:secret:orders/db-credentials-1LFT0S</div><div class="add">&#43;Allow dynamodb:GetItem,dynamodb:PutItem -&gt; arn:aws:dynamodb:us-east-1:123456789012:table/orders</div></div>
     <details class="full"><summary>expand full value</summary>
       <b>before</b><pre></pre>
       <b>after</b><pre>{
@@ -216,6 +225,13 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
         &#34;arn:aws:sqs:us-east-1:123456789012:orders-priority&#34;,
         &#34;arn:aws:sqs:us-east-1:123456789012:orders-standard&#34;
       ]
+    },
+    {
+      &#34;Action&#34;: [
+        &#34;secretsmanager:GetSecretValue&#34;
+      ],
+      &#34;Effect&#34;: &#34;Allow&#34;,
+      &#34;Resource&#34;: &#34;arn:aws:secretsmanager:us-east-1:123456789012:secret:orders/db-credentials-1LFT0S&#34;
     },
     {
       &#34;Action&#34;: [
@@ -255,12 +271,12 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
   <h2 id="waves-h">Waves</h2>
   <p class="src">Terraform applies in parallel: this shows possible parallelism, not a strict order.</p>
   
-  <details open><summary><b>apply wave 1</b> (4 resource(s))</summary>
-    <ul><li><b class="a-replace">replace</b> <span class="mono">aws_dynamodb_table.orders</span></li><li><b class="a-create">create</b> <span class="mono">aws_s3_bucket_lifecycle_configuration.receipts</span></li><li><b class="a-delete">delete</b> <span class="mono">aws_sqs_queue.orders</span> <span class="src">(3 instances)</span></li><li><b class="a-update">update</b> <span class="mono">aws_ssm_parameter.flags</span></li></ul>
+  <details open><summary><b>apply wave 1</b> (5 resource(s))</summary>
+    <ul><li><b class="a-replace">replace</b> <span class="mono">aws_dynamodb_table.orders</span></li><li><b class="a-create">create</b> <span class="mono">aws_s3_bucket_lifecycle_configuration.receipts</span></li><li><b class="a-update">update</b> <span class="mono">aws_secretsmanager_secret.db</span></li><li><b class="a-delete">delete</b> <span class="mono">aws_sqs_queue.orders</span> <span class="src">(3 instances)</span></li><li><b class="a-update">update</b> <span class="mono">aws_ssm_parameter.flags</span></li></ul>
   </details>
   
-  <details open><summary><b>apply wave 2</b> (2 resource(s))</summary>
-    <ul><li><b class="a-update">update</b> <span class="mono">aws_iam_role_policy.worker</span></li><li><b class="a-create">create</b> <span class="mono">aws_sns_topic_subscription.audit</span></li></ul>
+  <details open><summary><b>apply wave 2</b> (3 resource(s))</summary>
+    <ul><li><b class="a-update">update</b> <span class="mono">aws_iam_role_policy.worker</span></li><li><b class="a-replace">replace</b> <span class="mono">aws_secretsmanager_secret_version.db</span></li><li><b class="a-create">create</b> <span class="mono">aws_sns_topic_subscription.audit</span></li></ul>
   </details>
   
   <p class="src">1 reference(s) to local values are not visible in the plan JSON, so a dependency reached only through a local is missing and a resource can show in an earlier wave than it will run.</p>
@@ -368,7 +384,35 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="6" data-action="no-op" data-account="123456789012" data-module="root" data-type="aws_sns_topic" data-unit="" data-parent="(single)" data-quiet="1" data-text="aws_sns_topic.events aws_sns_topic 123456789012 root no-op">
+      <tr class="row" tabindex="0" data-idx="6" data-action="update" data-account="123456789012" data-module="root" data-type="aws_secretsmanager_secret" data-unit="" data-parent="(single)" data-quiet="0" data-text="aws_secretsmanager_secret.db aws_secretsmanager_secret 123456789012 root update">
+        <td><b class="a-update">~ update</b></td>
+        <td class="addr mono">aws_secretsmanager_secret.db
+          
+          
+          
+          
+          
+          <span class="badge">apply wave 1</span></td>
+        <td>aws_secretsmanager_secret</td>
+        <td><span class="mono">123456789012</span> <span class="src">(allowed_account_ids)</span> <span class="badge warn">differs from apply account</span></td>
+        <td>root</td>
+      </tr>
+    
+      <tr class="row" tabindex="0" data-idx="7" data-action="replace" data-account="123456789012" data-module="root" data-type="aws_secretsmanager_secret_version" data-unit="" data-parent="(single)" data-quiet="0" data-text="aws_secretsmanager_secret_version.db aws_secretsmanager_secret_version 123456789012 root replace">
+        <td><b class="a-replace">-/&#43; replace</b></td>
+        <td class="addr mono">aws_secretsmanager_secret_version.db
+          
+          
+          
+          
+          
+          <span class="badge">apply wave 2</span></td>
+        <td>aws_secretsmanager_secret_version</td>
+        <td><span class="mono">123456789012</span> <span class="src">(allowed_account_ids)</span> <span class="badge warn">differs from apply account</span></td>
+        <td>root</td>
+      </tr>
+    
+      <tr class="row" tabindex="0" data-idx="8" data-action="no-op" data-account="123456789012" data-module="root" data-type="aws_sns_topic" data-unit="" data-parent="(single)" data-quiet="1" data-text="aws_sns_topic.events aws_sns_topic 123456789012 root no-op">
         <td><b class="a-no-op">= no-op</b></td>
         <td class="addr mono">aws_sns_topic.events
           
@@ -382,7 +426,7 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="7" data-action="create" data-account="123456789012" data-module="root" data-type="aws_sns_topic_subscription" data-unit="" data-parent="(single)" data-quiet="0" data-text="aws_sns_topic_subscription.audit aws_sns_topic_subscription 123456789012 root create">
+      <tr class="row" tabindex="0" data-idx="9" data-action="create" data-account="123456789012" data-module="root" data-type="aws_sns_topic_subscription" data-unit="" data-parent="(single)" data-quiet="0" data-text="aws_sns_topic_subscription.audit aws_sns_topic_subscription 123456789012 root create">
         <td><b class="a-create">&#43; create</b></td>
         <td class="addr mono">aws_sns_topic_subscription.audit
           
@@ -396,7 +440,7 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="8" data-action="no-op" data-account="123456789012" data-module="root" data-type="aws_sns_topic_subscription" data-unit="" data-parent="(single)" data-quiet="1" data-text="aws_sns_topic_subscription.standard aws_sns_topic_subscription 123456789012 root no-op">
+      <tr class="row" tabindex="0" data-idx="10" data-action="no-op" data-account="123456789012" data-module="root" data-type="aws_sns_topic_subscription" data-unit="" data-parent="(single)" data-quiet="1" data-text="aws_sns_topic_subscription.standard aws_sns_topic_subscription 123456789012 root no-op">
         <td><b class="a-no-op">= no-op</b></td>
         <td class="addr mono">aws_sns_topic_subscription.standard
           
@@ -410,7 +454,7 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="9" data-action="no-op" data-account="123456789012" data-module="root" data-type="aws_sqs_queue" data-unit="" data-parent="(single)" data-quiet="1" data-text="aws_sqs_queue.dlq aws_sqs_queue 123456789012 root no-op">
+      <tr class="row" tabindex="0" data-idx="11" data-action="no-op" data-account="123456789012" data-module="root" data-type="aws_sqs_queue" data-unit="" data-parent="(single)" data-quiet="1" data-text="aws_sqs_queue.dlq aws_sqs_queue 123456789012 root no-op">
         <td><b class="a-no-op">= no-op</b></td>
         <td class="addr mono">aws_sqs_queue.dlq
           
@@ -424,7 +468,7 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="10" data-action="create" data-account="123456789012" data-module="root" data-type="aws_sqs_queue" data-unit="" data-parent="aws_sqs_queue.orders" data-quiet="0" data-text="aws_sqs_queue.orders[&#34;audit&#34;] aws_sqs_queue 123456789012 root create">
+      <tr class="row" tabindex="0" data-idx="12" data-action="create" data-account="123456789012" data-module="root" data-type="aws_sqs_queue" data-unit="" data-parent="aws_sqs_queue.orders" data-quiet="0" data-text="aws_sqs_queue.orders[&#34;audit&#34;] aws_sqs_queue 123456789012 root create">
         <td><b class="a-create">&#43; create</b></td>
         <td class="addr mono">aws_sqs_queue.orders[&#34;audit&#34;]
           
@@ -438,7 +482,7 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="11" data-action="delete" data-account="123456789012" data-module="root" data-type="aws_sqs_queue" data-unit="" data-parent="aws_sqs_queue.orders" data-quiet="0" data-text="aws_sqs_queue.orders[&#34;bulk&#34;] aws_sqs_queue 123456789012 root delete">
+      <tr class="row" tabindex="0" data-idx="13" data-action="delete" data-account="123456789012" data-module="root" data-type="aws_sqs_queue" data-unit="" data-parent="aws_sqs_queue.orders" data-quiet="0" data-text="aws_sqs_queue.orders[&#34;bulk&#34;] aws_sqs_queue 123456789012 root delete">
         <td><b class="a-delete">- delete</b></td>
         <td class="addr mono">aws_sqs_queue.orders[&#34;bulk&#34;]
           
@@ -452,7 +496,7 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="12" data-action="no-op" data-account="123456789012" data-module="root" data-type="aws_sqs_queue" data-unit="" data-parent="aws_sqs_queue.orders" data-quiet="1" data-text="aws_sqs_queue.orders[&#34;priority&#34;] aws_sqs_queue 123456789012 root no-op">
+      <tr class="row" tabindex="0" data-idx="14" data-action="no-op" data-account="123456789012" data-module="root" data-type="aws_sqs_queue" data-unit="" data-parent="aws_sqs_queue.orders" data-quiet="1" data-text="aws_sqs_queue.orders[&#34;priority&#34;] aws_sqs_queue 123456789012 root no-op">
         <td><b class="a-no-op">= no-op</b></td>
         <td class="addr mono">aws_sqs_queue.orders[&#34;priority&#34;]
           
@@ -466,7 +510,7 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="13" data-action="update" data-account="123456789012" data-module="root" data-type="aws_sqs_queue" data-unit="" data-parent="aws_sqs_queue.orders" data-quiet="0" data-text="aws_sqs_queue.orders[&#34;standard&#34;] aws_sqs_queue 123456789012 root update">
+      <tr class="row" tabindex="0" data-idx="15" data-action="update" data-account="123456789012" data-module="root" data-type="aws_sqs_queue" data-unit="" data-parent="aws_sqs_queue.orders" data-quiet="0" data-text="aws_sqs_queue.orders[&#34;standard&#34;] aws_sqs_queue 123456789012 root update">
         <td><b class="a-update">~ update</b></td>
         <td class="addr mono">aws_sqs_queue.orders[&#34;standard&#34;]
           
@@ -480,7 +524,7 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="14" data-action="update" data-account="123456789012" data-module="root" data-type="aws_ssm_parameter" data-unit="" data-parent="(single)" data-quiet="0" data-text="aws_ssm_parameter.flags aws_ssm_parameter 123456789012 root update">
+      <tr class="row" tabindex="0" data-idx="16" data-action="update" data-account="123456789012" data-module="root" data-type="aws_ssm_parameter" data-unit="" data-parent="(single)" data-quiet="0" data-text="aws_ssm_parameter.flags aws_ssm_parameter 123456789012 root update">
         <td><b class="a-update">~ update</b></td>
         <td class="addr mono">aws_ssm_parameter.flags
           
@@ -632,6 +676,48 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
 </template>
 
 <template id="d6">
+  <h3 class="mono">aws_secretsmanager_secret.db</h3>
+  <p><b class="a-update">update</b>
+    </p>
+  <p class="meta">aws_secretsmanager_secret &middot; provider <span class="mono">aws</span><br>
+    target account <span class="mono">123456789012</span> (source: allowed_account_ids) &mdash; <b>differs from apply account</b></p>
+  
+  
+  
+  
+<div class="attr">
+  <div><span class="path mono">description</span></div>
+  <div><span class="mono">&#34;Database credentials for the orders service&#34;</span> &rarr; <span class="mono">&#34;Database credentials for the orders service (rotated quarterly)&#34;</span></div>
+  
+</div>
+
+</template>
+
+<template id="d7">
+  <h3 class="mono">aws_secretsmanager_secret_version.db</h3>
+  <p><b class="a-replace">replace, 6 known after apply</b>
+    </p>
+  <p class="meta">aws_secretsmanager_secret_version &middot; provider <span class="mono">aws</span><br>
+    target account <span class="mono">123456789012</span> (source: allowed_account_ids) &mdash; <b>differs from apply account</b></p>
+  <p><b>Why:</b> Attribute change forces replacement: secret_string</p>
+  
+  
+  
+<div class="attr">
+  <div><span class="path mono">secret_binary</span></div>
+  <div class="empty">(sensitive value changed)</div>
+  
+</div>
+
+<div class="attr">
+  <div><span class="path mono">secret_string</span> <span class="badge warn">forces replacement</span></div>
+  <div class="empty">(sensitive value changed)</div>
+  
+</div>
+
+</template>
+
+<template id="d8">
   <h3 class="mono">aws_sns_topic.events</h3>
   <p><b class="a-no-op">no-op</b>
     </p>
@@ -643,7 +729,7 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
   
 </template>
 
-<template id="d7">
+<template id="d9">
   <h3 class="mono">aws_sns_topic_subscription.audit</h3>
   <p><b class="a-create">create, 7 known after apply</b>
     </p>
@@ -655,7 +741,7 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
   
 </template>
 
-<template id="d8">
+<template id="d10">
   <h3 class="mono">aws_sns_topic_subscription.standard</h3>
   <p><b class="a-no-op">no-op</b>
     </p>
@@ -667,7 +753,7 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
   
 </template>
 
-<template id="d9">
+<template id="d11">
   <h3 class="mono">aws_sqs_queue.dlq</h3>
   <p><b class="a-no-op">no-op</b>
     </p>
@@ -679,7 +765,7 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
   
 </template>
 
-<template id="d10">
+<template id="d12">
   <h3 class="mono">aws_sqs_queue.orders[&#34;audit&#34;]</h3>
   <p><b class="a-create">create, 10 known after apply</b>
     </p>
@@ -691,7 +777,7 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
   
 </template>
 
-<template id="d11">
+<template id="d13">
   <h3 class="mono">aws_sqs_queue.orders[&#34;bulk&#34;]</h3>
   <p><b class="a-delete">delete</b>
     </p>
@@ -703,7 +789,7 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
   
 </template>
 
-<template id="d12">
+<template id="d14">
   <h3 class="mono">aws_sqs_queue.orders[&#34;priority&#34;]</h3>
   <p><b class="a-no-op">no-op</b>
     </p>
@@ -715,7 +801,7 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
   
 </template>
 
-<template id="d13">
+<template id="d15">
   <h3 class="mono">aws_sqs_queue.orders[&#34;standard&#34;]</h3>
   <p><b class="a-update">update</b>
     </p>
@@ -733,7 +819,7 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
 
 </template>
 
-<template id="d14">
+<template id="d16">
   <h3 class="mono">aws_ssm_parameter.flags</h3>
   <p><b class="a-update">update, 1 known after apply</b>
     </p>

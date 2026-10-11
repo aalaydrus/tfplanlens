@@ -7,7 +7,7 @@ Terraform, AWS or a network: the plans are already in
 
 ## The scenario in one minute
 
-An orders platform (S3, DynamoDB, SNS, SQS, IAM, SSM; diagram in
+An orders platform (S3, DynamoDB, SNS, SQS, Secrets Manager, IAM, SSM; diagram in
 [`../assets/ARCHITECTURE.md`](../assets/ARCHITECTURE.md)). Production runs
 **v1**. A pull request proposes **v2**. Terraform runs from a CI account
 (`999999999999`) into the workload account (`123456789012`).
@@ -56,12 +56,14 @@ it will be applied from). The part to read first is **Danger**, full output in
 ```
 == Summary ==
 Executed from (apply account): 999999999999 (source: config)
-Actions: create 3, update 3, replace 1, delete 1, read 0, no-op 7, forget 0
+Actions: create 3, update 4, replace 2, delete 1, read 0, no-op 8, forget 0
 
 == Danger ==
 ! REPLACE aws_dynamodb_table.orders [STATEFUL]
     type: aws_dynamodb_table | target account: 123456789012 (source: allowed_account_ids)
     why: Attribute change forces replacement: range_key, hash_key
+! REPLACE aws_secretsmanager_secret_version.db
+    why: Attribute change forces replacement: secret_string
 ! DELETE aws_sqs_queue.orders["bulk"]
     why: for_each key removed: bulk
     WARNING: for_each key removed while sibling instances change (possible key rename: aws_sqs_queue.orders["audit"], ...
@@ -72,6 +74,14 @@ What to notice:
 - The PR looks like "add an index and tidy some queues", but one line in it
   **destroys and recreates the production orders table**. That is the finding a
   plain `terraform plan` buries on page three.
+- Rotating the database password (a new `secret_string`) is a **REPLACE** of
+  `aws_secretsmanager_secret_version`, not an in-place update: with this AWS
+  provider the old version is destroyed and a new one created. It is listed as
+  danger because it is a replace, but it is the routine part of this PR, which is
+  why it is on the list of cases to refine
+  ([`field-notes`](../../field-notes/WISHLIST.md)). The password itself is never
+  printed: it shows as `(sensitive value changed)`, even though `plan.json`
+  holds it in plain text (see [`field-notes`](../../field-notes/TERRAFORM_GOTCHAS.md)).
 - The `bulk` delete carries a warning: a queue key was removed while another
   key was added, which is how an accidental rename looks.
 - The target account (`123456789012`) was read from the provider's
@@ -132,11 +142,11 @@ The reviewer asks for the index instead of a re-key, and to keep `bulk`. The
 author pushes **v3**; the new plan is `assets/input/plan-revised.json`.
 
 ```
-tfplanlens report assets/input/plan-revised.json     # Danger: "No deletes or replacements."
+tfplanlens report assets/input/plan-revised.json     # Danger: only the password rotation is left
 tfplanlens diff assets/input/plan.json assets/input/plan-revised.json
 ```
 
-The gate now exits 0 (see [`output/gate-exit.txt`](../output/gate-exit.txt)). The
+The table and the `bulk` queue are no longer in Danger (the password rotation is, as before). The gate now exits 0 (see [`output/gate-exit.txt`](../output/gate-exit.txt)). The
 diff tells the reviewer exactly what the push changed, so they need not reread
 everything ([`output/diff.txt`](../output/diff.txt), or `-f markdown` for the PR:
 [`output/diff.md`](../output/diff.md)):

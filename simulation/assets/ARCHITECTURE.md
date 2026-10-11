@@ -22,6 +22,7 @@ flowchart LR
 
   subgraph access[Config and access]
     SSM["SSM /orders/feature-flags"]
+    SECRET["Secrets Manager<br/>orders/db-credentials<br/>+ secret version"]
     ROLE["IAM role orders-worker"]
     POL["IAM role policy"]
   end
@@ -35,6 +36,7 @@ flowchart LR
   ROLE --- POL
   POL -->|receive/delete| QS & QP & QB & QA
   POL -->|put/get| DDB
+  POL -->|get secret value| SECRET
   ROLE -.->|reads| SSM
 ```
 
@@ -43,8 +45,8 @@ flowchart LR
 | Version | What it is | Notable changes from the one before |
 |---|---|---|
 | [`v1-deployed`](terraform/v1-deployed/main.tf) | What runs in production. Its state is [`input/terraform.tfstate`](input/terraform.tfstate). | |
-| [`v2-proposed`](terraform/v2-proposed/main.tf) | A pull request. Plan: [`input/plan.json`](input/plan.json). | DynamoDB table re-keyed by `customer_id` (replaces the table); `bulk` queue removed; `audit` queue and subscription added; `standard` visibility timeout 30s to 60s; S3 lifecycle rule; feature flag on; IAM policy updated. |
-| [`v3-revised`](terraform/v3-revised/main.tf) | The same PR after review. Plan: [`input/plan-revised.json`](input/plan-revised.json). | Keeps the table key and adds an index instead (update in place); keeps the `bulk` queue. |
+| [`v2-proposed`](terraform/v2-proposed/main.tf) | A pull request. Plan: [`input/plan.json`](input/plan.json). | DynamoDB table re-keyed by `customer_id` (replaces the table); `bulk` queue removed; `audit` queue and subscription added; `standard` visibility timeout 30s to 60s; S3 lifecycle rule; feature flag on; database password rotated (a new secret version) and the secret's description edited; IAM policy updated. |
+| [`v3-revised`](terraform/v3-revised/main.tf) | The same PR after review. Plan: [`input/plan-revised.json`](input/plan-revised.json). | Keeps the table key and adds an index instead (update in place); keeps the `bulk` queue. The password rotation stays. |
 
 ## Where the plans came from
 
