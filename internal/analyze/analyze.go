@@ -170,7 +170,9 @@ func Analyze(p *plan.Plan, cfg *config.Config, opts *Options) *Analysis {
 		if c.HasIndex {
 			ch.Parent, ch.Key = c.ConfigAddress, c.Index
 		}
-		if as, ok := assigned[c.ConfigAddress]; ok {
+		// Only instances that do something are in a wave: a no-op sibling
+		// of a changing instance is not applied.
+		if as, ok := assigned[c.ConfigAddress]; ok && c.Action != "no-op" && c.Action != "forget" {
 			if n, ok := renumber[as.phase][as.wave]; ok {
 				ch.Wave, ch.WavePhase = n, as.phase
 			}
