@@ -38,3 +38,19 @@ dist/
 node_modules
 work/
 /tfplanlens
+
+# Terraform plans, state and variable files can hold secret values in plain
+# text. Never commit real ones. The fabricated examples under testdata/ and
+# simulation/ are the only exceptions.
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+.terraform/
+plan.bin
+plan.out
+tfplan
+plan.json
+plan-*.json
+!testdata/**
+!simulation/**
