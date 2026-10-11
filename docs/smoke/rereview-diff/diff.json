@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "plan": [],
+  "old": {
+    "create": 1,
+    "update": 1,
+    "replace": 1,
+    "delete": 0,
+    "read": 0,
+    "no_op": 3,
+    "forget": 0
+  },
+  "new": {
+    "create": 1,
+    "update": 1,
+    "replace": 0,
+    "delete": 1,
+    "read": 0,
+    "no_op": 3,
+    "forget": 0
+  },
+  "added": [
+    {
+      "address": "terraform_data.cache[2]",
+      "kind": "added",
+      "new_action": "create",
+      "differences": []
+    },
+    {
+      "address": "terraform_data.legacy",
+      "kind": "added",
+      "new_action": "delete",
+      "differences": [],
+      "danger": true
+    }
+  ],
+  "removed": [
+    {
+      "address": "terraform_data.db",
+      "kind": "removed",
+      "old_action": "replace",
+      "differences": [],
+      "defused": true
+    },
+    {
+      "address": "terraform_data.queue",
+      "kind": "removed",
+      "old_action": "create",
+      "differences": []
+    }
+  ],
+  "changed": [
+    {
+      "address": "terraform_data.app",
+      "kind": "changed",
+      "old_action": "update",
+      "new_action": "update",
+      "differences": [
+        "attribute input: was \"v1\" =\u003e \"v2\", now \"v1\" =\u003e \"v3\""
+      ]
+    }
+  ],
+  "unchanged": 0,
+  "new_danger": [
+    "terraform_data.legacy"
+  ],
+  "defused": [
+    "terraform_data.db"
+  ],
+  "drift_new": [],
+  "drift_gone": []
+}

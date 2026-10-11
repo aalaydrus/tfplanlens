@@ -47,3 +47,24 @@
 
 </details>
 
+### Waves
+
+Terraform applies in parallel: this shows possible parallelism, not a strict order.
+
+<details><summary><b>destroy wave 1</b> &mdash; 3 resource(s)</summary>
+
+- delete `terraform_data.db`
+- delete `terraform_data.shard` (2 instances)
+- delete `terraform_data.web`
+
+</details>
+
+### Resources with multiple instances
+
+<details><summary>terraform_data.shard (count) &mdash; 2 instance(s)</summary>
+
+- delete `0`
+- delete `1`
+
+</details>
+

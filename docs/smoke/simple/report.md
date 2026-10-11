@@ -45,3 +45,23 @@
 
 </details>
 
+### Waves
+
+Terraform applies in parallel: this shows possible parallelism, not a strict order.
+
+<details><summary><b>apply wave 1</b> &mdash; 3 resource(s)</summary>
+
+- create `terraform_data.cache`
+- replace `terraform_data.db`
+- update `terraform_data.web`
+
+</details>
+
+<details><summary><b>destroy wave 1</b> &mdash; 1 resource(s)</summary>
+
+- delete `terraform_data.old` (no configuration: order unknown)
+
+</details>
+
+
+> Resources removed from the configuration have no dependency information in the plan; their destroy order is unknown and they are shown in wave 1.

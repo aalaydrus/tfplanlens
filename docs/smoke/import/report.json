@@ -29,7 +29,9 @@
     },
     "known_after_apply": 2,
     "drift_count": 0,
-    "warnings": 0
+    "warnings": 0,
+    "apply_waves": 1,
+    "destroy_waves": 0
   },
   "findings": [],
   "drift": [],
@@ -71,7 +73,7 @@
       "warnings": [],
       "stateful": false,
       "import": true,
-      "import_id": "fc184291-6d4f-1d49-3525-548f3ef12a72",
+      "import_id": "e02b5035-f4a8-02be-3140-7e7f2d24d486",
       "removed_from_state_only": false,
       "attrs": [
         {
@@ -81,7 +83,9 @@
           "after": "managed"
         }
       ],
-      "known_after_apply": 1
+      "known_after_apply": 1,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "terraform_data.other",
@@ -105,7 +109,36 @@
           "after": "other-changed"
         }
       ],
-      "known_after_apply": 1
+      "known_after_apply": 1,
+      "wave": 1,
+      "wave_phase": "apply"
     }
-  ]
+  ],
+  "parents": [],
+  "waves": [
+    {
+      "phase": "apply",
+      "number": 1,
+      "resources": [
+        {
+          "address": "terraform_data.imp",
+          "action": "update",
+          "actions": {
+            "update": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "terraform_data.other",
+          "action": "update",
+          "actions": {
+            "update": 1
+          },
+          "instances": 1
+        }
+      ]
+    }
+  ],
+  "wave_notes": [],
+  "cycles": []
 }

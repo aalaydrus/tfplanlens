@@ -1,0 +1,278 @@
+{
+  "schema_version": 1,
+  "apply_account": {
+    "id": "111111111111",
+    "source": "flag",
+    "resolved": true
+  },
+  "notices": [],
+  "summary": {
+    "mode": "normal",
+    "applyable": true,
+    "errored": false,
+    "terraform_version": "1.16.5",
+    "total": 6,
+    "actions": {
+      "create": 1,
+      "update": 1,
+      "replace": 1,
+      "delete": 0,
+      "read": 0,
+      "no_op": 3,
+      "forget": 0
+    },
+    "by_type": {
+      "terraform_data": 3
+    },
+    "by_module": {
+      "root": 3
+    },
+    "known_after_apply": 5,
+    "drift_count": 0,
+    "warnings": 0,
+    "apply_waves": 1,
+    "destroy_waves": 0
+  },
+  "findings": [
+    {
+      "address": "terraform_data.db",
+      "type": "terraform_data",
+      "action": "replace",
+      "provider": "terraform",
+      "account": "111111111111",
+      "account_source": "apply_account",
+      "stateful": false,
+      "reason": "replace_because_cannot_update",
+      "reason_text": "Attribute change forces replacement: triggers_replace",
+      "replace_paths": [
+        "triggers_replace"
+      ],
+      "index_shift": false,
+      "drift_also": false
+    }
+  ],
+  "drift": [],
+  "groups": [
+    {
+      "key": "terraform",
+      "provider": "terraform",
+      "account": "111111111111",
+      "resolved": true,
+      "source": "apply_account",
+      "default": true,
+      "cross_account": false,
+      "counts": {
+        "create": 1,
+        "update": 1,
+        "replace": 1,
+        "delete": 0,
+        "read": 0,
+        "no_op": 3,
+        "forget": 0
+      },
+      "addresses": [
+        "terraform_data.app",
+        "terraform_data.cache[0]",
+        "terraform_data.cache[1]",
+        "terraform_data.db",
+        "terraform_data.legacy",
+        "terraform_data.queue"
+      ]
+    }
+  ],
+  "changes": [
+    {
+      "address": "terraform_data.app",
+      "type": "terraform_data",
+      "module": "root",
+      "mode": "managed",
+      "action": "update",
+      "provider": "terraform",
+      "account": "111111111111",
+      "account_source": "apply_account",
+      "cross_account": false,
+      "warnings": [],
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [
+        {
+          "path": "input",
+          "kind": "value",
+          "before": "v1",
+          "after": "v2"
+        }
+      ],
+      "known_after_apply": 1,
+      "wave": 1,
+      "wave_phase": "apply"
+    },
+    {
+      "address": "terraform_data.cache[0]",
+      "type": "terraform_data",
+      "module": "root",
+      "mode": "managed",
+      "action": "no-op",
+      "provider": "terraform",
+      "account": "111111111111",
+      "account_source": "apply_account",
+      "cross_account": false,
+      "warnings": [],
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [],
+      "known_after_apply": 0,
+      "parent": "terraform_data.cache",
+      "key": "0"
+    },
+    {
+      "address": "terraform_data.cache[1]",
+      "type": "terraform_data",
+      "module": "root",
+      "mode": "managed",
+      "action": "no-op",
+      "provider": "terraform",
+      "account": "111111111111",
+      "account_source": "apply_account",
+      "cross_account": false,
+      "warnings": [],
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [],
+      "known_after_apply": 0,
+      "parent": "terraform_data.cache",
+      "key": "1"
+    },
+    {
+      "address": "terraform_data.db",
+      "type": "terraform_data",
+      "module": "root",
+      "mode": "managed",
+      "action": "replace",
+      "provider": "terraform",
+      "account": "111111111111",
+      "account_source": "apply_account",
+      "cross_account": false,
+      "warnings": [],
+      "stateful": false,
+      "reason": "replace_because_cannot_update",
+      "reason_text": "Attribute change forces replacement: triggers_replace",
+      "replace_paths": [
+        "triggers_replace"
+      ],
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [
+        {
+          "path": "triggers_replace",
+          "kind": "value",
+          "before": "a",
+          "after": "b",
+          "forces_replacement": true
+        }
+      ],
+      "known_after_apply": 2,
+      "wave": 1,
+      "wave_phase": "apply"
+    },
+    {
+      "address": "terraform_data.legacy",
+      "type": "terraform_data",
+      "module": "root",
+      "mode": "managed",
+      "action": "no-op",
+      "provider": "terraform",
+      "account": "111111111111",
+      "account_source": "apply_account",
+      "cross_account": false,
+      "warnings": [],
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [],
+      "known_after_apply": 0
+    },
+    {
+      "address": "terraform_data.queue",
+      "type": "terraform_data",
+      "module": "root",
+      "mode": "managed",
+      "action": "create",
+      "provider": "terraform",
+      "account": "111111111111",
+      "account_source": "apply_account",
+      "cross_account": false,
+      "warnings": [],
+      "stateful": false,
+      "import": false,
+      "removed_from_state_only": false,
+      "attrs": [],
+      "known_after_apply": 2,
+      "wave": 1,
+      "wave_phase": "apply"
+    }
+  ],
+  "parents": [
+    {
+      "address": "terraform_data.cache",
+      "kind": "count",
+      "counts": {
+        "create": 0,
+        "update": 0,
+        "replace": 0,
+        "delete": 0,
+        "read": 0,
+        "no_op": 2,
+        "forget": 0
+      },
+      "instances": [
+        {
+          "key": "0",
+          "address": "terraform_data.cache[0]",
+          "action": "no-op"
+        },
+        {
+          "key": "1",
+          "address": "terraform_data.cache[1]",
+          "action": "no-op"
+        }
+      ]
+    }
+  ],
+  "waves": [
+    {
+      "phase": "apply",
+      "number": 1,
+      "resources": [
+        {
+          "address": "terraform_data.app",
+          "action": "update",
+          "actions": {
+            "update": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "terraform_data.db",
+          "action": "replace",
+          "actions": {
+            "replace": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "terraform_data.queue",
+          "action": "create",
+          "actions": {
+            "create": 1
+          },
+          "instances": 1
+        }
+      ]
+    }
+  ],
+  "wave_notes": [],
+  "cycles": []
+}

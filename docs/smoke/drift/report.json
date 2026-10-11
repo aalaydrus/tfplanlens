@@ -30,7 +30,9 @@
     },
     "known_after_apply": 15,
     "drift_count": 2,
-    "warnings": 0
+    "warnings": 0,
+    "apply_waves": 2,
+    "destroy_waves": 0
   },
   "findings": [],
   "drift": [
@@ -112,7 +114,9 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 7
+      "known_after_apply": 7,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "local_file.keep",
@@ -129,7 +133,9 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 7
+      "known_after_apply": 7,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "terraform_data.app",
@@ -153,7 +159,50 @@
           "after": "v2"
         }
       ],
-      "known_after_apply": 1
+      "known_after_apply": 1,
+      "wave": 2,
+      "wave_phase": "apply"
     }
-  ]
+  ],
+  "parents": [],
+  "waves": [
+    {
+      "phase": "apply",
+      "number": 1,
+      "resources": [
+        {
+          "address": "local_file.config",
+          "action": "create",
+          "actions": {
+            "create": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "local_file.keep",
+          "action": "create",
+          "actions": {
+            "create": 1
+          },
+          "instances": 1
+        }
+      ]
+    },
+    {
+      "phase": "apply",
+      "number": 2,
+      "resources": [
+        {
+          "address": "terraform_data.app",
+          "action": "update",
+          "actions": {
+            "update": 1
+          },
+          "instances": 1
+        }
+      ]
+    }
+  ],
+  "wave_notes": [],
+  "cycles": []
 }

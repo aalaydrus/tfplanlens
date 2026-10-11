@@ -33,7 +33,9 @@
     },
     "known_after_apply": 19,
     "drift_count": 0,
-    "warnings": 2
+    "warnings": 2,
+    "apply_waves": 2,
+    "destroy_waves": 0
   },
   "findings": [
     {
@@ -190,7 +192,9 @@
           "after": "prod v2"
         }
       ],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "aws_sns_topic_subscription.cross",
@@ -213,7 +217,9 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 6
+      "known_after_apply": 6,
+      "wave": 2,
+      "wave_phase": "apply"
     },
     {
       "address": "aws_sqs_queue.audit",
@@ -237,7 +243,9 @@
           "after": 60
         }
       ],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "aws_sqs_queue.runner",
@@ -265,7 +273,9 @@
           "after": "v2"
         }
       ],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "aws_sqs_queue.staging",
@@ -293,7 +303,9 @@
           "after": "v2"
         }
       ],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "aws_ssm_parameter.sandbox",
@@ -321,7 +333,9 @@
           "kind": "sensitive"
         }
       ],
-      "known_after_apply": 1
+      "known_after_apply": 1,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "module.net.aws_sqs_queue.inner",
@@ -363,7 +377,82 @@
           "after": null
         }
       ],
-      "known_after_apply": 12
+      "known_after_apply": 12,
+      "wave": 1,
+      "wave_phase": "apply"
     }
-  ]
+  ],
+  "parents": [],
+  "waves": [
+    {
+      "phase": "apply",
+      "number": 1,
+      "resources": [
+        {
+          "address": "aws_sns_topic.prod",
+          "action": "update",
+          "actions": {
+            "update": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "aws_sqs_queue.audit",
+          "action": "update",
+          "actions": {
+            "update": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "aws_sqs_queue.runner",
+          "action": "update",
+          "actions": {
+            "update": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "aws_sqs_queue.staging",
+          "action": "update",
+          "actions": {
+            "update": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "aws_ssm_parameter.sandbox",
+          "action": "update",
+          "actions": {
+            "update": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "module.net.aws_sqs_queue.inner",
+          "action": "replace",
+          "actions": {
+            "replace": 1
+          },
+          "instances": 1
+        }
+      ]
+    },
+    {
+      "phase": "apply",
+      "number": 2,
+      "resources": [
+        {
+          "address": "aws_sns_topic_subscription.cross",
+          "action": "create",
+          "actions": {
+            "create": 1
+          },
+          "instances": 1
+        }
+      ]
+    }
+  ],
+  "wave_notes": [],
+  "cycles": []
 }

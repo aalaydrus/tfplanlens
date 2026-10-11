@@ -31,7 +31,9 @@
     },
     "known_after_apply": 9,
     "drift_count": 0,
-    "warnings": 0
+    "warnings": 0,
+    "apply_waves": 1,
+    "destroy_waves": 1
   },
   "findings": [
     {
@@ -164,7 +166,9 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "parent": "terraform_data.counted",
+      "key": "0"
     },
     {
       "address": "terraform_data.follower",
@@ -183,7 +187,9 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 2
+      "known_after_apply": 2,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "terraform_data.requested",
@@ -202,7 +208,9 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 2
+      "known_after_apply": 2,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "terraform_data.single",
@@ -221,7 +229,9 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "terraform_data.single[\"a\"]",
@@ -238,7 +248,11 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 2
+      "known_after_apply": 2,
+      "parent": "terraform_data.single",
+      "key": "a",
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "terraform_data.tainted",
@@ -257,7 +271,9 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 2
+      "known_after_apply": 2,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "terraform_data.trigger",
@@ -281,7 +297,9 @@
           "after": "t2"
         }
       ],
-      "known_after_apply": 1
+      "known_after_apply": 1,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "module.gone.terraform_data.inner",
@@ -300,7 +318,9 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "destroy"
     },
     {
       "address": "module.mods[\"a\"].terraform_data.inner",
@@ -336,7 +356,87 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "destroy"
     }
-  ]
+  ],
+  "parents": [],
+  "waves": [
+    {
+      "phase": "apply",
+      "number": 1,
+      "resources": [
+        {
+          "address": "terraform_data.follower",
+          "action": "replace",
+          "actions": {
+            "replace": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "terraform_data.requested",
+          "action": "replace",
+          "actions": {
+            "replace": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "terraform_data.single",
+          "action": "delete",
+          "actions": {
+            "create": 1,
+            "delete": 1
+          },
+          "instances": 2
+        },
+        {
+          "address": "terraform_data.tainted",
+          "action": "replace",
+          "actions": {
+            "replace": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "terraform_data.trigger",
+          "action": "update",
+          "actions": {
+            "update": 1
+          },
+          "instances": 1
+        }
+      ]
+    },
+    {
+      "phase": "destroy",
+      "number": 1,
+      "resources": [
+        {
+          "address": "module.gone.terraform_data.inner",
+          "action": "delete",
+          "actions": {
+            "delete": 1
+          },
+          "instances": 1,
+          "no_configuration": true
+        },
+        {
+          "address": "module.mods.terraform_data.inner",
+          "action": "delete",
+          "actions": {
+            "delete": 1
+          },
+          "instances": 1
+        }
+      ]
+    }
+  ],
+  "wave_notes": [
+    "replace_triggered_by is not part of the plan JSON: a resource replaced by a trigger is not ordered after the resource that triggered it.",
+    "Resources removed from the configuration have no dependency information in the plan; their destroy order is unknown and they are shown in wave 1."
+  ],
+  "cycles": []
 }

@@ -1,0 +1,38 @@
+== Summary ==
+Plan: normal | applyable: yes | errored: no
+Executed from (apply account): unresolved
+NOTICE: Apply account unknown: set tfapply_account_id in tfplanlens.config.yaml (it cannot be read from the plan). Cros…
+Actions: create 1, update 1, replace 1, delete 0, read 0, no-op 3, forget 0
+Known after apply: 5 attribute(s)
+By type: terraform_data 3
+By module: root 3
+
+== Danger ==
+! REPLACE terraform_data.db
+    type: terraform_data | target account: unresolved (alias: default) (source: unresolved)
+    why: Attribute change forces replacement: triggers_replace
+
+== Drift ==
+No changes made outside Terraform.
+
+== Changes by account ==
+terraform: target account unresolved (alias: default) (source: unresolved)
+    create 1, update 1, replace 1, no-op 3
+    ~ terraform_data.app  (update, 1 known after apply)
+        input: "v1" -> "v2"
+    -/+ terraform_data.db  (replace, 2 known after apply)
+        triggers_replace: "a" -> "b"  [forces replacement]
+    + terraform_data.queue  (create, 2 known after apply)
+
+== Changes by module ==
+root: create 1, update 1, replace 1
+
+== Waves ==
+Terraform applies in parallel: this shows possible parallelism, not a strict order.
+apply wave 1:
+  update terraform_data.app
+  replace terraform_data.db
+  create terraform_data.queue
+
+== Resources with multiple instances ==
+terraform_data.cache [count]: 0 (no-op), 1 (no-op)

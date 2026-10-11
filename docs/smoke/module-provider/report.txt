@@ -36,3 +36,10 @@ local.alt: target account 111111111111 (source: apply_account)
 == Changes by module ==
 module.net: replace 1
 root: replace 2
+
+== Waves ==
+Terraform applies in parallel: this shows possible parallelism, not a strict order.
+apply wave 1:
+  replace local_file.alt
+  replace local_file.root
+  replace module.net.local_file.inner

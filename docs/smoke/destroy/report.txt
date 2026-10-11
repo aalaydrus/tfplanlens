@@ -34,3 +34,13 @@ terraform: target account 111111111111 (source: apply_account)
 
 == Changes by module ==
 root: delete 4
+
+== Waves ==
+Terraform applies in parallel: this shows possible parallelism, not a strict order.
+destroy wave 1:
+  delete terraform_data.db
+  delete terraform_data.shard (2 instances)
+  delete terraform_data.web
+
+== Resources with multiple instances ==
+terraform_data.shard [count]: 0 (delete), 1 (delete)

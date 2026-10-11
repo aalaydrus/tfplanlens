@@ -1,0 +1,39 @@
+== Summary ==
+Plan: normal | applyable: yes | errored: no
+Executed from (apply account): unresolved
+NOTICE: Apply account unknown: set tfapply_account_id in tfplanlens.config.yaml (it cannot be read from the plan). Cros…
+Actions: create 1, update 1, replace 0, delete 1, read 0, no-op 3, forget 0
+Known after apply: 3 attribute(s)
+By type: terraform_data 3
+By module: root 3
+
+== Danger ==
+! DELETE terraform_data.legacy
+    type: terraform_data | target account: unresolved (alias: default) (source: unresolved)
+    why: Removed from config
+
+== Drift ==
+No changes made outside Terraform.
+
+== Changes by account ==
+terraform: target account unresolved (alias: default) (source: unresolved)
+    create 1, update 1, delete 1, no-op 3
+    ~ terraform_data.app  (update, 1 known after apply)
+        input: "v1" -> "v3"
+    + terraform_data.cache[2]  (create, 2 known after apply)
+    - terraform_data.legacy  (delete)
+
+== Changes by module ==
+root: create 1, update 1, delete 1
+
+== Waves ==
+Terraform applies in parallel: this shows possible parallelism, not a strict order.
+apply wave 1:
+  update terraform_data.app
+  create terraform_data.cache
+destroy wave 1:
+  delete terraform_data.legacy [no configuration: order unknown]
+note: Resources removed from the configuration have no dependency information in the plan; their destroy order is unkno…
+
+== Resources with multiple instances ==
+terraform_data.cache [count]: 0 (no-op), 1 (no-op), 2 (create)

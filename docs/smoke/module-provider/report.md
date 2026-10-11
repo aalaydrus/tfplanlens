@@ -57,3 +57,15 @@
 
 </details>
 
+### Waves
+
+Terraform applies in parallel: this shows possible parallelism, not a strict order.
+
+<details><summary><b>apply wave 1</b> &mdash; 3 resource(s)</summary>
+
+- replace `local_file.alt`
+- replace `local_file.root`
+- replace `module.net.local_file.inner`
+
+</details>
+
