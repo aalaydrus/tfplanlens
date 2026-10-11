@@ -21,8 +21,8 @@ Order matters: model first, renderers last.
      build HTML by string concatenation.
    - json: automatic from the struct.
    - tui: `internal/tui/tui.go` (`changeNode`/`wavesTree`).
-5. **Document**: `docs/json-schema.md` (every JSON field), `README.md` if
-   user-visible.
+5. **Document**: `docs/json-schema.md` (every JSON field), `docs/USAGE.md` if
+   user-visible (the README stays a short summary: do not grow it).
 6. **Goldens**: `go test ./cmd/... -run TestGolden -update`; read the diff.
    JSON goldens change for every fixture when you add a top-level field
    (expected: a one-line addition each).
