@@ -73,7 +73,7 @@
       "warnings": [],
       "stateful": false,
       "import": true,
-      "import_id": "e02b5035-f4a8-02be-3140-7e7f2d24d486",
+      "import_id": "b4635ada-9d61-45f0-617d-d54bb21a6c27",
       "removed_from_state_only": false,
       "attrs": [
         {
@@ -140,5 +140,6 @@
     }
   ],
   "wave_notes": [],
-  "cycles": []
+  "cycles": [],
+  "units": []
 }
