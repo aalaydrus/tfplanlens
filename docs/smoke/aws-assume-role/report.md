@@ -88,3 +88,24 @@
 
 </details>
 
+### Waves
+
+Terraform applies in parallel: this shows possible parallelism, not a strict order.
+
+<details><summary><b>apply wave 1</b> &mdash; 6 resource(s)</summary>
+
+- update `aws_sns_topic.prod`
+- update `aws_sqs_queue.audit`
+- update `aws_sqs_queue.runner`
+- update `aws_sqs_queue.staging`
+- update `aws_ssm_parameter.sandbox`
+- replace `module.net.aws_sqs_queue.inner`
+
+</details>
+
+<details><summary><b>apply wave 2</b> &mdash; 1 resource(s)</summary>
+
+- create `aws_sns_topic_subscription.cross`
+
+</details>
+

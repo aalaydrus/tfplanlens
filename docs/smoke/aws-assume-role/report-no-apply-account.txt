@@ -52,3 +52,15 @@ aws.staging: target account 222222222222 (source: role_arn_variable) [DIFFERENT 
 == Changes by module ==
 module.net: replace 1
 root: create 1, update 5
+
+== Waves ==
+Terraform applies in parallel: this shows possible parallelism, not a strict order.
+apply wave 1:
+  update aws_sns_topic.prod
+  update aws_sqs_queue.audit
+  update aws_sqs_queue.runner
+  update aws_sqs_queue.staging
+  update aws_ssm_parameter.sandbox
+  replace module.net.aws_sqs_queue.inner
+apply wave 2:
+  create aws_sns_topic_subscription.cross

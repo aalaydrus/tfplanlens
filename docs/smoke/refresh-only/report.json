@@ -27,7 +27,9 @@
     "by_module": {},
     "known_after_apply": 0,
     "drift_count": 2,
-    "warnings": 0
+    "warnings": 0,
+    "apply_waves": 0,
+    "destroy_waves": 0
   },
   "findings": [],
   "drift": [
@@ -49,5 +51,9 @@
     }
   ],
   "groups": [],
-  "changes": []
+  "changes": [],
+  "parents": [],
+  "waves": [],
+  "wave_notes": [],
+  "cycles": []
 }

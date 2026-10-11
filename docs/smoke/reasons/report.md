@@ -73,3 +73,28 @@
 
 </details>
 
+### Waves
+
+Terraform applies in parallel: this shows possible parallelism, not a strict order.
+
+<details><summary><b>apply wave 1</b> &mdash; 5 resource(s)</summary>
+
+- replace `terraform_data.follower`
+- replace `terraform_data.requested`
+- delete `terraform_data.single` (2 instances)
+- replace `terraform_data.tainted`
+- update `terraform_data.trigger`
+
+</details>
+
+<details><summary><b>destroy wave 1</b> &mdash; 2 resource(s)</summary>
+
+- delete `module.gone.terraform_data.inner` (no configuration: order unknown)
+- delete `module.mods.terraform_data.inner`
+
+</details>
+
+
+> replace_triggered_by is not part of the plan JSON: a resource replaced by a trigger is not ordered after the resource that triggered it.
+
+> Resources removed from the configuration have no dependency information in the plan; their destroy order is unknown and they are shown in wave 1.

@@ -226,7 +226,7 @@ Each tick is backed by a test or check listed in [docs/acceptance.md](docs/accep
 **v0.3**
 - Multi-plan input (Terragrunt or monorepo), merged into one report.
 - Opt-in `--aws` mode: read-only checks for external references to replaced or deleted resources (security group attachments, role trust, KMS grants, DNS records).
-- Plan-to-plan diff: "what changed since the last time I reviewed this plan?"
+- Plan-to-plan diff: "what changed since the last time I reviewed this plan?" (`tfplanlens diff old.json new.json`, implemented)
 
 **Later**
 - IAM blast radius for roles and security groups in the plan.

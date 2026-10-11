@@ -48,3 +48,17 @@ terraform: target account 111111111111 (source: apply_account)
 module.gone: delete 1
 module.mods["b"]: delete 1
 root: create 1, update 1, replace 3, delete 1, no-op 1
+
+== Waves ==
+Terraform applies in parallel: this shows possible parallelism, not a strict order.
+apply wave 1:
+  replace terraform_data.follower
+  replace terraform_data.requested
+  delete terraform_data.single (2 instances)
+  replace terraform_data.tainted
+  update terraform_data.trigger
+destroy wave 1:
+  delete module.gone.terraform_data.inner [no configuration: order unknown]
+  delete module.mods.terraform_data.inner
+note: replace_triggered_by is not part of the plan JSON: a resource replaced by a trigger is not ordered after the reso…
+note: Resources removed from the configuration have no dependency information in the plan; their destroy order is unkno…

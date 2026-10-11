@@ -31,7 +31,9 @@
     },
     "known_after_apply": 0,
     "drift_count": 0,
-    "warnings": 0
+    "warnings": 0,
+    "apply_waves": 0,
+    "destroy_waves": 1
   },
   "findings": [
     {
@@ -131,7 +133,9 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "destroy"
     },
     {
       "address": "terraform_data.shard[0]",
@@ -149,7 +153,11 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "parent": "terraform_data.shard",
+      "key": "0",
+      "wave": 1,
+      "wave_phase": "destroy"
     },
     {
       "address": "terraform_data.shard[1]",
@@ -167,7 +175,11 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "parent": "terraform_data.shard",
+      "key": "1",
+      "wave": 1,
+      "wave_phase": "destroy"
     },
     {
       "address": "terraform_data.web",
@@ -185,7 +197,70 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "destroy"
     }
-  ]
+  ],
+  "parents": [
+    {
+      "address": "terraform_data.shard",
+      "kind": "count",
+      "counts": {
+        "create": 0,
+        "update": 0,
+        "replace": 0,
+        "delete": 2,
+        "read": 0,
+        "no_op": 0,
+        "forget": 0
+      },
+      "instances": [
+        {
+          "key": "0",
+          "address": "terraform_data.shard[0]",
+          "action": "delete"
+        },
+        {
+          "key": "1",
+          "address": "terraform_data.shard[1]",
+          "action": "delete"
+        }
+      ]
+    }
+  ],
+  "waves": [
+    {
+      "phase": "destroy",
+      "number": 1,
+      "resources": [
+        {
+          "address": "terraform_data.db",
+          "action": "delete",
+          "actions": {
+            "delete": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "terraform_data.shard",
+          "action": "delete",
+          "actions": {
+            "delete": 2
+          },
+          "instances": 2
+        },
+        {
+          "address": "terraform_data.web",
+          "action": "delete",
+          "actions": {
+            "delete": 1
+          },
+          "instances": 1
+        }
+      ]
+    }
+  ],
+  "wave_notes": [],
+  "cycles": []
 }

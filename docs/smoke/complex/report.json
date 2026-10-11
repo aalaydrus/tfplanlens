@@ -30,7 +30,9 @@
     },
     "known_after_apply": 10,
     "drift_count": 0,
-    "warnings": 0
+    "warnings": 0,
+    "apply_waves": 2,
+    "destroy_waves": 1
   },
   "findings": [
     {
@@ -145,7 +147,9 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 2
+      "known_after_apply": 2,
+      "wave": 2,
+      "wave_phase": "apply"
     },
     {
       "address": "terraform_data.creds",
@@ -167,7 +171,9 @@
           "kind": "sensitive"
         }
       ],
-      "known_after_apply": 1
+      "known_after_apply": 1,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "terraform_data.db",
@@ -197,7 +203,9 @@
           "forces_replacement": true
         }
       ],
-      "known_after_apply": 2
+      "known_after_apply": 2,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "terraform_data.lb",
@@ -217,11 +225,13 @@
         {
           "path": "input[1]",
           "kind": "value",
-          "before": "a211b832-4e57-d7a5-89c9-f9051c08db31",
-          "after": "93d5dd3a-0d98-f54f-6426-879666484ff0"
+          "before": "7da5d4e4-40b3-c080-7d70-1612bee51cb8",
+          "after": "def687db-3838-a2fa-cbcc-9f6b7f0baa6f"
         }
       ],
-      "known_after_apply": 2
+      "known_after_apply": 2,
+      "wave": 2,
+      "wave_phase": "apply"
     },
     {
       "address": "terraform_data.legacy",
@@ -256,7 +266,9 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "parent": "terraform_data.subnet",
+      "key": "a"
     },
     {
       "address": "terraform_data.subnet[\"b\"]",
@@ -275,7 +287,11 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "parent": "terraform_data.subnet",
+      "key": "b",
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "terraform_data.subnet[\"c\"]",
@@ -292,7 +308,9 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "parent": "terraform_data.subnet",
+      "key": "c"
     },
     {
       "address": "terraform_data.subnet[\"d\"]",
@@ -309,7 +327,11 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 2
+      "known_after_apply": 2,
+      "parent": "terraform_data.subnet",
+      "key": "d",
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "terraform_data.user_data",
@@ -348,7 +370,9 @@
           }
         }
       ],
-      "known_after_apply": 1
+      "known_after_apply": 1,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "terraform_data.worker[0]",
@@ -365,7 +389,9 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "parent": "terraform_data.worker",
+      "key": "0"
     },
     {
       "address": "terraform_data.worker[1]",
@@ -382,7 +408,9 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "parent": "terraform_data.worker",
+      "key": "1"
     },
     {
       "address": "terraform_data.worker[2]",
@@ -401,7 +429,11 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "parent": "terraform_data.worker",
+      "key": "2",
+      "wave": 1,
+      "wave_phase": "destroy"
     },
     {
       "address": "terraform_data.worker[3]",
@@ -420,7 +452,11 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "parent": "terraform_data.worker",
+      "key": "3",
+      "wave": 1,
+      "wave_phase": "destroy"
     },
     {
       "address": "module.network_core.terraform_data.route_table",
@@ -458,5 +494,158 @@
       "attrs": [],
       "known_after_apply": 0
     }
-  ]
+  ],
+  "parents": [
+    {
+      "address": "terraform_data.subnet",
+      "kind": "for_each",
+      "counts": {
+        "create": 1,
+        "update": 0,
+        "replace": 0,
+        "delete": 1,
+        "read": 0,
+        "no_op": 2,
+        "forget": 0
+      },
+      "instances": [
+        {
+          "key": "a",
+          "address": "terraform_data.subnet[\"a\"]",
+          "action": "no-op"
+        },
+        {
+          "key": "b",
+          "address": "terraform_data.subnet[\"b\"]",
+          "action": "delete"
+        },
+        {
+          "key": "c",
+          "address": "terraform_data.subnet[\"c\"]",
+          "action": "no-op"
+        },
+        {
+          "key": "d",
+          "address": "terraform_data.subnet[\"d\"]",
+          "action": "create"
+        }
+      ]
+    },
+    {
+      "address": "terraform_data.worker",
+      "kind": "count",
+      "counts": {
+        "create": 0,
+        "update": 0,
+        "replace": 0,
+        "delete": 2,
+        "read": 0,
+        "no_op": 2,
+        "forget": 0
+      },
+      "instances": [
+        {
+          "key": "0",
+          "address": "terraform_data.worker[0]",
+          "action": "no-op"
+        },
+        {
+          "key": "1",
+          "address": "terraform_data.worker[1]",
+          "action": "no-op"
+        },
+        {
+          "key": "2",
+          "address": "terraform_data.worker[2]",
+          "action": "delete"
+        },
+        {
+          "key": "3",
+          "address": "terraform_data.worker[3]",
+          "action": "delete"
+        }
+      ]
+    }
+  ],
+  "waves": [
+    {
+      "phase": "apply",
+      "number": 1,
+      "resources": [
+        {
+          "address": "terraform_data.creds",
+          "action": "update",
+          "actions": {
+            "update": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "terraform_data.db",
+          "action": "replace",
+          "actions": {
+            "replace": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "terraform_data.subnet",
+          "action": "delete",
+          "actions": {
+            "create": 1,
+            "delete": 1
+          },
+          "instances": 2
+        },
+        {
+          "address": "terraform_data.user_data",
+          "action": "update",
+          "actions": {
+            "update": 1
+          },
+          "instances": 1
+        }
+      ]
+    },
+    {
+      "phase": "apply",
+      "number": 2,
+      "resources": [
+        {
+          "address": "terraform_data.app",
+          "action": "update",
+          "actions": {
+            "update": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "terraform_data.lb",
+          "action": "update",
+          "actions": {
+            "update": 1
+          },
+          "instances": 1
+        }
+      ]
+    },
+    {
+      "phase": "destroy",
+      "number": 1,
+      "resources": [
+        {
+          "address": "terraform_data.worker",
+          "action": "delete",
+          "actions": {
+            "delete": 2
+          },
+          "instances": 2
+        }
+      ]
+    }
+  ],
+  "wave_notes": [
+    "1 reference(s) to local values are not visible in the plan JSON, so a dependency reached only through a local is missing and a resource can show in an earlier wave than it will run."
+  ],
+  "cycles": []
 }

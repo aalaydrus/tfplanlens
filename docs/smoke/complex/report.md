@@ -33,7 +33,7 @@
 - `terraform_data.db` (replace, 2 known after apply)
   - `triggers_replace`: `"a"` → `"b"` (forces replacement)
 - `terraform_data.lb` (update, 2 known after apply)
-  - `input[1]`: `"a211b832-4e57-d7a5-89c9-f9051c08db31"` → `"93d5dd3a-0d98-f54f-6426-879666484ff0"`
+  - `input[1]`: `"7da5d4e4-40b3-c080-7d70-1612bee51cb8"` → `"def687db-3838-a2fa-cbcc-9f6b7f0baa6f"`
 - `terraform_data.legacy` (removed from state only)
 - `terraform_data.subnet["b"]` (delete)
 - `terraform_data.subnet["d"]` (create, 2 known after apply)
@@ -82,6 +82,54 @@
 | update, 1 known after apply | `terraform_data.user_data` | `111111111111` (apply_account) |
 | delete | `terraform_data.worker[2]` | `111111111111` (apply_account) |
 | delete | `terraform_data.worker[3]` | `111111111111` (apply_account) |
+
+</details>
+
+### Waves
+
+Terraform applies in parallel: this shows possible parallelism, not a strict order.
+
+<details><summary><b>apply wave 1</b> &mdash; 4 resource(s)</summary>
+
+- update `terraform_data.creds`
+- replace `terraform_data.db`
+- delete `terraform_data.subnet` (2 instances)
+- update `terraform_data.user_data`
+
+</details>
+
+<details><summary><b>apply wave 2</b> &mdash; 2 resource(s)</summary>
+
+- update `terraform_data.app`
+- update `terraform_data.lb`
+
+</details>
+
+<details><summary><b>destroy wave 1</b> &mdash; 1 resource(s)</summary>
+
+- delete `terraform_data.worker` (2 instances)
+
+</details>
+
+
+> 1 reference(s) to local values are not visible in the plan JSON, so a dependency reached only through a local is missing and a resource can show in an earlier wave than it will run.
+### Resources with multiple instances
+
+<details><summary>terraform_data.subnet (for_each) &mdash; 4 instance(s)</summary>
+
+- no-op `a`
+- delete `b`
+- no-op `c`
+- create `d`
+
+</details>
+
+<details><summary>terraform_data.worker (count) &mdash; 4 instance(s)</summary>
+
+- no-op `0`
+- no-op `1`
+- delete `2`
+- delete `3`
 
 </details>
 

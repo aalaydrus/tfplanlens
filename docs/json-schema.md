@@ -83,3 +83,27 @@ Resources that only forget or do nothing are not in a wave.
 ## `cycles[]`
 `resources`: the configuration addresses in one dependency cycle. Terraform
 rejects cycles before it plans, so this only appears for incomplete plans.
+
+# `tfplanlens diff` JSON
+
+`tfplanlens diff old.json new.json -f json`. Arrays are never `null`.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `schema_version` | number | 1 |
+| `plan` | array of strings | Plan-wide differences: mode, Terraform version, apply account. |
+| `old`, `new` | object | Action counts of each plan (same shape as `summary.actions`). |
+| `added` | array | Entries that change in the new plan only. |
+| `removed` | array | Entries that changed in the old plan and no longer do. |
+| `changed` | array | Entries that change in both, differently. |
+| `unchanged` | number | Resources that change identically in both. |
+| `new_danger` | array of addresses | Deleted or replaced by the new plan only. |
+| `defused` | array of addresses | Deleted or replaced by the old plan only. |
+| `drift_new`, `drift_gone` | array of addresses | Drift present in only one plan. |
+
+Entry: `address`, `kind` (`added` / `removed` / `changed`), `old_action` and
+`new_action` (absent when the resource is not changing), `differences` (plain
+sentences: action, reason, target account, moved/import, and per attribute
+"now changes", "no longer changes", kind or forces-replacement changes, and
+before/after values), `danger` and `defused` (booleans, omitted when false).
+Resources are matched by address; a plain no-op counts as not changing.

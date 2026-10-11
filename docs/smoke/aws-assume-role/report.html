@@ -173,6 +173,24 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
 
 
 
+
+
+<section aria-labelledby="waves-h">
+  <h2 id="waves-h">Waves</h2>
+  <p class="src">Terraform applies in parallel: this shows possible parallelism, not a strict order.</p>
+  
+  <details open><summary><b>apply wave 1</b> (6 resource(s))</summary>
+    <ul><li><b class="a-update">update</b> <span class="mono">aws_sns_topic.prod</span></li><li><b class="a-update">update</b> <span class="mono">aws_sqs_queue.audit</span></li><li><b class="a-update">update</b> <span class="mono">aws_sqs_queue.runner</span></li><li><b class="a-update">update</b> <span class="mono">aws_sqs_queue.staging</span></li><li><b class="a-update">update</b> <span class="mono">aws_ssm_parameter.sandbox</span></li><li><b class="a-replace">replace</b> <span class="mono">module.net.aws_sqs_queue.inner</span></li></ul>
+  </details>
+  
+  <details open><summary><b>apply wave 2</b> (1 resource(s))</summary>
+    <ul><li><b class="a-create">create</b> <span class="mono">aws_sns_topic_subscription.cross</span></li></ul>
+  </details>
+  
+  
+</section>
+
+
 <section aria-labelledby="changes-h">
   <h2 id="changes-h">All changes</h2>
   <div class="controls">
@@ -182,7 +200,7 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
         <option value="update">update</option><option value="create">create</option><option value="replace">replace</option>
       </select></label>
     <label>Group by
-      <select id="group"><option value="">none</option><option value="account">account</option><option value="module">module</option><option value="type">type</option></select></label>
+      <select id="group"><option value="">none</option><option value="account">account</option><option value="module">module</option><option value="type">type</option><option value="parent">resource (count/for_each)</option></select></label>
     <label><input id="hidequiet" type="checkbox"> hide plain no-ops and reads</label>
     <span id="count" class="src"></span>
   </div>
@@ -190,92 +208,99 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
     <thead><tr><th>Action</th><th>Resource</th><th>Type</th><th>Target account (source)</th><th>Module</th></tr></thead>
     <tbody id="rows">
     
-      <tr class="row" tabindex="0" data-idx="0" data-action="update" data-account="111111111111" data-module="root" data-type="aws_sns_topic" data-quiet="0" data-text="aws_sns_topic.prod aws_sns_topic 111111111111 root update">
+      <tr class="row" tabindex="0" data-idx="0" data-action="update" data-account="111111111111" data-module="root" data-type="aws_sns_topic" data-parent="(single)" data-quiet="0" data-text="aws_sns_topic.prod aws_sns_topic 111111111111 root update">
         <td><b class="a-update">~ update</b></td>
         <td class="addr mono">aws_sns_topic.prod
           
           
           
           
-          </td>
+          
+          <span class="badge">apply wave 1</span></td>
         <td>aws_sns_topic</td>
         <td><span class="mono">111111111111</span> <span class="src">(role_arn)</span></td>
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="1" data-action="create" data-account="999999999999" data-module="root" data-type="aws_sns_topic_subscription" data-quiet="0" data-text="aws_sns_topic_subscription.cross aws_sns_topic_subscription 999999999999 root create">
+      <tr class="row" tabindex="0" data-idx="1" data-action="create" data-account="999999999999" data-module="root" data-type="aws_sns_topic_subscription" data-parent="(single)" data-quiet="0" data-text="aws_sns_topic_subscription.cross aws_sns_topic_subscription 999999999999 root create">
         <td><b class="a-create">&#43; create</b></td>
         <td class="addr mono">aws_sns_topic_subscription.cross
           
           
           
           
-          <span class="badge warn">1 warning(s)</span></td>
+          <span class="badge warn">1 warning(s)</span>
+          <span class="badge">apply wave 2</span></td>
         <td>aws_sns_topic_subscription</td>
         <td><span class="mono">999999999999</span> <span class="src">(caller_identity)</span> <span class="badge warn">differs from apply account</span></td>
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="2" data-action="update" data-account="999999999999" data-module="root" data-type="aws_sqs_queue" data-quiet="0" data-text="aws_sqs_queue.audit aws_sqs_queue 999999999999 root update">
+      <tr class="row" tabindex="0" data-idx="2" data-action="update" data-account="999999999999" data-module="root" data-type="aws_sqs_queue" data-parent="(single)" data-quiet="0" data-text="aws_sqs_queue.audit aws_sqs_queue 999999999999 root update">
         <td><b class="a-update">~ update</b></td>
         <td class="addr mono">aws_sqs_queue.audit
           
           
           
           
-          </td>
+          
+          <span class="badge">apply wave 1</span></td>
         <td>aws_sqs_queue</td>
         <td><span class="mono">999999999999</span> <span class="src">(allowed_account_ids)</span> <span class="badge warn">differs from apply account</span></td>
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="3" data-action="update" data-account="999999999999" data-module="root" data-type="aws_sqs_queue" data-quiet="0" data-text="aws_sqs_queue.runner aws_sqs_queue 999999999999 root update">
+      <tr class="row" tabindex="0" data-idx="3" data-action="update" data-account="999999999999" data-module="root" data-type="aws_sqs_queue" data-parent="(single)" data-quiet="0" data-text="aws_sqs_queue.runner aws_sqs_queue 999999999999 root update">
         <td><b class="a-update">~ update</b></td>
         <td class="addr mono">aws_sqs_queue.runner
           
           
           
           
-          </td>
+          
+          <span class="badge">apply wave 1</span></td>
         <td>aws_sqs_queue</td>
         <td><span class="mono">999999999999</span> <span class="src">(caller_identity)</span> <span class="badge warn">differs from apply account</span></td>
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="4" data-action="update" data-account="222222222222" data-module="root" data-type="aws_sqs_queue" data-quiet="0" data-text="aws_sqs_queue.staging aws_sqs_queue 222222222222 root update">
+      <tr class="row" tabindex="0" data-idx="4" data-action="update" data-account="222222222222" data-module="root" data-type="aws_sqs_queue" data-parent="(single)" data-quiet="0" data-text="aws_sqs_queue.staging aws_sqs_queue 222222222222 root update">
         <td><b class="a-update">~ update</b></td>
         <td class="addr mono">aws_sqs_queue.staging
           
           
           
           
-          </td>
+          
+          <span class="badge">apply wave 1</span></td>
         <td>aws_sqs_queue</td>
         <td><span class="mono">222222222222</span> <span class="src">(role_arn_variable)</span> <span class="badge warn">differs from apply account</span></td>
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="5" data-action="update" data-account="111111111111" data-module="root" data-type="aws_ssm_parameter" data-quiet="0" data-text="aws_ssm_parameter.sandbox aws_ssm_parameter 111111111111 root update">
+      <tr class="row" tabindex="0" data-idx="5" data-action="update" data-account="111111111111" data-module="root" data-type="aws_ssm_parameter" data-parent="(single)" data-quiet="0" data-text="aws_ssm_parameter.sandbox aws_ssm_parameter 111111111111 root update">
         <td><b class="a-update">~ update</b></td>
         <td class="addr mono">aws_ssm_parameter.sandbox
           
           
           
           
-          <span class="badge warn">1 warning(s)</span></td>
+          <span class="badge warn">1 warning(s)</span>
+          <span class="badge">apply wave 1</span></td>
         <td>aws_ssm_parameter</td>
         <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="6" data-action="replace" data-account="111111111111" data-module="module.net" data-type="aws_sqs_queue" data-quiet="0" data-text="module.net.aws_sqs_queue.inner aws_sqs_queue 111111111111 module.net replace">
+      <tr class="row" tabindex="0" data-idx="6" data-action="replace" data-account="111111111111" data-module="module.net" data-type="aws_sqs_queue" data-parent="(single)" data-quiet="0" data-text="module.net.aws_sqs_queue.inner aws_sqs_queue 111111111111 module.net replace">
         <td><b class="a-replace">-/&#43; replace</b></td>
         <td class="addr mono">module.net.aws_sqs_queue.inner
           
           
           
           
-          </td>
+          
+          <span class="badge">apply wave 1</span></td>
         <td>aws_sqs_queue</td>
         <td><span class="mono">111111111111</span> <span class="src">(role_arn)</span></td>
         <td>module.net</td>

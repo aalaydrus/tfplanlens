@@ -33,7 +33,7 @@ terraform: target account 111111111111 (source: apply_account)
     -/+ terraform_data.db  (replace, 2 known after apply)
         triggers_replace: "a" -> "b"  [forces replacement]
     ~ terraform_data.lb  (update, 2 known after apply)
-        input[1]: "a211b832-4e57-d7a5-89c9-f9051c08db31" -> "93d5dd3a-0d98-f54f-6426-879666484ff0"
+        input[1]: "7da5d4e4-40b3-c080-7d70-1612bee51cb8" -> "def687db-3838-a2fa-cbcc-9f6b7f0baa6f"
     x terraform_data.legacy  (removed from state only)
     - terraform_data.subnet["b"]  (delete)
     + terraform_data.subnet["d"]  (create, 2 known after apply)
@@ -55,3 +55,21 @@ terraform: target account 111111111111 (source: apply_account)
 == Changes by module ==
 module.network_core: no-op 2
 root: create 1, update 4, replace 1, delete 3, forget 1
+
+== Waves ==
+Terraform applies in parallel: this shows possible parallelism, not a strict order.
+apply wave 1:
+  update terraform_data.creds
+  replace terraform_data.db
+  delete terraform_data.subnet (2 instances)
+  update terraform_data.user_data
+apply wave 2:
+  update terraform_data.app
+  update terraform_data.lb
+destroy wave 1:
+  delete terraform_data.worker (2 instances)
+note: 1 reference(s) to local values are not visible in the plan JSON, so a dependency reached only through a local is …
+
+== Resources with multiple instances ==
+terraform_data.subnet [for_each]: a (no-op), b (delete), c (no-op), d (create)
+terraform_data.worker [count]: 0 (no-op), 1 (no-op), 2 (delete), 3 (delete)

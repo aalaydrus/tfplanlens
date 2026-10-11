@@ -7,6 +7,11 @@
 # .terraform), plans, and writes the `terraform show -json` output to
 # testdata/plans/real/<scenario>-tf<terraform version>.json.
 #
+# If the scenario also has a v3 directory, it is planned a second time against
+# the same state (the plan for v2 is never applied) and written to
+# testdata/plans/real/<scenario>-after-tf<version>.json: the "pushed a fix, plan
+# again" pair that `tfplanlens diff` compares.
+#
 # A scenario directory may also contain:
 #   between.sh  run in the work directory after v1 is applied and before v2
 #               is swapped in: out-of-band changes, taints, state surgery.
@@ -83,3 +88,15 @@ version=$(terraform version | sed -n '1s/^Terraform v//p')
 mkdir -p "$root/testdata/plans/real"
 cp plan.json "$root/testdata/plans/real/$scenario-tf$version.json"
 echo "wrote testdata/plans/real/$scenario-tf$version.json"
+
+# A second plan after the configuration changes again, against the same state.
+if [ -d "$dir/v3" ]; then
+  find . -maxdepth 1 -name '*.tf' -delete
+  rm -rf modules
+  cp -R "$dir/v3/." .
+  terraform init -input=false -no-color ${init_args[@]+"${init_args[@]}"}
+  terraform plan -input=false -no-color ${plan_args[@]+"${plan_args[@]}"} -out=plan-after.bin
+  terraform show -json plan-after.bin > plan-after.json
+  cp plan-after.json "$root/testdata/plans/real/$scenario-after-tf$version.json"
+  echo "wrote testdata/plans/real/$scenario-after-tf$version.json"
+fi

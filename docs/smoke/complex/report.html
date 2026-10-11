@@ -200,6 +200,28 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
 
 
 
+
+
+<section aria-labelledby="waves-h">
+  <h2 id="waves-h">Waves</h2>
+  <p class="src">Terraform applies in parallel: this shows possible parallelism, not a strict order.</p>
+  
+  <details open><summary><b>apply wave 1</b> (4 resource(s))</summary>
+    <ul><li><b class="a-update">update</b> <span class="mono">terraform_data.creds</span></li><li><b class="a-replace">replace</b> <span class="mono">terraform_data.db</span></li><li><b class="a-delete">delete</b> <span class="mono">terraform_data.subnet</span> <span class="src">(2 instances)</span></li><li><b class="a-update">update</b> <span class="mono">terraform_data.user_data</span></li></ul>
+  </details>
+  
+  <details open><summary><b>apply wave 2</b> (2 resource(s))</summary>
+    <ul><li><b class="a-update">update</b> <span class="mono">terraform_data.app</span></li><li><b class="a-update">update</b> <span class="mono">terraform_data.lb</span></li></ul>
+  </details>
+  
+  <details open><summary><b>destroy wave 1</b> (1 resource(s))</summary>
+    <ul><li><b class="a-delete">delete</b> <span class="mono">terraform_data.worker</span> <span class="src">(2 instances)</span></li></ul>
+  </details>
+  
+  <p class="src">1 reference(s) to local values are not visible in the plan JSON, so a dependency reached only through a local is missing and a resource can show in an earlier wave than it will run.</p>
+</section>
+
+
 <section aria-labelledby="changes-h">
   <h2 id="changes-h">All changes</h2>
   <div class="controls">
@@ -209,7 +231,7 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
         <option value="update">update</option><option value="replace">replace</option><option value="forget">forget</option><option value="no-op">no-op</option><option value="delete">delete</option><option value="create">create</option>
       </select></label>
     <label>Group by
-      <select id="group"><option value="">none</option><option value="account">account</option><option value="module">module</option><option value="type">type</option></select></label>
+      <select id="group"><option value="">none</option><option value="account">account</option><option value="module">module</option><option value="type">type</option><option value="parent">resource (count/for_each)</option></select></label>
     <label><input id="hidequiet" type="checkbox"> hide plain no-ops and reads</label>
     <span id="count" class="src"></span>
   </div>
@@ -217,193 +239,208 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
     <thead><tr><th>Action</th><th>Resource</th><th>Type</th><th>Target account (source)</th><th>Module</th></tr></thead>
     <tbody id="rows">
     
-      <tr class="row" tabindex="0" data-idx="0" data-action="update" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="0" data-text="terraform_data.app terraform_data 111111111111 root update">
+      <tr class="row" tabindex="0" data-idx="0" data-action="update" data-account="111111111111" data-module="root" data-type="terraform_data" data-parent="(single)" data-quiet="0" data-text="terraform_data.app terraform_data 111111111111 root update">
         <td><b class="a-update">~ update</b></td>
         <td class="addr mono">terraform_data.app
           
           
           
           
-          </td>
+          
+          <span class="badge">apply wave 2</span></td>
         <td>terraform_data</td>
         <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="1" data-action="update" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="0" data-text="terraform_data.creds terraform_data 111111111111 root update">
+      <tr class="row" tabindex="0" data-idx="1" data-action="update" data-account="111111111111" data-module="root" data-type="terraform_data" data-parent="(single)" data-quiet="0" data-text="terraform_data.creds terraform_data 111111111111 root update">
         <td><b class="a-update">~ update</b></td>
         <td class="addr mono">terraform_data.creds
           
           
           
           
-          </td>
+          
+          <span class="badge">apply wave 1</span></td>
         <td>terraform_data</td>
         <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="2" data-action="replace" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="0" data-text="terraform_data.db terraform_data 111111111111 root replace">
+      <tr class="row" tabindex="0" data-idx="2" data-action="replace" data-account="111111111111" data-module="root" data-type="terraform_data" data-parent="(single)" data-quiet="0" data-text="terraform_data.db terraform_data 111111111111 root replace">
         <td><b class="a-replace">-/&#43; replace</b></td>
         <td class="addr mono">terraform_data.db
           
           
           
           
-          </td>
+          
+          <span class="badge">apply wave 1</span></td>
         <td>terraform_data</td>
         <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="3" data-action="update" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="0" data-text="terraform_data.lb terraform_data 111111111111 root update">
+      <tr class="row" tabindex="0" data-idx="3" data-action="update" data-account="111111111111" data-module="root" data-type="terraform_data" data-parent="(single)" data-quiet="0" data-text="terraform_data.lb terraform_data 111111111111 root update">
         <td><b class="a-update">~ update</b></td>
         <td class="addr mono">terraform_data.lb
           
           
           
           
-          </td>
+          
+          <span class="badge">apply wave 2</span></td>
         <td>terraform_data</td>
         <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="4" data-action="forget" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="0" data-text="terraform_data.legacy terraform_data 111111111111 root forget">
+      <tr class="row" tabindex="0" data-idx="4" data-action="forget" data-account="111111111111" data-module="root" data-type="terraform_data" data-parent="(single)" data-quiet="0" data-text="terraform_data.legacy terraform_data 111111111111 root forget">
         <td><b class="a-forget">x forget</b></td>
         <td class="addr mono">terraform_data.legacy
           
           
           
           <span class="badge">state only</span>
+          
           </td>
         <td>terraform_data</td>
         <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="5" data-action="no-op" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="1" data-text="terraform_data.subnet[&#34;a&#34;] terraform_data 111111111111 root no-op">
+      <tr class="row" tabindex="0" data-idx="5" data-action="no-op" data-account="111111111111" data-module="root" data-type="terraform_data" data-parent="terraform_data.subnet" data-quiet="1" data-text="terraform_data.subnet[&#34;a&#34;] terraform_data 111111111111 root no-op">
         <td><b class="a-no-op">= no-op</b></td>
         <td class="addr mono">terraform_data.subnet[&#34;a&#34;]
           
           
           
           
+          
           </td>
         <td>terraform_data</td>
         <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="6" data-action="delete" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="0" data-text="terraform_data.subnet[&#34;b&#34;] terraform_data 111111111111 root delete">
+      <tr class="row" tabindex="0" data-idx="6" data-action="delete" data-account="111111111111" data-module="root" data-type="terraform_data" data-parent="terraform_data.subnet" data-quiet="0" data-text="terraform_data.subnet[&#34;b&#34;] terraform_data 111111111111 root delete">
         <td><b class="a-delete">- delete</b></td>
         <td class="addr mono">terraform_data.subnet[&#34;b&#34;]
           
           
           
           
-          </td>
+          
+          <span class="badge">apply wave 1</span></td>
         <td>terraform_data</td>
         <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="7" data-action="no-op" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="1" data-text="terraform_data.subnet[&#34;c&#34;] terraform_data 111111111111 root no-op">
+      <tr class="row" tabindex="0" data-idx="7" data-action="no-op" data-account="111111111111" data-module="root" data-type="terraform_data" data-parent="terraform_data.subnet" data-quiet="1" data-text="terraform_data.subnet[&#34;c&#34;] terraform_data 111111111111 root no-op">
         <td><b class="a-no-op">= no-op</b></td>
         <td class="addr mono">terraform_data.subnet[&#34;c&#34;]
           
           
           
           
+          
           </td>
         <td>terraform_data</td>
         <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="8" data-action="create" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="0" data-text="terraform_data.subnet[&#34;d&#34;] terraform_data 111111111111 root create">
+      <tr class="row" tabindex="0" data-idx="8" data-action="create" data-account="111111111111" data-module="root" data-type="terraform_data" data-parent="terraform_data.subnet" data-quiet="0" data-text="terraform_data.subnet[&#34;d&#34;] terraform_data 111111111111 root create">
         <td><b class="a-create">&#43; create</b></td>
         <td class="addr mono">terraform_data.subnet[&#34;d&#34;]
           
           
           
           
-          </td>
+          
+          <span class="badge">apply wave 1</span></td>
         <td>terraform_data</td>
         <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="9" data-action="update" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="0" data-text="terraform_data.user_data terraform_data 111111111111 root update">
+      <tr class="row" tabindex="0" data-idx="9" data-action="update" data-account="111111111111" data-module="root" data-type="terraform_data" data-parent="(single)" data-quiet="0" data-text="terraform_data.user_data terraform_data 111111111111 root update">
         <td><b class="a-update">~ update</b></td>
         <td class="addr mono">terraform_data.user_data
           
           
           
           
-          </td>
+          
+          <span class="badge">apply wave 1</span></td>
         <td>terraform_data</td>
         <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="10" data-action="no-op" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="1" data-text="terraform_data.worker[0] terraform_data 111111111111 root no-op">
+      <tr class="row" tabindex="0" data-idx="10" data-action="no-op" data-account="111111111111" data-module="root" data-type="terraform_data" data-parent="terraform_data.worker" data-quiet="1" data-text="terraform_data.worker[0] terraform_data 111111111111 root no-op">
         <td><b class="a-no-op">= no-op</b></td>
         <td class="addr mono">terraform_data.worker[0]
           
           
           
           
+          
           </td>
         <td>terraform_data</td>
         <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="11" data-action="no-op" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="1" data-text="terraform_data.worker[1] terraform_data 111111111111 root no-op">
+      <tr class="row" tabindex="0" data-idx="11" data-action="no-op" data-account="111111111111" data-module="root" data-type="terraform_data" data-parent="terraform_data.worker" data-quiet="1" data-text="terraform_data.worker[1] terraform_data 111111111111 root no-op">
         <td><b class="a-no-op">= no-op</b></td>
         <td class="addr mono">terraform_data.worker[1]
           
           
           
           
+          
           </td>
         <td>terraform_data</td>
         <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="12" data-action="delete" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="0" data-text="terraform_data.worker[2] terraform_data 111111111111 root delete">
+      <tr class="row" tabindex="0" data-idx="12" data-action="delete" data-account="111111111111" data-module="root" data-type="terraform_data" data-parent="terraform_data.worker" data-quiet="0" data-text="terraform_data.worker[2] terraform_data 111111111111 root delete">
         <td><b class="a-delete">- delete</b></td>
         <td class="addr mono">terraform_data.worker[2]
           
           
           
           
-          </td>
+          
+          <span class="badge">destroy wave 1</span></td>
         <td>terraform_data</td>
         <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="13" data-action="delete" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="0" data-text="terraform_data.worker[3] terraform_data 111111111111 root delete">
+      <tr class="row" tabindex="0" data-idx="13" data-action="delete" data-account="111111111111" data-module="root" data-type="terraform_data" data-parent="terraform_data.worker" data-quiet="0" data-text="terraform_data.worker[3] terraform_data 111111111111 root delete">
         <td><b class="a-delete">- delete</b></td>
         <td class="addr mono">terraform_data.worker[3]
           
           
           
           
-          </td>
+          
+          <span class="badge">destroy wave 1</span></td>
         <td>terraform_data</td>
         <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="14" data-action="no-op" data-account="111111111111" data-module="module.network_core" data-type="terraform_data" data-quiet="0" data-text="module.network_core.terraform_data.route_table terraform_data 111111111111 module.network_core no-op">
+      <tr class="row" tabindex="0" data-idx="14" data-action="no-op" data-account="111111111111" data-module="module.network_core" data-type="terraform_data" data-parent="(single)" data-quiet="0" data-text="module.network_core.terraform_data.route_table terraform_data 111111111111 module.network_core no-op">
         <td><b class="a-no-op">= no-op</b></td>
         <td class="addr mono">module.network_core.terraform_data.route_table
           
           <span class="badge">moved</span>
+          
           
           
           </td>
@@ -412,11 +449,12 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
         <td>module.network_core</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="15" data-action="no-op" data-account="111111111111" data-module="module.network_core" data-type="terraform_data" data-quiet="0" data-text="module.network_core.terraform_data.vpc terraform_data 111111111111 module.network_core no-op">
+      <tr class="row" tabindex="0" data-idx="15" data-action="no-op" data-account="111111111111" data-module="module.network_core" data-type="terraform_data" data-parent="(single)" data-quiet="0" data-text="module.network_core.terraform_data.vpc terraform_data 111111111111 module.network_core no-op">
         <td><b class="a-no-op">= no-op</b></td>
         <td class="addr mono">module.network_core.terraform_data.vpc
           
           <span class="badge">moved</span>
+          
           
           
           </td>
@@ -496,7 +534,7 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
   
 <div class="attr">
   <div><span class="path mono">input[1]</span></div>
-  <div><span class="mono">&#34;a211b832-4e57-d7a5-89c9-f9051c08db31&#34;</span> &rarr; <span class="mono">&#34;93d5dd3a-0d98-f54f-6426-879666484ff0&#34;</span></div>
+  <div><span class="mono">&#34;7da5d4e4-40b3-c080-7d70-1612bee51cb8&#34;</span> &rarr; <span class="mono">&#34;def687db-3838-a2fa-cbcc-9f6b7f0baa6f&#34;</span></div>
   
 </div>
 

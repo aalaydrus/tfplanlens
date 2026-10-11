@@ -1,0 +1,23 @@
+== Plan diff ==
+old: create 1, update 1, replace 1, delete 0
+new: create 1, update 1, replace 0, delete 1
+
+== New danger ==
+terraform_data.legacy is now deleted or replaced
+
+== No longer deleted or replaced ==
+terraform_data.db
+
+== Only in the new plan (2) ==
++ create  terraform_data.cache[2]
++ delete  terraform_data.legacy
+
+== No longer in the plan (2) ==
+- was replace  terraform_data.db
+- was create  terraform_data.queue
+
+== Changed (1) ==
+~ update -> update  terraform_data.app
+    attribute input: was "v1" => "v2", now "v1" => "v3"
+
+0 resource(s) change identically in both plans.

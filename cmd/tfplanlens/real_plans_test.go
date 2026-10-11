@@ -666,3 +666,91 @@ func TestRealWavesFromConfiguration(t *testing.T) {
 		}
 	}
 }
+
+// The "rereview" scenario is a real before/after pair: the same state planned
+// against v2 and then against v3 of the configuration.
+func TestRealPlanDiff(t *testing.T) {
+	before := realPlans(t, "rereview")
+	afterFiles, _ := filepath.Glob("../../testdata/plans/real/rereview-after-tf*.json")
+	if len(afterFiles) == 0 {
+		t.Skip("no rereview-after plan")
+	}
+	t.Setenv(envApplyAccount, "")
+	code, out, errs := runCLI("diff", before[0], afterFiles[0], "-f", "json", "--tfapply-account-id", "111111111111")
+	if code != exitOK {
+		t.Fatalf("exit %d: %s", code, errs)
+	}
+	var d struct {
+		Added, Removed, Changed []struct {
+			Address     string
+			Differences []string
+			Danger      bool
+			Defused     bool
+		}
+		NewDanger []string `json:"new_danger"`
+		Defused   []string
+		Unchanged int
+	}
+	if err := json.Unmarshal([]byte(out), &d); err != nil {
+		t.Fatal(err)
+	}
+	names := func(es []struct {
+		Address     string
+		Differences []string
+		Danger      bool
+		Defused     bool
+	}) string {
+		var a []string
+		for _, e := range es {
+			a = append(a, e.Address)
+		}
+		return strings.Join(a, ",")
+	}
+	if got := names(d.Added); got != "terraform_data.cache[2],terraform_data.legacy" {
+		t.Errorf("added %s", got)
+	}
+	if got := names(d.Removed); got != "terraform_data.db,terraform_data.queue" {
+		t.Errorf("removed %s", got)
+	}
+	if got := names(d.Changed); got != "terraform_data.app" || !strings.Contains(strings.Join(d.Changed[0].Differences, ";"), `now "v1" => "v3"`) {
+		t.Errorf("changed %s %v", got, d.Changed)
+	}
+	if strings.Join(d.NewDanger, ",") != "terraform_data.legacy" || strings.Join(d.Defused, ",") != "terraform_data.db" {
+		t.Errorf("danger %v defused %v", d.NewDanger, d.Defused)
+	}
+
+	// Same plan twice: no differences.
+	code, out, _ = runCLI("diff", before[0], before[0])
+	if code != exitOK || !strings.Contains(out, "No differences") {
+		t.Errorf("self diff: exit %d\n%s", code, out)
+	}
+
+	// --fail-on-new-danger exits 1 only when the new plan adds danger; the
+	// report is still written first.
+	code, out, errs = runCLI("diff", before[0], afterFiles[0], "--fail-on-new-danger", "--tfapply-account-id", "111111111111")
+	if code != exitFailOn || !strings.Contains(errs, "new danger: terraform_data.legacy") || !strings.Contains(out, "New danger") {
+		t.Errorf("fail-on-new-danger: exit %d, stderr %q", code, errs)
+	}
+	code, _, _ = runCLI("diff", afterFiles[0], before[0], "--fail-on-new-danger", "--tfapply-account-id", "111111111111")
+	if code != exitFailOn { // going back re-introduces the db replace
+		t.Errorf("reverse diff: exit %d, want %d (db is replaced again)", code, exitFailOn)
+	}
+	code, _, _ = runCLI("diff", before[0], before[0], "--fail-on-new-danger")
+	if code != exitOK {
+		t.Errorf("identical plans failed --fail-on-new-danger: %d", code)
+	}
+}
+
+func TestDiffRejectsBadInput(t *testing.T) {
+	for name, args := range map[string][]string{
+		"two stdin":  {"diff", "-", "-"},
+		"html":       {"diff", "a", "b", "-f", "html"},
+		"missing":    {"diff", "nope.json", "nope2.json"},
+		"one plan":   {"diff", "a"},
+		"two format": {"diff", "a", "b", "-f", "text", "-f", "json"},
+	} {
+		if code, _, _ := runCLI(args...); code == exitOK {
+			t.Errorf("%s: exit 0", name)
+		}
+	}
+}

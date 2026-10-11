@@ -218,6 +218,24 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
 
 
 
+
+
+<section aria-labelledby="waves-h">
+  <h2 id="waves-h">Waves</h2>
+  <p class="src">Terraform applies in parallel: this shows possible parallelism, not a strict order.</p>
+  
+  <details open><summary><b>apply wave 1</b> (5 resource(s))</summary>
+    <ul><li><b class="a-replace">replace</b> <span class="mono">terraform_data.follower</span></li><li><b class="a-replace">replace</b> <span class="mono">terraform_data.requested</span></li><li><b class="a-delete">delete</b> <span class="mono">terraform_data.single</span> <span class="src">(2 instances)</span></li><li><b class="a-replace">replace</b> <span class="mono">terraform_data.tainted</span></li><li><b class="a-update">update</b> <span class="mono">terraform_data.trigger</span></li></ul>
+  </details>
+  
+  <details open><summary><b>destroy wave 1</b> (2 resource(s))</summary>
+    <ul><li><b class="a-delete">delete</b> <span class="mono">module.gone.terraform_data.inner</span> <span class="badge warn">no configuration: order unknown</span></li><li><b class="a-delete">delete</b> <span class="mono">module.mods.terraform_data.inner</span></li></ul>
+  </details>
+  
+  <p class="src">replace_triggered_by is not part of the plan JSON: a resource replaced by a trigger is not ordered after the resource that triggered it.</p><p class="src">Resources removed from the configuration have no dependency information in the plan; their destroy order is unknown and they are shown in wave 1.</p>
+</section>
+
+
 <section aria-labelledby="changes-h">
   <h2 id="changes-h">All changes</h2>
   <div class="controls">
@@ -227,7 +245,7 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
         <option value="no-op">no-op</option><option value="replace">replace</option><option value="delete">delete</option><option value="create">create</option><option value="update">update</option>
       </select></label>
     <label>Group by
-      <select id="group"><option value="">none</option><option value="account">account</option><option value="module">module</option><option value="type">type</option></select></label>
+      <select id="group"><option value="">none</option><option value="account">account</option><option value="module">module</option><option value="type">type</option><option value="parent">resource (count/for_each)</option></select></label>
     <label><input id="hidequiet" type="checkbox"> hide plain no-ops and reads</label>
     <span id="count" class="src"></span>
   </div>
@@ -235,113 +253,122 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
     <thead><tr><th>Action</th><th>Resource</th><th>Type</th><th>Target account (source)</th><th>Module</th></tr></thead>
     <tbody id="rows">
     
-      <tr class="row" tabindex="0" data-idx="0" data-action="no-op" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="0" data-text="terraform_data.counted[0] terraform_data 111111111111 root no-op">
+      <tr class="row" tabindex="0" data-idx="0" data-action="no-op" data-account="111111111111" data-module="root" data-type="terraform_data" data-parent="terraform_data.counted" data-quiet="0" data-text="terraform_data.counted[0] terraform_data 111111111111 root no-op">
         <td><b class="a-no-op">= no-op</b></td>
         <td class="addr mono">terraform_data.counted[0]
           
           <span class="badge">moved</span>
           
           
+          
           </td>
         <td>terraform_data</td>
         <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="1" data-action="replace" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="0" data-text="terraform_data.follower terraform_data 111111111111 root replace">
+      <tr class="row" tabindex="0" data-idx="1" data-action="replace" data-account="111111111111" data-module="root" data-type="terraform_data" data-parent="(single)" data-quiet="0" data-text="terraform_data.follower terraform_data 111111111111 root replace">
         <td><b class="a-replace">-/&#43; replace</b></td>
         <td class="addr mono">terraform_data.follower
           
           
           
           
-          </td>
+          
+          <span class="badge">apply wave 1</span></td>
         <td>terraform_data</td>
         <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="2" data-action="replace" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="0" data-text="terraform_data.requested terraform_data 111111111111 root replace">
+      <tr class="row" tabindex="0" data-idx="2" data-action="replace" data-account="111111111111" data-module="root" data-type="terraform_data" data-parent="(single)" data-quiet="0" data-text="terraform_data.requested terraform_data 111111111111 root replace">
         <td><b class="a-replace">-/&#43; replace</b></td>
         <td class="addr mono">terraform_data.requested
           
           
           
           
-          </td>
+          
+          <span class="badge">apply wave 1</span></td>
         <td>terraform_data</td>
         <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="3" data-action="delete" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="0" data-text="terraform_data.single terraform_data 111111111111 root delete">
+      <tr class="row" tabindex="0" data-idx="3" data-action="delete" data-account="111111111111" data-module="root" data-type="terraform_data" data-parent="(single)" data-quiet="0" data-text="terraform_data.single terraform_data 111111111111 root delete">
         <td><b class="a-delete">- delete</b></td>
         <td class="addr mono">terraform_data.single
           
           
           
           
-          </td>
+          
+          <span class="badge">apply wave 1</span></td>
         <td>terraform_data</td>
         <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="4" data-action="create" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="0" data-text="terraform_data.single[&#34;a&#34;] terraform_data 111111111111 root create">
+      <tr class="row" tabindex="0" data-idx="4" data-action="create" data-account="111111111111" data-module="root" data-type="terraform_data" data-parent="terraform_data.single" data-quiet="0" data-text="terraform_data.single[&#34;a&#34;] terraform_data 111111111111 root create">
         <td><b class="a-create">&#43; create</b></td>
         <td class="addr mono">terraform_data.single[&#34;a&#34;]
           
           
           
           
-          </td>
+          
+          <span class="badge">apply wave 1</span></td>
         <td>terraform_data</td>
         <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="5" data-action="replace" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="0" data-text="terraform_data.tainted terraform_data 111111111111 root replace">
+      <tr class="row" tabindex="0" data-idx="5" data-action="replace" data-account="111111111111" data-module="root" data-type="terraform_data" data-parent="(single)" data-quiet="0" data-text="terraform_data.tainted terraform_data 111111111111 root replace">
         <td><b class="a-replace">-/&#43; replace</b></td>
         <td class="addr mono">terraform_data.tainted
           
           
           
           
-          </td>
+          
+          <span class="badge">apply wave 1</span></td>
         <td>terraform_data</td>
         <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="6" data-action="update" data-account="111111111111" data-module="root" data-type="terraform_data" data-quiet="0" data-text="terraform_data.trigger terraform_data 111111111111 root update">
+      <tr class="row" tabindex="0" data-idx="6" data-action="update" data-account="111111111111" data-module="root" data-type="terraform_data" data-parent="(single)" data-quiet="0" data-text="terraform_data.trigger terraform_data 111111111111 root update">
         <td><b class="a-update">~ update</b></td>
         <td class="addr mono">terraform_data.trigger
           
           
           
           
-          </td>
+          
+          <span class="badge">apply wave 1</span></td>
         <td>terraform_data</td>
         <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
         <td>root</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="7" data-action="delete" data-account="111111111111" data-module="module.gone" data-type="terraform_data" data-quiet="0" data-text="module.gone.terraform_data.inner terraform_data 111111111111 module.gone delete">
+      <tr class="row" tabindex="0" data-idx="7" data-action="delete" data-account="111111111111" data-module="module.gone" data-type="terraform_data" data-parent="(single)" data-quiet="0" data-text="module.gone.terraform_data.inner terraform_data 111111111111 module.gone delete">
         <td><b class="a-delete">- delete</b></td>
         <td class="addr mono">module.gone.terraform_data.inner
           
           
           
           
-          </td>
+          
+          <span class="badge">destroy wave 1</span></td>
         <td>terraform_data</td>
         <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
         <td>module.gone</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="8" data-action="no-op" data-account="111111111111" data-module="module.mods[&#34;a&#34;]" data-type="terraform_data" data-quiet="1" data-text="module.mods[&#34;a&#34;].terraform_data.inner terraform_data 111111111111 module.mods[&#34;a&#34;] no-op">
+      <tr class="row" tabindex="0" data-idx="8" data-action="no-op" data-account="111111111111" data-module="module.mods[&#34;a&#34;]" data-type="terraform_data" data-parent="(single)" data-quiet="1" data-text="module.mods[&#34;a&#34;].terraform_data.inner terraform_data 111111111111 module.mods[&#34;a&#34;] no-op">
         <td><b class="a-no-op">= no-op</b></td>
         <td class="addr mono">module.mods[&#34;a&#34;].terraform_data.inner
+          
           
           
           
@@ -352,14 +379,15 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
         <td>module.mods[&#34;a&#34;]</td>
       </tr>
     
-      <tr class="row" tabindex="0" data-idx="9" data-action="delete" data-account="111111111111" data-module="module.mods[&#34;b&#34;]" data-type="terraform_data" data-quiet="0" data-text="module.mods[&#34;b&#34;].terraform_data.inner terraform_data 111111111111 module.mods[&#34;b&#34;] delete">
+      <tr class="row" tabindex="0" data-idx="9" data-action="delete" data-account="111111111111" data-module="module.mods[&#34;b&#34;]" data-type="terraform_data" data-parent="(single)" data-quiet="0" data-text="module.mods[&#34;b&#34;].terraform_data.inner terraform_data 111111111111 module.mods[&#34;b&#34;] delete">
         <td><b class="a-delete">- delete</b></td>
         <td class="addr mono">module.mods[&#34;b&#34;].terraform_data.inner
           
           
           
           
-          </td>
+          
+          <span class="badge">destroy wave 1</span></td>
         <td>terraform_data</td>
         <td><span class="mono">111111111111</span> <span class="src">(apply_account)</span></td>
         <td>module.mods[&#34;b&#34;]</td>

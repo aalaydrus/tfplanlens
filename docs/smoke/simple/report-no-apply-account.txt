@@ -30,3 +30,13 @@ terraform: target account unresolved (alias: default) (source: unresolved)
 
 == Changes by module ==
 root: create 1, update 1, replace 1, delete 1
+
+== Waves ==
+Terraform applies in parallel: this shows possible parallelism, not a strict order.
+apply wave 1:
+  create terraform_data.cache
+  replace terraform_data.db
+  update terraform_data.web
+destroy wave 1:
+  delete terraform_data.old [no configuration: order unknown]
+note: Resources removed from the configuration have no dependency information in the plan; their destroy order is unkno…

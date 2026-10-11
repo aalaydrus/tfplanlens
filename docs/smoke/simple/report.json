@@ -29,7 +29,9 @@
     },
     "known_after_apply": 5,
     "drift_count": 0,
-    "warnings": 0
+    "warnings": 0,
+    "apply_waves": 1,
+    "destroy_waves": 1
   },
   "findings": [
     {
@@ -105,7 +107,9 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 2
+      "known_after_apply": 2,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "terraform_data.db",
@@ -135,7 +139,9 @@
           "forces_replacement": true
         }
       ],
-      "known_after_apply": 2
+      "known_after_apply": 2,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "terraform_data.old",
@@ -154,7 +160,9 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "destroy"
     },
     {
       "address": "terraform_data.web",
@@ -178,7 +186,61 @@
           "after": "v2"
         }
       ],
-      "known_after_apply": 1
+      "known_after_apply": 1,
+      "wave": 1,
+      "wave_phase": "apply"
     }
-  ]
+  ],
+  "parents": [],
+  "waves": [
+    {
+      "phase": "apply",
+      "number": 1,
+      "resources": [
+        {
+          "address": "terraform_data.cache",
+          "action": "create",
+          "actions": {
+            "create": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "terraform_data.db",
+          "action": "replace",
+          "actions": {
+            "replace": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "terraform_data.web",
+          "action": "update",
+          "actions": {
+            "update": 1
+          },
+          "instances": 1
+        }
+      ]
+    },
+    {
+      "phase": "destroy",
+      "number": 1,
+      "resources": [
+        {
+          "address": "terraform_data.old",
+          "action": "delete",
+          "actions": {
+            "delete": 1
+          },
+          "instances": 1,
+          "no_configuration": true
+        }
+      ]
+    }
+  ],
+  "wave_notes": [
+    "Resources removed from the configuration have no dependency information in the plan; their destroy order is unknown and they are shown in wave 1."
+  ],
+  "cycles": []
 }

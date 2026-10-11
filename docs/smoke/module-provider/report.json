@@ -30,7 +30,9 @@
     },
     "known_after_apply": 21,
     "drift_count": 0,
-    "warnings": 0
+    "warnings": 0,
+    "apply_waves": 1,
+    "destroy_waves": 0
   },
   "findings": [
     {
@@ -158,7 +160,9 @@
           "forces_replacement": true
         }
       ],
-      "known_after_apply": 7
+      "known_after_apply": 7,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "local_file.root",
@@ -188,7 +192,9 @@
           "forces_replacement": true
         }
       ],
-      "known_after_apply": 7
+      "known_after_apply": 7,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "module.net.local_file.inner",
@@ -218,7 +224,44 @@
           "forces_replacement": true
         }
       ],
-      "known_after_apply": 7
+      "known_after_apply": 7,
+      "wave": 1,
+      "wave_phase": "apply"
     }
-  ]
+  ],
+  "parents": [],
+  "waves": [
+    {
+      "phase": "apply",
+      "number": 1,
+      "resources": [
+        {
+          "address": "local_file.alt",
+          "action": "replace",
+          "actions": {
+            "replace": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "local_file.root",
+          "action": "replace",
+          "actions": {
+            "replace": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "module.net.local_file.inner",
+          "action": "replace",
+          "actions": {
+            "replace": 1
+          },
+          "instances": 1
+        }
+      ]
+    }
+  ],
+  "wave_notes": [],
+  "cycles": []
 }
