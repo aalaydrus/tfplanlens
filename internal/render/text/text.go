@@ -103,6 +103,22 @@ func (r *renderer) summary(a *analyze.Analysis) {
 	}
 	r.counts("By type", s.ByType)
 	r.counts("By module", s.ByModule)
+	r.units(a)
+}
+
+// units lists the plans of a merged report.
+func (r *renderer) units(a *analyze.Analysis) {
+	if len(a.Units) == 0 {
+		return
+	}
+	r.heading("Plans")
+	for _, u := range a.Units {
+		acct := u.ApplyAccount.ID
+		if !u.ApplyAccount.Resolved {
+			acct = "unresolved"
+		}
+		r.line("%s: %s, executed from %s | %s", u.Label, u.Mode, acct, countsLine(u.Actions))
+	}
 }
 
 func (r *renderer) counts(label string, m map[string]int) {

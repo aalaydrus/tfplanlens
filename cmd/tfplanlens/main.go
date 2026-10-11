@@ -127,9 +127,14 @@ func newVersionCmd() *cobra.Command {
 func newReportCmd() *cobra.Command {
 	var o reportOptions
 	cmd := &cobra.Command{
-		Use:   "report <plan.json|->",
+		Use:   "report <plan.json|-> [more plans...]",
 		Short: "Analyze a `terraform show -json` plan and print a report",
 		Long: `Analyze a ` + "`terraform show -json`" + ` plan and print a report. Pass - to read stdin.
+
+Pass several plans (the root modules of a monorepo, say) to get one merged
+report: every address is prefixed with the plan's label, which is
+its file name, its directory when the file is called plan.json, or label=path.
+Each plan is analyzed on its own, so accounts and waves stay per plan.
 
 Settings come from ./` + config.DefaultPath + ` when it exists; flags override it.
 Accounts default to what the plan's own provider configuration says; set
@@ -137,10 +142,12 @@ tfapply_account_id and accounts: in the config file to fill in the rest.`,
 		Example: `  tfplanlens report plan.json
   tfplanlens report plan.json -f html -o report.html
   terraform show -json plan.out | tfplanlens report - -f markdown
+  tfplanlens report network/plan.json app/plan.json -f html -o all.html
+  tfplanlens report net=a.json app=b.json
   tfplanlens report plan.json --fail-on delete,replace:aws_db_instance`,
-		Args: cobra.ExactArgs(1),
+		Args: cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runReport(cmd, args[0], &o)
+			return runReport(cmd, args, &o)
 		},
 	}
 	f := cmd.Flags()
@@ -177,7 +184,7 @@ func (e *failOnError) Error() string {
 	return strings.Join(parts, "; ")
 }
 
-func runReport(cmd *cobra.Command, path string, o *reportOptions) error {
+func runReport(cmd *cobra.Command, paths []string, o *reportOptions) error {
 	cfg, err := config.Load(o.config)
 	if err != nil {
 		return err
@@ -214,7 +221,7 @@ func runReport(cmd *cobra.Command, path string, o *reportOptions) error {
 		maxLine = config.DefaultMaxLine
 	}
 
-	p, a, err := loadAnalysis(cmd, path, cfg, o)
+	a, checkFailOn, err := loadAll(cmd, paths, cfg, o)
 	if err != nil {
 		return err
 	}
@@ -251,7 +258,7 @@ func runReport(cmd *cobra.Command, path string, o *reportOptions) error {
 	}
 
 	// --fail-on is evaluated on the whole plan, including ignored types.
-	if m := analyze.CheckFailOn(p, a, rules); len(m) > 0 {
+	if m := checkFailOn(rules); len(m) > 0 {
 		return &failOnError{matches: m}
 	}
 	return nil
@@ -299,22 +306,24 @@ func useColor(w io.Writer, noColor bool) bool {
 func newTUICmd() *cobra.Command {
 	var o reportOptions
 	cmd := &cobra.Command{
-		Use:   "tui <plan.json>",
+		Use:   "tui <plan.json> [more plans...]",
 		Short: "Explore a plan interactively in the terminal",
 		Long: `Explore a plan interactively: expand and collapse changes, search, filter by
 action, group by account or module, and see the apply/destroy waves.
 Account settings come from the same config file and flags as report.`,
-		Example: "  tfplanlens tui plan.json",
-		Args:    cobra.ExactArgs(1),
+		Example: "  tfplanlens tui plan.json\n  tfplanlens tui network/plan.json app/plan.json",
+		Args:    cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if args[0] == "-" {
-				return errors.New("tui needs a plan file, not stdin (stdin is the keyboard)")
+			for _, a := range args {
+				if a == "-" {
+					return errors.New("tui needs plan files, not stdin (stdin is the keyboard)")
+				}
 			}
 			cfg, err := config.Load(o.config)
 			if err != nil {
 				return err
 			}
-			_, a, err := loadAnalysis(cmd, args[0], cfg, &o)
+			a, _, err := loadAll(cmd, args, cfg, &o)
 			if err != nil {
 				return err
 			}

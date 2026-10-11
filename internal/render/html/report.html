@@ -42,6 +42,18 @@
   </div>
 </section>
 
+{{if .A.Units}}
+<section aria-labelledby="units-h">
+  <h2 id="units-h">Plans</h2>
+  <table>
+    <thead><tr><th>Plan</th><th>Mode</th><th>Executed from</th><th>create</th><th>update</th><th>replace</th><th>delete</th></tr></thead>
+    <tbody>
+    {{range .A.Units}}<tr><td class="mono">{{.Label}}</td><td>{{.Mode}}</td><td class="mono">{{if .ApplyAccount.Resolved}}{{.ApplyAccount.ID}}{{else}}unresolved{{end}}</td><td>{{.Actions.Create}}</td><td>{{.Actions.Update}}</td><td>{{.Actions.Replace}}</td><td>{{.Actions.Delete}}</td></tr>{{end}}
+    </tbody>
+  </table>
+</section>
+{{end}}
+
 <section class="panel" aria-labelledby="chart-h">
   <h2 id="chart-h">Actions</h2>
   <svg class="chart" viewBox="0 0 {{.Chart.Width}} {{.Chart.Height}}" role="img" aria-label="Bar chart of changes by action">
@@ -94,7 +106,7 @@
         {{range .Actions}}<option value="{{.}}">{{.}}</option>{{end}}
       </select></label>
     <label>Group by
-      <select id="group"><option value="">none</option><option value="account">account</option><option value="module">module</option><option value="type">type</option><option value="parent">resource (count/for_each)</option></select></label>
+      <select id="group"><option value="">none</option><option value="account">account</option><option value="module">module</option><option value="type">type</option><option value="parent">resource (count/for_each)</option>{{if .A.Units}}<option value="unit">plan</option>{{end}}</select></label>
     <label><input id="hidequiet" type="checkbox"> hide plain no-ops and reads</label>
     <span id="count" class="src"></span>
   </div>
@@ -102,7 +114,7 @@
     <thead><tr><th>Action</th><th>Resource</th><th>Type</th><th>Target account (source)</th><th>Module</th></tr></thead>
     <tbody id="rows">
     {{range .Rows}}
-      <tr class="row" tabindex="0" data-idx="{{.Idx}}" data-action="{{.C.Action}}" data-account="{{.C.Account}}" data-module="{{.C.Module}}" data-type="{{.C.Type}}" data-parent="{{if .C.Parent}}{{.C.Parent}}{{else}}(single){{end}}" data-quiet="{{if .C.Listed}}0{{else}}1{{end}}" data-text="{{.Text}}">
+      <tr class="row" tabindex="0" data-idx="{{.Idx}}" data-action="{{.C.Action}}" data-account="{{.C.Account}}" data-module="{{.C.Module}}" data-type="{{.C.Type}}" data-unit="{{.C.Unit}}" data-parent="{{if .C.Parent}}{{.C.Parent}}{{else}}(single){{end}}" data-quiet="{{if .C.Listed}}0{{else}}1{{end}}" data-text="{{.Text}}">
         <td><b class="a-{{.C.Action}}">{{sym .C.Action}} {{.C.Action}}</b></td>
         <td class="addr mono">{{.C.Address}}
           {{if .C.Stateful}}<span class="badge stateful">STATEFUL</span>{{end}}

@@ -31,6 +31,17 @@ type Analysis struct {
 	Waves     []Wave   `json:"waves"`
 	WaveNotes []string `json:"wave_notes"`
 	Cycles    []Cycle  `json:"cycles"`
+	// Units lists the plans of a merged report (one per root module). It is empty for a single plan.
+	Units []Unit `json:"units"`
+}
+
+// Unit is one plan of a merged report.
+type Unit struct {
+	Label            string       `json:"label"`
+	Mode             string       `json:"mode"`
+	TerraformVersion string       `json:"terraform_version,omitempty"`
+	ApplyAccount     ApplyAccount `json:"apply_account"`
+	Actions          ActionCounts `json:"actions"`
 }
 
 // Account sources, recorded wherever an account is resolved.
@@ -47,6 +58,9 @@ const (
 	// SourceInferred marks an apply account taken from the plan's default
 	// provider; ApplyAccount.Via says which source resolved that provider.
 	SourceInferred = "inferred"
+	// SourceMixed marks the apply account of a merged report whose plans
+	// run from different accounts.
+	SourceMixed = "mixed"
 )
 
 // ApplyAccount is the account terraform apply runs from (SPEC 5.5).
@@ -62,6 +76,9 @@ type ApplyAccount struct {
 // Describe says where the apply account came from, e.g. "source: flag" or
 // "source: inferred from the default provider via caller_identity".
 func (a ApplyAccount) Describe() string {
+	if a.Source == SourceMixed {
+		return "source: mixed; see each plan under Plans"
+	}
 	if a.Source == SourceInferred {
 		return "source: inferred from the default provider via " + a.Via
 	}
@@ -126,6 +143,8 @@ type Finding struct {
 	Warning    string `json:"warning,omitempty"`
 	// DriftAlso is set when the resource also drifted (high risk).
 	DriftAlso bool `json:"drift_also"`
+	// Unit is the plan this finding came from in a merged report.
+	Unit string `json:"unit,omitempty"`
 }
 
 // Attr is one changed attribute.
@@ -148,6 +167,8 @@ type DriftItem struct {
 	// HighRisk is set when the resource is also replaced or deleted.
 	HighRisk bool   `json:"high_risk"`
 	Note     string `json:"note,omitempty"`
+	// Unit is the plan this drift came from in a merged report.
+	Unit string `json:"unit,omitempty"`
 }
 
 // Group is a provider-config grouping of changes (SPEC 5.5).
@@ -194,6 +215,8 @@ type Change struct {
 	// Wave is the 1-based wave of this change within WavePhase.
 	Wave      int    `json:"wave,omitempty"`
 	WavePhase string `json:"wave_phase,omitempty"`
+	// Unit is the plan this change came from in a merged report.
+	Unit string `json:"unit,omitempty"`
 }
 
 // Listed reports whether a change is worth listing in a report: it does

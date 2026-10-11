@@ -140,6 +140,7 @@ func summary(w *writer, a *analyze.Analysis) {
 		w.line("| Hidden by ignore_types | %d |", s.Hidden)
 	}
 	w.line("")
+	units(w, a)
 	for _, n := range a.Notices {
 		w.line("> **Notice:** %s", cell(n))
 		w.line("")
@@ -451,4 +452,23 @@ func parents(w *writer, a *analyze.Analysis) {
 			return
 		}
 	}
+}
+
+// units lists the plans of a merged report.
+func units(w *writer, a *analyze.Analysis) {
+	if len(a.Units) == 0 {
+		return
+	}
+	w.line("| Plan | Mode | Executed from | Changes |")
+	w.line("|---|---|---|---|")
+	for _, u := range a.Units {
+		acct := code(u.ApplyAccount.ID)
+		if !u.ApplyAccount.Resolved {
+			acct = "**unresolved**"
+		}
+		if !w.line("| %s | %s | %s | %s |", codeCell(u.Label), cell(u.Mode), acct, countsLine(u.Actions)) {
+			return
+		}
+	}
+	w.line("")
 }
