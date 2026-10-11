@@ -10,6 +10,7 @@ import (
 
 	"github.com/aalaydrus/tfplanlens/internal/config"
 	"github.com/aalaydrus/tfplanlens/internal/plan"
+	"github.com/aalaydrus/tfplanlens/internal/redact"
 )
 
 // Options are inputs that do not come from the plan or the config file.
@@ -32,6 +33,11 @@ func Analyze(p *plan.Plan, cfg *config.Config, opts *Options) *Analysis {
 	if opts == nil {
 		opts = &Options{}
 	}
+	var red *redact.Redactor
+	if cfg.RedactSecretsEnabled() {
+		red = redact.New()
+	}
+	ao := attrOpts{longKeys: cfg.LongValueKeys, red: red, noDecode: !cfg.DecodeValuesEnabled()}
 	stateful := toSet(builtinStateful, cfg.StatefulTypes)
 	ignored := toSet(cfg.IgnoreTypes)
 
@@ -121,7 +127,7 @@ func Analyze(p *plan.Plan, cfg *config.Config, opts *Options) *Analysis {
 	// Drift whose only difference is null vs an empty collection is the
 	// provider reading back "{}" where state had null; Terraform's own plan
 	// output does not report it either.
-	realDrift := meaningfulDrift(p, cfg.LongValueKeys)
+	realDrift := meaningfulDrift(p, ao)
 	driftAddr := map[string]bool{}
 	for _, d := range realDrift {
 		driftAddr[d.change.Address] = true
@@ -160,7 +166,7 @@ func Analyze(p *plan.Plan, cfg *config.Config, opts *Options) *Analysis {
 		ch.KnownAfterApply = countUnknown(c.AfterUnknown)
 		a.Summary.KnownAfterApply += ch.KnownAfterApply
 		if c.Action == plan.ActionUpdate || c.Action == plan.ActionReplace {
-			ch.Attrs = diffAttrs(c.Before, c.After, c.BeforeSensitive, c.AfterSensitive, c.AfterUnknown, c.ReplacePaths, cfg.LongValueKeys)
+			ch.Attrs = diffAttrs(c.Before, c.After, c.BeforeSensitive, c.AfterSensitive, c.AfterUnknown, c.ReplacePaths, ao)
 		}
 		if active(c) && acct.resolved {
 			if w := arnWarnings(c, acct); len(w) > 0 { // never nil: JSON arrays are [] not null
@@ -232,6 +238,10 @@ func Analyze(p *plan.Plan, cfg *config.Config, opts *Options) *Analysis {
 		a.Drift = append(a.Drift, item)
 	}
 	a.Summary.DriftCount = len(a.Drift)
+	a.Summary.Redacted = red.Count()
+	if a.Summary.Redacted > 0 {
+		a.Notices = append(a.Notices, fmt.Sprintf("Hid secret-looking values in %d place(s): they are not marked sensitive by Terraform, but have secret-like names, key material, tokens or NAME=value lines. Set redact_secrets: false in tfplanlens.config.yaml to show them.", a.Summary.Redacted))
+	}
 	return a
 }
 
@@ -435,7 +445,7 @@ type driftEntry struct {
 // meaningfulDrift returns the plan's drift entries that a reviewer should care
 // about: deletes always, and updates with at least one difference that is not
 // merely null versus an empty map or list.
-func meaningfulDrift(p *plan.Plan, longKeys []string) []driftEntry {
+func meaningfulDrift(p *plan.Plan, o attrOpts) []driftEntry {
 	var out []driftEntry
 	for _, d := range p.Drift {
 		if d.Action == plan.ActionDelete {
@@ -443,7 +453,7 @@ func meaningfulDrift(p *plan.Plan, longKeys []string) []driftEntry {
 			continue
 		}
 		attrs := []Attr{}
-		for _, at := range diffAttrs(d.Before, d.After, d.BeforeSensitive, d.AfterSensitive, d.AfterUnknown, nil, longKeys) {
+		for _, at := range diffAttrs(d.Before, d.After, d.BeforeSensitive, d.AfterSensitive, d.AfterUnknown, nil, o) {
 			if at.Kind == "value" && nullish(at.Before) && nullish(at.After) {
 				continue
 			}

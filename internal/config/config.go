@@ -38,9 +38,27 @@ type Config struct {
 	// MaxLine is the terminal truncation width (default 120).
 	MaxLine int `yaml:"max_line"`
 
+	// RedactSecrets hides values that look like secrets but are not marked
+	// sensitive by Terraform (default true). DecodeValues decodes base64, gzip
+	// and JSON in long values before diffing them (default true).
+	RedactSecrets *bool `yaml:"redact_secrets"`
+	DecodeValues  *bool `yaml:"decode_values"`
+
 	StatefulTypes []string `yaml:"stateful_types"`
 	LongValueKeys []string `yaml:"long_value_keys"`
 	IgnoreTypes   []string `yaml:"ignore_types"`
+}
+
+// RedactSecretsEnabled reports whether secret-looking values are hidden (the
+// default; only an explicit redact_secrets: false turns it off).
+func (c *Config) RedactSecretsEnabled() bool {
+	return c == nil || c.RedactSecrets == nil || *c.RedactSecrets
+}
+
+// DecodeValuesEnabled reports whether long values are decoded before diffing
+// (the default; only an explicit decode_values: false turns it off).
+func (c *Config) DecodeValuesEnabled() bool {
+	return c == nil || c.DecodeValues == nil || *c.DecodeValues
 }
 
 // Load reads path. An empty path means DefaultPath, which is optional; an

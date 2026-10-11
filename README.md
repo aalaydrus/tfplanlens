@@ -2,7 +2,7 @@
 
 Read a Terraform plan the way a reviewer needs to: deletes and replaces first, with the reason in plain English.
 
-It works **offline** on the JSON from `terraform show -json`: no AWS credentials, no Terraform binary, no network, no LLM. Output is deterministic and sensitive values are never printed.
+It works **offline** on the JSON from `terraform show -json`: no AWS credentials, no Terraform binary, no network, no LLM. Output is deterministic. Values Terraform marks sensitive are never printed, and secret-looking values it does not mark are hidden too (best effort: [what is and is not hidden](docs/SECRETS.md)).
 
 ![tfplanlens HTML report: Danger panel, summary tiles and a filterable table](docs/readme/html-report.png)
 
@@ -55,6 +55,6 @@ Working on tfplanlens with an AI agent? Point it at [`AGENTS_START_HERE.md`](fie
 
 </details>
 
-**More:** [Usage and flags](docs/USAGE.md) · [Accounts](docs/ACCOUNTS.md) · [Why not just read `terraform plan`?](docs/WHY.md) · [JSON schema](docs/json-schema.md) · [Development](docs/DEVELOPMENT.md) · [Working notes](field-notes/) · [SPEC](SPEC.md)
+**More:** [Usage and flags](docs/USAGE.md) · [Accounts](docs/ACCOUNTS.md) · [Secrets](docs/SECRETS.md) · [Why not just read `terraform plan`?](docs/WHY.md) · [JSON schema](docs/json-schema.md) · [Development](docs/DEVELOPMENT.md) · [Working notes](field-notes/) · [SPEC](SPEC.md)
 
 MIT. [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [Third-party notices](THIRD_PARTY_NOTICES.md). Not affiliated with HashiCorp or AWS.

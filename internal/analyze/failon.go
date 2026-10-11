@@ -76,7 +76,7 @@ func CheckFailOn(p *plan.Plan, a *Analysis, rules []Rule) []Match {
 		list := p.Changes
 		if r.Kind == "drift" {
 			list = nil
-			for _, rd := range meaningfulDrift(p, nil) {
+			for _, rd := range meaningfulDrift(p, attrOpts{}) {
 				list = append(list, rd.change)
 			}
 		}

@@ -381,7 +381,7 @@ func TestUnknownAttributesAreCountedNotListed(t *testing.T) {
 	attrs := diffAttrs(
 		map[string]any{"id": "old-id", "output": strings.Repeat("x", 500), "name": "a"},
 		map[string]any{"name": "b"},
-		nil, nil, map[string]any{"id": true, "output": true}, nil, nil)
+		nil, nil, map[string]any{"id": true, "output": true}, nil, attrOpts{})
 	if len(attrs) != 1 || attrs[0].Path != "name" {
 		t.Errorf("attrs = %+v, want only name", attrs)
 	}
@@ -393,7 +393,7 @@ func TestMarkedLeafCollapsesTheOtherSidesChildren(t *testing.T) {
 	attrs := diffAttrs(
 		map[string]any{"output": []any{"a", "b", "c"}, "input": []any{"a", "b"}},
 		map[string]any{"input": []any{"a", "x"}},
-		nil, nil, map[string]any{"output": true}, nil, nil)
+		nil, nil, map[string]any{"output": true}, nil, attrOpts{})
 	if len(attrs) != 1 || attrs[0].Path != "input[1]" {
 		t.Errorf("attrs = %+v, want only input[1]", attrs)
 	}
@@ -406,7 +406,7 @@ func TestSecretCopiedIntoUnmarkedAttributeIsMasked(t *testing.T) {
 	attrs := diffAttrs(
 		map[string]any{"input": "hunter2", "output": "hunter2", "note": "hi"},
 		map[string]any{"input": "hunter3", "output": "hunter3", "note": "bye"},
-		map[string]any{"input": true}, map[string]any{"input": true}, nil, nil, nil)
+		map[string]any{"input": true}, map[string]any{"input": true}, nil, nil, attrOpts{})
 	for _, at := range attrs {
 		if at.Before != nil || at.After != nil {
 			if at.Path != "note" {
@@ -427,7 +427,7 @@ func TestSecretCopiedIntoUnmarkedAttributeIsMasked(t *testing.T) {
 	// Short values are not matched: a sensitive "1" must not mask every "1".
 	short := diffAttrs(
 		map[string]any{"pw": "1", "count": "1"}, map[string]any{"pw": "2", "count": "2"},
-		map[string]any{"pw": true}, map[string]any{"pw": true}, nil, nil, nil)
+		map[string]any{"pw": true}, map[string]any{"pw": true}, nil, nil, attrOpts{})
 	for _, at := range short {
 		if at.Path == "count" && at.Kind != "value" {
 			t.Errorf("short secret over-masked: %+v", at)

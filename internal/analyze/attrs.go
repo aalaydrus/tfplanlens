@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/aalaydrus/tfplanlens/internal/redact"
 	"github.com/aalaydrus/tfplanlens/internal/valuediff"
 )
 
@@ -183,7 +184,16 @@ func lastKey(path string) string {
 
 // diffAttrs lists changed attributes between before and after. Sensitive
 // values are never copied into the result.
-func diffAttrs(before, after, bsens, asens, aunk any, replacePaths []string, longKeys []string) []Attr {
+// attrOpts carries what diffAttrs needs besides the values themselves.
+type attrOpts struct {
+	longKeys []string
+	// red hides secret-looking values (nil: hide nothing).
+	red *redact.Redactor
+	// noDecode compares long values without decoding base64, gzip or JSON.
+	noDecode bool
+}
+
+func diffAttrs(before, after, bsens, asens, aunk any, replacePaths []string, o attrOpts) []Attr {
 	bl, al := map[string]leaf{}, map[string]leaf{}
 	flatten(before, bsens, nil, "", bl)
 	flatten(after, asens, aunk, "", al)
@@ -234,22 +244,31 @@ func diffAttrs(before, after, bsens, asens, aunk any, replacePaths []string, lon
 			continue
 		case b.sens || a.sens:
 			at.Kind = "sensitive"
+		case o.red != nil && redact.SecretName(lastKey(p)) && hasValue(b, bok) && hasValue(a, aok):
+			// Terraform did not mark it sensitive, but its name says it is a
+			// secret: treat it as one.
+			at.Kind = "sensitive"
+			o.red.Hit()
 		default:
 			bs, bIsStr := b.val.(string)
 			as, aIsStr := a.val.(string)
 			key := lastKey(p)
-			if (bIsStr && valuediff.IsLong(key, bs, longKeys)) || (aIsStr && valuediff.IsLong(key, as, longKeys)) {
+			if (bIsStr && valuediff.IsLong(key, bs, o.longKeys)) || (aIsStr && valuediff.IsLong(key, as, o.longKeys)) {
 				at.Kind = "long"
-				d := valuediff.Diff(p, bs, as)
+				vo := valuediff.Options{NoDecode: o.noDecode}
+				if o.red != nil {
+					vo.Redact = o.red.Text
+				}
+				d := valuediff.DiffWith(p, bs, as, vo)
 				at.Diff = &d
 				break
 			}
 			at.Kind = "value"
 			if bok {
-				at.Before = json.RawMessage(format(b.val))
+				at.Before = json.RawMessage(format(o.red.Value(b.val)))
 			}
 			if aok {
-				at.After = json.RawMessage(format(a.val))
+				at.After = json.RawMessage(format(o.red.Value(a.val)))
 			}
 		}
 		attrs = append(attrs, at)
@@ -329,4 +348,17 @@ func maskDerivedSecrets(bl, al map[string]leaf) {
 			}
 		}
 	}
+}
+
+// hasValue reports whether a side of a change holds a real value: present,
+// not null and not an empty string. A secret-named attribute that is empty on
+// a side has nothing to hide there.
+func hasValue(l leaf, present bool) bool {
+	if !present || l.unknown || l.val == nil {
+		return false
+	}
+	if s, ok := l.val.(string); ok && s == "" {
+		return false
+	}
+	return true
 }

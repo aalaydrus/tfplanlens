@@ -157,11 +157,30 @@ func splitLines(s string) []string {
 	return strings.Split(strings.TrimSuffix(s, "\n"), "\n")
 }
 
+// Options tune Diff.
+type Options struct {
+	// NoDecode compares the values as they are, without decoding base64, gzip
+	// or JSON first.
+	NoDecode bool
+	// Redact, if set, hides secret-looking text in both sides before they are
+	// compared, so neither the diff lines nor FullBefore/FullAfter contain it.
+	Redact func(string) string
+}
+
 // Diff decodes both sides and returns only changed lines plus context. Pass
 // an empty string for a missing side.
-func Diff(key, before, after string) Result {
-	b, _ := Decode(before)
-	a, _ := Decode(after)
+func Diff(key, before, after string) Result { return DiffWith(key, before, after, Options{}) }
+
+// DiffWith is Diff with options.
+func DiffWith(key, before, after string, o Options) Result {
+	b, a := before, after
+	if !o.NoDecode {
+		b, _ = Decode(before)
+		a, _ = Decode(after)
+	}
+	if o.Redact != nil {
+		b, a = o.Redact(b), o.Redact(a)
+	}
 	res := diffLines(key, splitLines(b), splitLines(a))
 	res.FullBefore, res.FullAfter = b, a
 

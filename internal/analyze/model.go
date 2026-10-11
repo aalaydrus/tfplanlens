@@ -124,6 +124,9 @@ type Summary struct {
 
 	// Hidden counts changes removed by ignore_types.
 	Hidden int `json:"hidden,omitempty"`
+	// Redacted counts values hidden because they look like secrets that
+	// Terraform did not mark sensitive (see internal/redact).
+	Redacted int `json:"redacted,omitempty"`
 }
 
 // Finding is a danger finding: a delete or replace (SPEC 5.2).

@@ -21,6 +21,7 @@ Unit tests that build `plan.Plan`/`Analysis` by hand are in each package.
 |---|---|
 | Every plan x every format works | `TestEveryPlanEveryFormat`, `TestGolden` (`cmd/tfplanlens/golden_test.go`) |
 | Danger first, reasons, long values | `TestDangerBeforeAnyChangeListing`, `TestReasonText`, `TestDiffChangedLinesPlusContext` |
+| Secret-looking values redacted | `TestUnmarkedSecretsNeverReachAnyOutput`, `TestRedactionIsCountedAndExplained`, `TestRedactionCanBeSwitchedOffAndDecodingToo`, `TestRedactionLeavesTheRealPlansAlone` (`cmd/tfplanlens/redact_test.go`), unit tests in `internal/redact`; offline/no-writes: `scripts/verify-offline.sh` (manual, Linux) |
 | Sensitive never printed | `TestSensitiveValuesNeverPrinted`, `TestSensitiveValuesNeverAppear` (html), `TestSensitiveNeverPrinted` (markdown), `TestSimulationNeverPrintsSecretValues` |
 | JSON shape | `TestJSONArraysAreNeverNull` (`real_plans_test.go`; add new array keys to `arrayKeys`) |
 | Accounts | `apply_account_test.go`, `internal/analyze/analyze_test.go`, `internal/plan/provider_test.go` |

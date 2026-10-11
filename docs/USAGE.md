@@ -53,6 +53,8 @@ accounts:                            # provider alias or key (aws.prod) -> accou
 format: [text]                       # default output format(s)
 fail_on: [delete, "replace:aws_db_instance"]
 max_line: 120                        # terminal truncation width
+redact_secrets: true                # hide secret-looking values Terraform did not mark sensitive
+decode_values: true                  # decode base64/gzip/JSON in long values before diffing
 stateful_types: [aws_rds_cluster]    # added to the built-in list
 long_value_keys: [custom_script]     # added to the built-in list
 ignore_types: []                     # hidden from the report, never from --fail-on

@@ -50,6 +50,9 @@ skipped for them.
 
 - Reproduce with a real plan first, then fix, then prove the new test fails on the
   old code.
+- Never print sensitive values, and keep the redaction (`internal/redact`) in
+  step: a new output path that shows plan values must go through it; a new
+  credential format is a pattern plus a test in `internal/redact`.
 - Never print sensitive values; JSON arrays are `[]`, never `null`; say "unknown"
   when the plan cannot tell instead of guessing. Tests enforce these.
 - Keep the CLI small: prefer a config key to a flag, and a default to either.

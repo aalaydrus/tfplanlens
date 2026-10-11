@@ -31,6 +31,19 @@
 # Terminal truncation width (default 120).
 # max_line: 120
 
+# --- Secrets --------------------------------------------------------------
+# Values Terraform marks sensitive are never printed. These two settings cover
+# the rest (see docs/SECRETS.md). Both default to true.
+
+# Hide values that look like secrets but are not marked sensitive: attributes
+# named like a password or token, key material, NAME=value lines in decoded
+# user_data. Best effort, not a guarantee.
+# redact_secrets: true
+
+# Decode base64/gzip/JSON in long values (user_data, policies) before diffing.
+# Set false to leave them as the opaque strings Terraform shows.
+# decode_values: true
+
 # --- Report content -------------------------------------------------------
 # Resource types treated as stateful, added to the built-in list
 # (databases, buckets, volumes, KMS keys, Route53 zones, EFS, DynamoDB, ...).
