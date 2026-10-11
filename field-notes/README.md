@@ -10,6 +10,7 @@ simulation rundown.)
 | [`TERRAFORM_GOTCHAS.md`](TERRAFORM_GOTCHAS.md) | Plan JSON and provider behavior that surprised us, each with how it was verified |
 | [`WISHLIST.md`](WISHLIST.md) | Ideas and edge cases to dig into, with a status |
 | [`CONTRIBUTING_NOTES.md`](CONTRIBUTING_NOTES.md) | How we build, verify and review changes |
+| [`Author-Notes/`](Author-Notes/AGENTS_START_HERE.md) | For agents: a routing page, code/test/CLI maps, task playbooks, and importable skills ([`SKILLS/`](Author-Notes/SKILLS/README.md)) |
 
 Rules for entries: say **what you saw**, **where** (a file in this repo or the
 Terraform/provider version), and mark it `verified` only if you ran it. A
