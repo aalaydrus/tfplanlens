@@ -10,6 +10,12 @@ Terraform plans. Each is a folder with a `SKILL.md` (YAML frontmatter with
 | [`compare-terraform-plans`](compare-terraform-plans/SKILL.md) | "what changed since the last plan?" |
 | [`gate-terraform-plans`](gate-terraform-plans/SKILL.md) | "block risky plans in CI" |
 
+## For the agent itself
+
+[`CLAUDE.md`](CLAUDE.md) and [`KIRO.md`](KIRO.md) tell an agent how to find its
+way around the repo, contribute from its own fork, and write skills for itself in
+its tool's format. Point the agent at the file for its tool.
+
 ## Install
 
 The skills **call the `tfplanlens` binary**, which must be on the PATH of the

@@ -18,6 +18,7 @@ open only the one ref or playbook your task points to.
 | Know every flag, exit code, config key | [refs/CLI_REFERENCE.md](refs/CLI_REFERENCE.md) | |
 | Open a PR | [playbooks/open-a-pr.md](playbooks/open-a-pr.md) | |
 | Use tfplanlens as an agent skill | [SKILLS/README.md](SKILLS/README.md) | |
+| Contribute from a fork / write your own skills | [SKILLS/CLAUDE.md](SKILLS/CLAUDE.md), [SKILLS/KIRO.md](SKILLS/KIRO.md) | |
 | Check a Terraform/provider quirk or idea | [../TERRAFORM_GOTCHAS.md](../TERRAFORM_GOTCHAS.md), [../WISHLIST.md](../WISHLIST.md) | |
 
 ## Five facts that save the most tokens
