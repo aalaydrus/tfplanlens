@@ -167,3 +167,54 @@ func TestMarkdownEscapesAndMarks(t *testing.T) {
 		}
 	}
 }
+
+func moved(c analyze.Change, from string) analyze.Change {
+	c.MovedFrom = from
+	return c
+}
+
+func TestMovedResourceIsTheSameResource(t *testing.T) {
+	// Renamed with a moved block, same change: one changed entry (the move),
+	// not removed + added.
+	r := Compare(
+		an(change("old.x", "update", val("a", `"1"`, `"2"`))),
+		an(moved(change("new.x", "update", val("a", `"1"`, `"2"`)), "old.x")),
+	)
+	if len(r.Added) != 0 || len(r.Removed) != 0 || len(r.Changed) != 1 {
+		t.Fatalf("%+v", r)
+	}
+	if e := r.Changed[0]; e.Address != "new.x" || !reflect.DeepEqual(e.Differences, []string{"moved from: (none) -> old.x"}) {
+		t.Errorf("%+v", e)
+	}
+
+	// Renamed and changed differently: both differences on the new address.
+	r = Compare(
+		an(change("old.x", "update", val("a", `"1"`, `"2"`))),
+		an(moved(change("new.x", "update", val("a", `"1"`, `"3"`)), "old.x")),
+	)
+	if len(r.Changed) != 1 || len(r.Changed[0].Differences) != 2 {
+		t.Errorf("%+v", r)
+	}
+
+	// The old plan's delete of old.x is not "defused"-and-"added": a replace
+	// of the moved resource is still the same danger.
+	r = Compare(an(change("old.x", "replace")), an(moved(change("new.x", "replace"), "old.x")))
+	if r.Dangerous() || len(r.Defused) != 0 {
+		t.Errorf("same replace before and after the move: new danger %v defused %v", r.NewDanger, r.Defused)
+	}
+	r = Compare(an(change("old.x", "update")), an(moved(change("new.x", "delete"), "old.x")))
+	if !reflect.DeepEqual(r.NewDanger, []string{"new.x"}) {
+		t.Errorf("update -> delete after move: %v", r.NewDanger)
+	}
+}
+
+func TestMovedFromIsNotPairedWhenTheOldAddressStillExists(t *testing.T) {
+	r := Compare(
+		an(change("old.x", "update"), change("new.x", "create")),
+		an(change("old.x", "update"), moved(change("new.x", "create"), "old.x")),
+	)
+	// old.x is unchanged; new.x gains a moved_from.
+	if r.Unchanged != 1 || len(r.Changed) != 1 || r.Changed[0].Address != "new.x" || len(r.Added)+len(r.Removed) != 0 {
+		t.Errorf("%+v", r)
+	}
+}

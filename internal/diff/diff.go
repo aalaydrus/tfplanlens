@@ -1,6 +1,7 @@
 // Package diff compares two analyses of the same configuration ("what
 // changed since the last time I reviewed this plan?", SPEC 10). Resources
-// are matched by address; a resource that is absent or a plain no-op counts
+// are matched by address (a resource the new plan moved from an address the
+// old plan listed counts as the same one); a resource that is absent or a plain no-op counts
 // as "not changing".
 package diff
 
@@ -102,6 +103,15 @@ func Compare(oldA, newA *analyze.Analysis) *Result {
 	}
 
 	oldBy, newBy := index(oldA), index(newA)
+	// A resource renamed with a moved block is the same resource: the old
+	// plan listed it under its old address, the new one under the new address
+	// with moved_from. Compare them as one instead of removed plus added.
+	for addr, n := range newBy {
+		if x := n.MovedFrom; x != "" && oldBy[x] != nil && newBy[x] == nil && oldBy[addr] == nil {
+			oldBy[addr] = oldBy[x]
+			delete(oldBy, x)
+		}
+	}
 	addrs := map[string]bool{}
 	for a := range oldBy {
 		addrs[a] = true
