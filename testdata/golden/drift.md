@@ -56,3 +56,15 @@
 
 </details>
 
+### Waves
+
+Terraform applies in parallel: this shows possible parallelism, not a strict order.
+
+<details><summary><b>apply wave 1</b> &mdash; 3 resource(s)</summary>
+
+- update `aws_instance.api`
+- create `aws_instance.legacy`
+- replace `aws_security_group.web`
+
+</details>
+

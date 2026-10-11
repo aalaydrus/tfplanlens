@@ -32,7 +32,9 @@
     },
     "known_after_apply": 0,
     "drift_count": 0,
-    "warnings": 0
+    "warnings": 0,
+    "apply_waves": 1,
+    "destroy_waves": 1
   },
   "findings": [
     {
@@ -124,7 +126,11 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "parent": "aws_iam_user.team",
+      "key": "carol",
+      "wave": 1,
+      "wave_phase": "destroy"
     },
     {
       "address": "aws_iam_user.team[\"alice\"]",
@@ -141,7 +147,11 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "parent": "aws_iam_user.team",
+      "key": "alice",
+      "wave": 1,
+      "wave_phase": "destroy"
     },
     {
       "address": "aws_instance.fleet[0]",
@@ -158,7 +168,11 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "parent": "aws_instance.fleet",
+      "key": "0",
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "aws_instance.fleet[1]",
@@ -182,7 +196,11 @@
           "after": "c"
         }
       ],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "parent": "aws_instance.fleet",
+      "key": "1",
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "aws_instance.fleet[2]",
@@ -201,7 +219,11 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "parent": "aws_instance.fleet",
+      "key": "2",
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "aws_s3_bucket.shards[1]",
@@ -220,7 +242,11 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "parent": "aws_s3_bucket.shards",
+      "key": "1",
+      "wave": 1,
+      "wave_phase": "destroy"
     },
     {
       "address": "aws_s3_bucket.shards[0]",
@@ -237,7 +263,138 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "parent": "aws_s3_bucket.shards",
+      "key": "0",
+      "wave": 1,
+      "wave_phase": "destroy"
     }
-  ]
+  ],
+  "parents": [
+    {
+      "address": "aws_iam_user.team",
+      "kind": "for_each",
+      "counts": {
+        "create": 0,
+        "update": 0,
+        "replace": 0,
+        "delete": 1,
+        "read": 0,
+        "no_op": 1,
+        "forget": 0
+      },
+      "instances": [
+        {
+          "key": "carol",
+          "address": "aws_iam_user.team[\"carol\"]",
+          "action": "delete"
+        },
+        {
+          "key": "alice",
+          "address": "aws_iam_user.team[\"alice\"]",
+          "action": "no-op"
+        }
+      ]
+    },
+    {
+      "address": "aws_instance.fleet",
+      "kind": "count",
+      "counts": {
+        "create": 0,
+        "update": 1,
+        "replace": 0,
+        "delete": 1,
+        "read": 0,
+        "no_op": 1,
+        "forget": 0
+      },
+      "instances": [
+        {
+          "key": "0",
+          "address": "aws_instance.fleet[0]",
+          "action": "no-op"
+        },
+        {
+          "key": "1",
+          "address": "aws_instance.fleet[1]",
+          "action": "update"
+        },
+        {
+          "key": "2",
+          "address": "aws_instance.fleet[2]",
+          "action": "delete"
+        }
+      ]
+    },
+    {
+      "address": "aws_s3_bucket.shards",
+      "kind": "count",
+      "counts": {
+        "create": 0,
+        "update": 0,
+        "replace": 0,
+        "delete": 1,
+        "read": 0,
+        "no_op": 1,
+        "forget": 0
+      },
+      "instances": [
+        {
+          "key": "1",
+          "address": "aws_s3_bucket.shards[1]",
+          "action": "delete"
+        },
+        {
+          "key": "0",
+          "address": "aws_s3_bucket.shards[0]",
+          "action": "no-op"
+        }
+      ]
+    }
+  ],
+  "waves": [
+    {
+      "phase": "apply",
+      "number": 1,
+      "resources": [
+        {
+          "address": "aws_instance.fleet",
+          "action": "delete",
+          "actions": {
+            "delete": 1,
+            "update": 1
+          },
+          "instances": 2
+        }
+      ]
+    },
+    {
+      "phase": "destroy",
+      "number": 1,
+      "resources": [
+        {
+          "address": "aws_iam_user.team",
+          "action": "delete",
+          "actions": {
+            "delete": 1
+          },
+          "instances": 1,
+          "no_configuration": true
+        },
+        {
+          "address": "aws_s3_bucket.shards",
+          "action": "delete",
+          "actions": {
+            "delete": 1
+          },
+          "instances": 1,
+          "no_configuration": true
+        }
+      ]
+    }
+  ],
+  "wave_notes": [
+    "Resources removed from the configuration have no dependency information in the plan; their destroy order is unknown and they are shown in wave 1."
+  ],
+  "cycles": []
 }

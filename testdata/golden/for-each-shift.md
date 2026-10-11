@@ -48,3 +48,46 @@
 
 </details>
 
+### Waves
+
+Terraform applies in parallel: this shows possible parallelism, not a strict order.
+
+<details><summary><b>apply wave 1</b> &mdash; 1 resource(s)</summary>
+
+- delete `aws_instance.fleet` (2 instances)
+
+</details>
+
+<details><summary><b>destroy wave 1</b> &mdash; 2 resource(s)</summary>
+
+- delete `aws_iam_user.team` (no configuration: order unknown)
+- delete `aws_s3_bucket.shards` (no configuration: order unknown)
+
+</details>
+
+
+> Resources removed from the configuration have no dependency information in the plan; their destroy order is unknown and they are shown in wave 1.
+### Resources with multiple instances
+
+<details><summary>aws_iam_user.team (for_each) &mdash; 2 instance(s)</summary>
+
+- delete `carol`
+- no-op `alice`
+
+</details>
+
+<details><summary>aws_instance.fleet (count) &mdash; 3 instance(s)</summary>
+
+- no-op `0`
+- update `1`
+- delete `2`
+
+</details>
+
+<details><summary>aws_s3_bucket.shards (count) &mdash; 2 instance(s)</summary>
+
+- delete `1`
+- no-op `0`
+
+</details>
+

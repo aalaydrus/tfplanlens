@@ -40,7 +40,9 @@
     },
     "known_after_apply": 0,
     "drift_count": 0,
-    "warnings": 0
+    "warnings": 0,
+    "apply_waves": 1,
+    "destroy_waves": 1
   },
   "findings": [
     {
@@ -260,7 +262,9 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "destroy"
     },
     {
       "address": "aws_sns_topic.switched",
@@ -279,7 +283,9 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "destroy"
     },
     {
       "address": "aws_instance.counted[2]",
@@ -298,7 +304,11 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "parent": "aws_instance.counted",
+      "key": "2",
+      "wave": 1,
+      "wave_phase": "destroy"
     },
     {
       "address": "aws_iam_user.keyed[\"bob\"]",
@@ -317,7 +327,11 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "parent": "aws_iam_user.keyed",
+      "key": "bob",
+      "wave": 1,
+      "wave_phase": "destroy"
     },
     {
       "address": "module.gone.aws_s3_bucket.data",
@@ -336,7 +350,9 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "destroy"
     },
     {
       "address": "aws_lambda_function.orphan",
@@ -355,7 +371,9 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "destroy"
     },
     {
       "address": "aws_db_instance.main",
@@ -384,7 +402,9 @@
           "forces_replacement": true
         }
       ],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "aws_instance.tainted",
@@ -410,7 +430,9 @@
           "after": "tainted-new"
         }
       ],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "aws_ebs_volume.requested",
@@ -436,7 +458,9 @@
           "after": "requested-new"
         }
       ],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "aws_lb.triggered",
@@ -462,7 +486,9 @@
           "after": "triggered-new"
         }
       ],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "aws_eip.mystery",
@@ -488,7 +514,9 @@
           "after": "mystery-new"
         }
       ],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "apply"
     },
     {
       "address": "aws_instance.create_before_destroy",
@@ -518,7 +546,131 @@
           "forces_replacement": true
         }
       ],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "wave": 1,
+      "wave_phase": "apply"
     }
-  ]
+  ],
+  "parents": [],
+  "waves": [
+    {
+      "phase": "apply",
+      "number": 1,
+      "resources": [
+        {
+          "address": "aws_db_instance.main",
+          "action": "replace",
+          "actions": {
+            "replace": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "aws_ebs_volume.requested",
+          "action": "replace",
+          "actions": {
+            "replace": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "aws_eip.mystery",
+          "action": "replace",
+          "actions": {
+            "replace": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "aws_instance.create_before_destroy",
+          "action": "replace",
+          "actions": {
+            "replace": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "aws_instance.tainted",
+          "action": "replace",
+          "actions": {
+            "replace": 1
+          },
+          "instances": 1
+        },
+        {
+          "address": "aws_lb.triggered",
+          "action": "replace",
+          "actions": {
+            "replace": 1
+          },
+          "instances": 1
+        }
+      ]
+    },
+    {
+      "phase": "destroy",
+      "number": 1,
+      "resources": [
+        {
+          "address": "aws_iam_user.keyed",
+          "action": "delete",
+          "actions": {
+            "delete": 1
+          },
+          "instances": 1,
+          "no_configuration": true
+        },
+        {
+          "address": "aws_instance.counted",
+          "action": "delete",
+          "actions": {
+            "delete": 1
+          },
+          "instances": 1,
+          "no_configuration": true
+        },
+        {
+          "address": "aws_lambda_function.orphan",
+          "action": "delete",
+          "actions": {
+            "delete": 1
+          },
+          "instances": 1,
+          "no_configuration": true
+        },
+        {
+          "address": "aws_sns_topic.switched",
+          "action": "delete",
+          "actions": {
+            "delete": 1
+          },
+          "instances": 1,
+          "no_configuration": true
+        },
+        {
+          "address": "aws_sqs_queue.removed",
+          "action": "delete",
+          "actions": {
+            "delete": 1
+          },
+          "instances": 1,
+          "no_configuration": true
+        },
+        {
+          "address": "module.gone.aws_s3_bucket.data",
+          "action": "delete",
+          "actions": {
+            "delete": 1
+          },
+          "instances": 1,
+          "no_configuration": true
+        }
+      ]
+    }
+  ],
+  "wave_notes": [
+    "replace_triggered_by is not part of the plan JSON: a resource replaced by a trigger is not ordered after the resource that triggered it.",
+    "Resources removed from the configuration have no dependency information in the plan; their destroy order is unknown and they are shown in wave 1."
+  ],
+  "cycles": []
 }

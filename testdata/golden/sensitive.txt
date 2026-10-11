@@ -25,3 +25,10 @@ aws: target account unresolved (alias: default) (source: unresolved)
 
 == Changes by module ==
 root: create 1, update 2
+
+== Waves ==
+Terraform applies in parallel: this shows possible parallelism, not a strict order.
+apply wave 1:
+  update aws_db_instance.main
+  create aws_secretsmanager_secret_version.s
+  update aws_ssm_parameter.mixed

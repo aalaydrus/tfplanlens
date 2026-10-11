@@ -34,6 +34,8 @@ func Render(w io.Writer, a *analyze.Analysis, opt Options) error {
 	r.drift(a)
 	r.byAccount(a)
 	r.byModule(a)
+	r.waves(a)
+	r.parents(a)
 	_, err := io.WriteString(w, r.b.String())
 	return err
 }
@@ -346,5 +348,58 @@ func (r *renderer) byModule(a *analyze.Analysis) {
 			break
 		}
 		r.line("%s: %s", m.name, countsLine(m.c))
+	}
+}
+
+// waves prints the apply/destroy waves and any dependency cycle.
+func (r *renderer) waves(a *analyze.Analysis) {
+	if len(a.Cycles) > 0 {
+		r.heading("Dependency cycles")
+		for _, cy := range a.Cycles {
+			r.line("%s", r.c(red, "cycle: "+strings.Join(cy.Resources, " -> ")))
+		}
+	}
+	if len(a.Waves) == 0 {
+		return
+	}
+	r.heading("Waves")
+	r.line("Terraform applies in parallel: this shows possible parallelism, not a strict order.")
+	for _, w := range a.Waves {
+		r.line("%s wave %d:", w.Phase, w.Number)
+		for _, res := range w.Resources {
+			note := ""
+			if res.Instances > 1 {
+				note = fmt.Sprintf(" (%d instances)", res.Instances)
+			}
+			if res.NoConfiguration {
+				note += " [no configuration: order unknown]"
+			}
+			r.line("  %s %s%s", res.Action, res.Address, note)
+		}
+	}
+	for _, n := range a.WaveNotes {
+		r.line("note: %s", n)
+	}
+}
+
+// parents lists count/for_each resources with their instance keys.
+func (r *renderer) parents(a *analyze.Analysis) {
+	if len(a.Parents) == 0 {
+		return
+	}
+	r.heading("Resources with multiple instances")
+	for i, p := range a.Parents {
+		if i == MaxList {
+			r.line("+%d more", len(a.Parents)-MaxList)
+			break
+		}
+		keys := make([]string, 0, len(p.Instances))
+		for _, in := range p.Instances {
+			keys = append(keys, in.Key+" ("+in.Action+")")
+		}
+		if len(keys) > MaxList {
+			keys = append(keys[:MaxList], fmt.Sprintf("+%d more", len(keys)-MaxList))
+		}
+		r.line("%s [%s]: %s", p.Address, p.Kind, strings.Join(keys, ", "))
 	}
 }

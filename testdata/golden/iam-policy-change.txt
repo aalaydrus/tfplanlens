@@ -58,3 +58,9 @@ aws: target account unresolved (alias: default) (source: unresolved)
 
 == Changes by module ==
 root: update 2
+
+== Waves ==
+Terraform applies in parallel: this shows possible parallelism, not a strict order.
+apply wave 1:
+  update aws_iam_policy.data
+  update aws_iam_role.app

@@ -43,3 +43,15 @@ No deletes or replacements.
 
 </details>
 
+### Waves
+
+Terraform applies in parallel: this shows possible parallelism, not a strict order.
+
+<details><summary><b>apply wave 1</b> &mdash; 3 resource(s)</summary>
+
+- update `aws_db_instance.main`
+- create `aws_secretsmanager_secret_version.s`
+- update `aws_ssm_parameter.mixed`
+
+</details>
+

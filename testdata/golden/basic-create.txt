@@ -26,3 +26,12 @@ aws: target account unresolved (alias: default) (source: unresolved)
 
 == Changes by module ==
 root: create 2, update 2, read 1
+
+== Waves ==
+Terraform applies in parallel: this shows possible parallelism, not a strict order.
+apply wave 1:
+  update aws_instance.api
+  create aws_instance.web
+  create aws_s3_bucket.logs
+  update aws_security_group.web
+  read data.aws_caller_identity.current

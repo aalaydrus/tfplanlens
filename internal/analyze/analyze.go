@@ -42,6 +42,10 @@ func Analyze(p *plan.Plan, cfg *config.Config, opts *Options) *Analysis {
 		Groups:        []Group{},
 		Changes:       []Change{},
 		Notices:       []string{},
+		Parents:       []Parent{},
+		Waves:         []Wave{},
+		WaveNotes:     []string{},
+		Cycles:        []Cycle{},
 	}
 	a.ApplyAccount = ApplyAccount{Source: SourceUnresolved}
 	switch {
@@ -81,6 +85,26 @@ func Analyze(p *plan.Plan, cfg *config.Config, opts *Options) *Analysis {
 			continue
 		}
 		visible = append(visible, c)
+	}
+	waves, cycles, waveNotes, assigned := computeWaves(p)
+	waves, renumber := hideIgnoredWaves(waves, ignored)
+	a.Waves, a.Cycles = waves, cycles
+	if len(cycles) == 0 {
+		a.Cycles = []Cycle{}
+	}
+	if len(waves) > 0 && len(waveNotes) > 0 {
+		a.WaveNotes = waveNotes
+	}
+	for _, w := range waves {
+		if w.Phase == PhaseApply {
+			a.Summary.ApplyWaves = w.Number
+		} else {
+			a.Summary.DestroyWaves = w.Number
+		}
+	}
+	a.Parents = buildParents(visible)
+	if a.Parents == nil {
+		a.Parents = []Parent{}
 	}
 	siblings := map[string][]plan.Change{}
 	for _, c := range visible {
@@ -141,6 +165,14 @@ func Analyze(p *plan.Plan, cfg *config.Config, opts *Options) *Analysis {
 			if w := arnWarnings(c, acct); len(w) > 0 { // never nil: JSON arrays are [] not null
 				ch.Warnings = w
 				a.Summary.Warnings += len(w)
+			}
+		}
+		if c.HasIndex {
+			ch.Parent, ch.Key = c.ConfigAddress, c.Index
+		}
+		if as, ok := assigned[c.ConfigAddress]; ok {
+			if n, ok := renumber[as.phase][as.wave]; ok {
+				ch.Wave, ch.WavePhase = n, as.phase
 			}
 		}
 		a.Changes = append(a.Changes, ch)
@@ -428,4 +460,45 @@ func nullish(raw json.RawMessage) bool {
 		return true
 	}
 	return false
+}
+
+// hideIgnoredWaves drops resources of ignored types from the waves, removes
+// waves that become empty and renumbers each phase consecutively. renumber maps
+// a computed wave number to the displayed one.
+func hideIgnoredWaves(waves []Wave, ignored map[string]bool) ([]Wave, map[string]map[int]int) {
+	renumber := map[string]map[int]int{PhaseApply: {}, PhaseDestroy: {}}
+	out := []Wave{}
+	next := map[string]int{}
+	for _, w := range waves {
+		var rs []WaveResource
+		for _, r := range w.Resources {
+			if !ignored[typeOfConfigAddress(r.Address)] {
+				rs = append(rs, r)
+			}
+		}
+		if len(rs) == 0 {
+			continue
+		}
+		next[w.Phase]++
+		renumber[w.Phase][w.Number] = next[w.Phase]
+		out = append(out, Wave{Phase: w.Phase, Number: next[w.Phase], Resources: rs})
+	}
+	return out, renumber
+}
+
+// typeOfConfigAddress is the resource type of a configuration address such as
+// "module.a.data.aws_x.y" or "module.a.aws_x.y".
+func typeOfConfigAddress(addr string) string {
+	parts := strings.Split(addr, ".")
+	for i := 0; i < len(parts); i++ {
+		if parts[i] == "module" {
+			i++ // skip the module name
+			continue
+		}
+		if parts[i] == "data" && i+1 < len(parts) {
+			return parts[i+1]
+		}
+		return parts[i]
+	}
+	return ""
 }

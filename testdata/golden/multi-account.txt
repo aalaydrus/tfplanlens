@@ -36,3 +36,13 @@ aws.shared: target account 222222222222 (source: role_arn)
 
 == Changes by module ==
 root: create 3, update 1, delete 1
+
+== Waves ==
+Terraform applies in parallel: this shows possible parallelism, not a strict order.
+apply wave 1:
+  create aws_s3_bucket.default
+  create aws_s3_bucket.prod
+  update aws_s3_bucket.shared
+  create aws_sqs_queue.eu
+destroy wave 1:
+  delete aws_db_instance.prod

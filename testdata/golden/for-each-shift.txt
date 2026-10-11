@@ -33,3 +33,17 @@ aws: target account unresolved (alias: default) (source: unresolved)
 
 == Changes by module ==
 root: update 1, delete 3
+
+== Waves ==
+Terraform applies in parallel: this shows possible parallelism, not a strict order.
+apply wave 1:
+  delete aws_instance.fleet (2 instances)
+destroy wave 1:
+  delete aws_iam_user.team [no configuration: order unknown]
+  delete aws_s3_bucket.shards [no configuration: order unknown]
+note: Resources removed from the configuration have no dependency information in the plan; their destroy order is unkno…
+
+== Resources with multiple instances ==
+aws_iam_user.team [for_each]: carol (delete), alice (no-op)
+aws_instance.fleet [count]: 0 (no-op), 1 (update), 2 (delete)
+aws_s3_bucket.shards [count]: 1 (delete), 0 (no-op)

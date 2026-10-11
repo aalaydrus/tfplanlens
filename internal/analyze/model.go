@@ -23,6 +23,14 @@ type Analysis struct {
 	Drift    []DriftItem `json:"drift"`
 	Groups   []Group     `json:"groups"`
 	Changes  []Change    `json:"changes"`
+	// Parents groups the instances of count/for_each resources.
+	Parents []Parent `json:"parents"`
+	// Waves layer the changing resources by dependency depth: possible
+	// parallelism, not a strict order. WaveNotes list what the plan JSON
+	// cannot tell us. Cycles lists resources that depend on each other.
+	Waves     []Wave   `json:"waves"`
+	WaveNotes []string `json:"wave_notes"`
+	Cycles    []Cycle  `json:"cycles"`
 }
 
 // Account sources, recorded wherever an account is resolved.
@@ -93,6 +101,10 @@ type Summary struct {
 	DriftCount      int `json:"drift_count"`
 	// Warnings counts per-resource warnings.
 	Warnings int `json:"warnings"`
+	// ApplyWaves and DestroyWaves are the number of waves in each phase.
+	ApplyWaves   int `json:"apply_waves"`
+	DestroyWaves int `json:"destroy_waves"`
+
 	// Hidden counts changes removed by ignore_types.
 	Hidden int `json:"hidden,omitempty"`
 }
@@ -175,6 +187,13 @@ type Change struct {
 	StateOnly       bool      `json:"removed_from_state_only"`
 	Attrs           []Attr    `json:"attrs"`
 	KnownAfterApply int       `json:"known_after_apply"`
+	// Parent and Key identify a count/for_each instance: its configuration
+	// address and index key.
+	Parent string `json:"parent,omitempty"`
+	Key    string `json:"key,omitempty"`
+	// Wave is the 1-based wave of this change within WavePhase.
+	Wave      int    `json:"wave,omitempty"`
+	WavePhase string `json:"wave_phase,omitempty"`
 }
 
 // Listed reports whether a change is worth listing in a report: it does

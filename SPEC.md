@@ -215,9 +215,9 @@ Internal model: `Analysis{ Summary, Findings[], Drift[], Groups[], Changes[] }`.
 
 Each tick is backed by a test or check listed in [docs/acceptance.md](docs/acceptance.md).
 
-## 10. Roadmap (do not build in v0.1)
+## 10. Roadmap
 
-**v0.2**
+**v0.2** (waves, cycles and instance grouping are implemented; the terminal UI is not)
 - Apply **waves** from the configuration's references and `depends_on`: wave 1 has no dependencies, wave 2 depends only on wave 1, and so on. Note that Terraform applies in parallel, so this shows possible parallelism, not a strict order.
 - Detect and display dependency cycles.
 - Group `count` and `for_each` instances under their parent with an expandable key list.

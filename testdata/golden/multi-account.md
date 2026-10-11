@@ -62,3 +62,22 @@
 
 </details>
 
+### Waves
+
+Terraform applies in parallel: this shows possible parallelism, not a strict order.
+
+<details><summary><b>apply wave 1</b> &mdash; 4 resource(s)</summary>
+
+- create `aws_s3_bucket.default`
+- create `aws_s3_bucket.prod`
+- update `aws_s3_bucket.shared`
+- create `aws_sqs_queue.eu`
+
+</details>
+
+<details><summary><b>destroy wave 1</b> &mdash; 1 resource(s)</summary>
+
+- delete `aws_db_instance.prod`
+
+</details>
+

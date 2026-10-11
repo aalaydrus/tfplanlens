@@ -55,3 +55,14 @@ No deletes or replacements.
 
 </details>
 
+### Waves
+
+Terraform applies in parallel: this shows possible parallelism, not a strict order.
+
+<details><summary><b>apply wave 1</b> &mdash; 2 resource(s)</summary>
+
+- update `aws_instance.imported_update`
+- update `module.net.aws_vpc.main`
+
+</details>
+
