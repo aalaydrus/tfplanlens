@@ -83,3 +83,34 @@ IaC to refer to shared resources (an RDS or Redshift cluster).
     only for the stacks you supply. Concurrent applies in a shared dev account
     are mostly a state-locking and drift problem; the drift view covers part of
     it, and a plan does not say when the last apply happened (`hypothesis`).
+
+## From more user feedback
+
+A second reader suggested running tfplanlens at plan time, using it in code
+review agents (fewer tokens than querying source control), and ranking changes
+by how much they matter.
+
+23. **Rank by how many resources depend on the change** (`exploring`). An SSM
+    parameter that 12 other resources reference matters more than one nothing
+    uses. The plan's `configuration` already carries the reference edges used
+    for apply waves. Limits: it only sees references inside this plan; `local.*`
+    and other stacks are invisible, so the number is a lower bound ("at least
+    12") and must never be shown as exact.
+24. **Deletion protection and final snapshot on a delete or replace**
+    (`exploring`). Destroying a DB cluster with deletion protection on is
+    refused by AWS, without it the data is gone. The flag is in the resource's
+    `before` values (for example `deletion_protection` on RDS instances and
+    clusters). Needs a per-type table of attribute names; unknown types say
+    "unknown". `hypothesis`: attribute names are not yet checked against a real
+    plan, and the emulator we use may not produce RDS clusters (see item 13).
+25. **Compact, ranked output for review agents** (`open`). The top N changes
+    with the reason each matters and nothing else, so an agent does not spend
+    tokens on the rest. Builds on items 23 and 24; `-f json` and the markdown
+    PR comment already put Danger first.
+26. **Run at plan time** (`open`). Terraform has no hook in `plan` itself that
+    we know of (not searched exhaustively). Recipes to document, none run yet:
+    a wrapper (`terraform show -json p | tfplanlens report -`), a Terragrunt
+    `after_hook`, an Atlantis custom plan step (a post-workflow hook does not
+    post its output to the PR). An HCP Terraform post-plan run task sends a
+    webhook with a plan JSON URL and expects a callback, so it needs a small
+    web service in front of the CLI.
