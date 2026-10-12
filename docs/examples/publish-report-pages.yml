@@ -1,0 +1,71 @@
+# Example: publish a tfplanlens HTML report to GitHub Pages (opt-in, copy and adapt).
+# Read docs/PAGES.md first: a Pages site is public unless your plan restricts it.
+#
+# All account IDs, role names and bucket names below are dummy values
+# (123456789012 is AWS's documentation example account). Replace them.
+name: Publish plan report
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  # A role that can plan but not apply. Trust it from GitHub's OIDC provider.
+  PLAN_ROLE_ARN: arn:aws:iam::123456789012:role/example-terraform-plan-readonly
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # lets the job request an OIDC token for the AWS role
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: "1.23"
+
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_wrapper: false # the wrapper would add output to `terraform show`
+
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ env.PLAN_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Plan
+        working-directory: infra # your Terraform directory
+        run: |
+          terraform init -input=false
+          terraform plan -input=false -out=tfplan
+          terraform show -json tfplan > ../plan.json
+
+      - name: Render the report
+        run: |
+          go install github.com/aalaydrus/tfplanlens/cmd/tfplanlens@main # pin a release tag once one exists
+          mkdir site
+          "$(go env GOPATH)/bin/tfplanlens" report plan.json \
+            --tfapply-account-id 123456789012 \
+            -f html -o site/index.html
+
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: site
+
+  deploy:
+    needs: report
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

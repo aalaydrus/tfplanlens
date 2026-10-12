@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>tfplanlens demo reports</title>
+<style>
+  :root { --bg:#fff; --fg:#1b1f24; --muted:#59636e; --line:#d0d7de; --accent:#0969da; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0d1117; --fg:#e6edf3; --muted:#9198a1; --line:#30363d; --accent:#4493f8; }
+  }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.5 system-ui,sans-serif; }
+  main { max-width:760px; margin:0 auto; padding:32px 16px 64px; }
+  h1 { margin:0 0 4px; font-size:1.6rem; }
+  h2 { margin:32px 0 8px; font-size:1.1rem; }
+  p, li { color:var(--muted); }
+  a { color:var(--accent); }
+  ul { padding-left:20px; }
+  li { margin:6px 0; }
+  li a { font-weight:600; }
+  .btn { display:inline-block; margin:8px 0; padding:8px 16px; border:1px solid var(--accent); border-radius:6px; font-weight:600; text-decoration:none; }
+  .btn:hover { background:var(--accent); color:var(--bg); }
+  .note { border:1px solid var(--line); border-radius:8px; padding:12px 16px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>tfplanlens demo reports</h1>
+  <p><a class="btn" href="https://github.com/aalaydrus/tfplanlens">View the repository on GitHub</a> &nbsp; <a href="about.html">About the tool</a></p>
+  <p>Real <code>tfplanlens report -f html</code> output from the example plans in the
+  <a href="https://github.com/aalaydrus/tfplanlens">repository</a>. Open one and use the search,
+  grouping and per-resource detail drawers.</p>
+
+  <p class="note">Everything here is made up. The plans were produced against a local AWS emulator
+  (no real AWS account), with dummy account IDs such as <code>123456789012</code>. This page makes no
+  network requests and runs no tracking.</p>
+
+  <h2>Start here</h2>
+  <ul>
+    <li><a href="reports/orders-platform.html">Orders platform: a proposed change</a>
+      A made-up AWS stack (S3, DynamoDB, SNS, SQS, IAM, Secrets Manager). A stateful DynamoDB table is
+      replaced, a queue is deleted, and drift on an IAM role is shown.</li>
+    <li><a href="reports/assume-role.html">Cross-account apply</a>
+      The plan is applied from one account and targets another, with a cross-account warning.</li>
+  </ul>
+
+  <h2>More scenarios</h2>
+  <ul>
+    <li><a href="reports/destroy.html">Destroy</a> A destroy plan: every resource listed under Danger.</li>
+    <li><a href="reports/drift.html">Drift</a> A plan alongside changes made outside Terraform.</li>
+    <li><a href="reports/refresh-only.html">Refresh only</a> A refresh-only plan: it updates state and changes nothing.</li>
+    <li><a href="reports/import.html">Import</a> A plan with imported resources.</li>
+    <li><a href="reports/module-provider.html">Modules and providers</a> Replacements inside modules.</li>
+    <li><a href="reports/reasons.html">Replace reasons</a> Why Terraform decided to replace or delete each resource.</li>
+    <li><a href="reports/complex.html">Complex plan</a> Creates, updates, replaces, deletes and a forgotten resource in one plan.</li>
+    <li><a href="reports/simple.html">Simple plan</a> One create, update, replace and delete.</li>
+  </ul>
+</main>
+</body>
+</html>
