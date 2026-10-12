@@ -27,6 +27,8 @@
   pre code { background:none; padding:0; }
   .c { color:var(--muted); } .d { color:var(--danger); }
   img { max-width:100%; border:1px solid var(--line); border-radius:8px; }
+  .btn { display:inline-block; margin:8px 0; padding:8px 16px; border:1px solid var(--accent); border-radius:6px; font-weight:600; text-decoration:none; }
+  .btn:hover { background:var(--accent); color:var(--bg); }
   figure { margin:16px 0; } figcaption { font-size:14px; color:var(--muted); margin-top:4px; }
   ul { padding-left:20px; } li { margin:6px 0; }
   .grid { display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); }
@@ -44,7 +46,7 @@
   <nav>
     <a href="index.html">demo reports</a>
     <a href="reports/orders-platform.html">example report</a>
-    <a href="https://github.com/aalaydrus/tfplanlens">github</a>
+    <a href="https://github.com/aalaydrus/tfplanlens">github repo</a>
   </nav>
 
   <h1>tfplanlens</h1>
@@ -53,6 +55,8 @@
   <p>A small Go CLI that reads the JSON from <code>terraform show -json</code> and reports what matters.
   It works <strong>offline</strong>: no AWS credentials, no Terraform binary, no network, no LLM.
   The output is deterministic.</p>
+
+  <p><a class="btn" href="https://github.com/aalaydrus/tfplanlens">View the repository on GitHub</a> &nbsp; <a href="index.html">Browse the demo reports</a></p>
 
   <figure>
     <img src="assets/html-report.png" alt="tfplanlens HTML report: Danger panel, summary tiles and a filterable table">
