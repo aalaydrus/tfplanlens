@@ -48,7 +48,8 @@
       "reason_text": "Destroy plan: every resource is being destroyed",
       "index_shift": false,
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "terraform_data.shard[0]",
@@ -62,7 +63,8 @@
       "reason_text": "Destroy plan: every resource is being destroyed",
       "index_shift": false,
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "terraform_data.shard[1]",
@@ -76,7 +78,8 @@
       "reason_text": "Destroy plan: every resource is being destroyed",
       "index_shift": false,
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "terraform_data.web",
@@ -90,7 +93,8 @@
       "reason_text": "Destroy plan: every resource is being destroyed",
       "index_shift": false,
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     }
   ],
   "drift": [],

@@ -125,6 +125,7 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
       </div>
     <p class="why">Attribute change forces replacement: range_key, hash_key</p>
     <p class="why">used by 1&#43; resources in this plan: aws_iam_role_policy.worker</p>
+    <p class="why">deletion protection is off</p>
     
     <div class="meta">aws_dynamodb_table &middot; target account <span class="mono">123456789012</span> (source: allowed_account_ids)</div>
   </div>
@@ -135,6 +136,7 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
       </div>
     <p class="why">for_each key removed: bulk</p>
     <p class="why">used by 3&#43; resources in this plan: aws_iam_role_policy.worker, aws_sns_topic_subscription.audit, &#43;1 more</p>
+    
     <p class="warnline"><b>WARNING:</b> for_each key removed while sibling instances change (possible key rename: aws_sqs_queue.orders[&#34;audit&#34;], aws_sqs_queue.orders[&#34;standard&#34;])</p>
     <div class="meta">aws_sqs_queue &middot; target account <span class="mono">123456789012</span> (source: allowed_account_ids)</div>
   </div>
@@ -144,6 +146,7 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
       
       </div>
     <p class="why">Attribute change forces replacement: secret_string</p>
+    
     
     
     <div class="meta">aws_secretsmanager_secret_version &middot; target account <span class="mono">123456789012</span> (source: allowed_account_ids)</div>

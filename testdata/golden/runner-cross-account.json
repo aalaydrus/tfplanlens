@@ -53,7 +53,17 @@
       "reason_text": "Removed from config",
       "index_shift": false,
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": [
+        {
+          "name": "deletion_protection",
+          "state": "unknown"
+        },
+        {
+          "name": "final_snapshot",
+          "state": "unknown"
+        }
+      ]
     },
     {
       "address": "aws_instance.web",
@@ -70,7 +80,8 @@
       ],
       "index_shift": false,
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     }
   ],
   "drift": [],

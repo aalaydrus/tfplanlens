@@ -11,6 +11,8 @@ By module: root 7
 ! DELETE aws_db_instance.prod [STATEFUL]
     type: aws_db_instance | target account: 444444444444 (source: flag)
     why: Removed from config
+    deletion protection: unknown (not in the plan)
+    final snapshot: unknown (not in the plan)
 ! REPLACE aws_instance.web
     type: aws_instance | target account: 222222222222 (source: role_arn_variable)
     why: Attribute change forces replacement: ami

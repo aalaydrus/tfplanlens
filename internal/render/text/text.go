@@ -165,6 +165,11 @@ func (r *renderer) danger(a *analyze.Analysis) {
 		if d := analyze.DependentsText(f.Dependents); d != "" {
 			r.line("    %s", d)
 		}
+		for _, sg := range f.Safeguards {
+			if t := analyze.SafeguardText(sg); t != "" {
+				r.line("    %s", t)
+			}
+		}
 		if f.IndexShift {
 			r.line("    %s", r.c(red+bold, "WARNING: "+f.Warning))
 		}

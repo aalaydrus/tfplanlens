@@ -11,6 +11,7 @@ By module: root 10
     type: aws_dynamodb_table | target account: 123456789012 (source: allowed_account_ids)
     why: Attribute change forces replacement: range_key, hash_key
     used by 1+ resources in this plan: aws_iam_role_policy.worker
+    deletion protection is off
 ! DELETE aws_sqs_queue.orders["bulk"]
     type: aws_sqs_queue | target account: 123456789012 (source: allowed_account_ids)
     why: for_each key removed: bulk

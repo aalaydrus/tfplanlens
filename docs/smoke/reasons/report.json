@@ -48,7 +48,8 @@
       "reason_text": "replace_triggered_by dependency changed",
       "index_shift": false,
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "terraform_data.requested",
@@ -62,7 +63,8 @@
       "reason_text": "Replacement requested with -replace",
       "index_shift": false,
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "terraform_data.single",
@@ -77,7 +79,8 @@
       "index_shift": true,
       "warning": "count/for_each was added or removed on this resource; instances are being destroyed rather than moved",
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "terraform_data.tainted",
@@ -91,7 +94,8 @@
       "reason_text": "Resource is tainted",
       "index_shift": false,
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "module.gone.terraform_data.inner",
@@ -105,7 +109,8 @@
       "reason_text": "Removed from config",
       "index_shift": false,
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "module.mods[\"b\"].terraform_data.inner",
@@ -119,7 +124,8 @@
       "reason_text": "Whole module removed or its call changed",
       "index_shift": false,
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     }
   ],
   "drift": [],

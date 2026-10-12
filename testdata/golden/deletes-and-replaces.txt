@@ -14,6 +14,8 @@ By module: root 11, module.gone 1
 ! REPLACE aws_db_instance.main [STATEFUL]
     type: aws_db_instance | target account: unresolved (alias: default) (source: unresolved)
     why: Attribute change forces replacement: storage_encrypted
+    deletion protection: unknown (not in the plan)
+    final snapshot: unknown (not in the plan)
 ! REPLACE aws_ebs_volume.requested [STATEFUL]
     type: aws_ebs_volume | target account: unresolved (alias: default) (source: unresolved)
     why: Replacement requested with -replace

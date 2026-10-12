@@ -50,7 +50,8 @@
       ],
       "index_shift": false,
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "local_file.root",
@@ -67,7 +68,8 @@
       ],
       "index_shift": false,
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "module.net.local_file.inner",
@@ -84,7 +86,8 @@
       ],
       "index_shift": false,
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     }
   ],
   "drift": [],

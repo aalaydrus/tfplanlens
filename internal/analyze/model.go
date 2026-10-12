@@ -150,6 +150,10 @@ type Finding struct {
 	// depend on this one, directly or through others. A lower bound: other
 	// stacks, and dependencies that pass through a local value, are not seen.
 	Dependents []string `json:"dependents"`
+	// Safeguards are settings read from the resource's before values that
+	// decide what the delete does (deletion protection, final snapshot). Only
+	// for types whose attribute names are known; [] otherwise.
+	Safeguards []Safeguard `json:"safeguards"`
 	// Unit is the plan this finding came from in a merged report.
 	Unit string `json:"unit,omitempty"`
 }

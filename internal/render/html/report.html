@@ -31,6 +31,7 @@
       {{if .DriftAlso}}<span class="badge hi">HIGH RISK: also drifted</span>{{end}}</div>
     <p class="why">{{.ReasonText}}</p>
     {{with dependents .Dependents}}<p class="why">{{.}}</p>{{end}}
+    {{range .Safeguards}}{{with safeguard .}}<p class="why">{{.}}</p>{{end}}{{end}}
     {{if .IndexShift}}<p class="warnline"><b>WARNING:</b> {{.Warning}}</p>{{end}}
     <div class="meta">{{.Type}} &middot; target account <span class="mono">{{.Account}}</span> (source: {{.AccountSource}})</div>
   </div>

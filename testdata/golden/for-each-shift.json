@@ -49,7 +49,8 @@
       "reason_text": "count shrank; index 1 no longer exists",
       "index_shift": false,
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "aws_iam_user.team[\"carol\"]",
@@ -63,7 +64,8 @@
       "reason_text": "for_each key removed: carol",
       "index_shift": false,
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "aws_instance.fleet[2]",
@@ -78,7 +80,8 @@
       "index_shift": true,
       "warning": "likely count index shift: other instances of this resource are also changing (aws_instance.fleet[1])",
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     }
   ],
   "drift": [],

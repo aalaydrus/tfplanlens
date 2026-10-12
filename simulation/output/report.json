@@ -59,6 +59,12 @@
       "drift_also": false,
       "dependents": [
         "aws_iam_role_policy.worker"
+      ],
+      "safeguards": [
+        {
+          "name": "deletion_protection",
+          "state": "off"
+        }
       ]
     },
     {
@@ -78,7 +84,8 @@
         "aws_iam_role_policy.worker",
         "aws_sns_topic_subscription.audit",
         "aws_sns_topic_subscription.standard"
-      ]
+      ],
+      "safeguards": []
     },
     {
       "address": "aws_secretsmanager_secret_version.db",
@@ -95,7 +102,8 @@
       ],
       "index_shift": false,
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     }
   ],
   "drift": [

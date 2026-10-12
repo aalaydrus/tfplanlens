@@ -52,7 +52,8 @@
       "drift_also": false,
       "dependents": [
         "terraform_data.app"
-      ]
+      ],
+      "safeguards": []
     },
     {
       "address": "terraform_data.subnet[\"b\"]",
@@ -69,7 +70,8 @@
       "drift_also": false,
       "dependents": [
         "terraform_data.lb"
-      ]
+      ],
+      "safeguards": []
     },
     {
       "address": "terraform_data.worker[2]",
@@ -83,7 +85,8 @@
       "reason_text": "count shrank; index 2 no longer exists",
       "index_shift": false,
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "terraform_data.worker[3]",
@@ -97,7 +100,8 @@
       "reason_text": "count shrank; index 3 no longer exists",
       "index_shift": false,
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     }
   ],
   "drift": [],

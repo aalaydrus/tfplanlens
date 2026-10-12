@@ -35,8 +35,14 @@ English), `replace_paths`, `index_shift` + `warning` (likely count/for_each shif
 `drift_also` (the resource also drifted: high risk), `dependents` (resources in
 this plan that depend on this one, directly or through others; always an array;
 a lower bound, because other stacks and dependencies that pass through a local
-value are not in the plan). Findings are ordered stateful first, then by number
-of dependents (most first); ties keep the plan's order.
+value are not in the plan), `safeguards` (what the resource's own settings say a
+delete will do, read from its before values; an array of `{name, state}`, `[]` for
+types without known attribute names). `name` is `deletion_protection` (`on`, `off`
+or `unknown`) or `final_snapshot` (`taken`, `none` or `unknown`); `unknown` means
+the plan did not say. Known types: `aws_dynamodb_table`, `aws_db_instance`,
+`aws_rds_cluster`. Findings are ordered stateful first, then those without
+deletion protection, then by number of dependents (most first); ties keep the
+plan's order.
 
 ## `drift[]`
 `address`, `type`, `action`, `attrs`, `high_risk` (also replaced or deleted by

@@ -46,7 +46,8 @@
       "reason_text": "Removed from config",
       "index_shift": false,
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     }
   ],
   "drift": [],

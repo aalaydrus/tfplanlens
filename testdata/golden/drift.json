@@ -51,7 +51,8 @@
       ],
       "index_shift": false,
       "drift_also": true,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     }
   ],
   "drift": [

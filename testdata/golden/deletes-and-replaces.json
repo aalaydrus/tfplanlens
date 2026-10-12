@@ -57,7 +57,8 @@
       "reason_text": "Whole module removed or its call changed",
       "index_shift": false,
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "aws_db_instance.main",
@@ -74,7 +75,17 @@
       ],
       "index_shift": false,
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": [
+        {
+          "name": "deletion_protection",
+          "state": "unknown"
+        },
+        {
+          "name": "final_snapshot",
+          "state": "unknown"
+        }
+      ]
     },
     {
       "address": "aws_ebs_volume.requested",
@@ -88,7 +99,8 @@
       "reason_text": "Replacement requested with -replace",
       "index_shift": false,
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "aws_sqs_queue.removed",
@@ -102,7 +114,8 @@
       "reason_text": "Removed from config",
       "index_shift": false,
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "aws_sns_topic.switched",
@@ -117,7 +130,8 @@
       "index_shift": true,
       "warning": "count/for_each was added or removed on this resource; instances are being destroyed rather than moved",
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "aws_instance.counted[2]",
@@ -131,7 +145,8 @@
       "reason_text": "count shrank; index 2 no longer exists",
       "index_shift": false,
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "aws_iam_user.keyed[\"bob\"]",
@@ -145,7 +160,8 @@
       "reason_text": "for_each key removed: bob",
       "index_shift": false,
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "aws_lambda_function.orphan",
@@ -159,7 +175,8 @@
       "reason_text": "Moved to an address that no longer exists",
       "index_shift": false,
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "aws_instance.tainted",
@@ -173,7 +190,8 @@
       "reason_text": "Resource is tainted",
       "index_shift": false,
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "aws_lb.triggered",
@@ -187,7 +205,8 @@
       "reason_text": "replace_triggered_by dependency changed",
       "index_shift": false,
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "aws_eip.mystery",
@@ -201,7 +220,8 @@
       "reason_text": "some_future_reason",
       "index_shift": false,
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "aws_instance.create_before_destroy",
@@ -218,7 +238,8 @@
       ],
       "index_shift": false,
       "drift_also": false,
-      "dependents": []
+      "dependents": [],
+      "safeguards": []
     }
   ],
   "drift": [],

@@ -212,7 +212,7 @@ func Analyze(p *plan.Plan, cfg *config.Config, opts *Options) *Analysis {
 				Address: c.Address, Type: c.Type, Action: string(c.Action),
 				Provider: c.ProviderKey, Account: acct.label, AccountSource: acct.source, Stateful: ch.Stateful,
 				Reason: c.Reason, ReasonText: ch.ReasonText, ReplacePaths: c.ReplacePaths,
-				DriftAlso: driftAddr[c.Address], Dependents: ch.Dependents,
+				DriftAlso: driftAddr[c.Address], Dependents: ch.Dependents, Safeguards: safeguardsFor(c),
 			}
 			f.IndexShift, f.Warning = indexShift(c, siblings)
 			a.Findings = append(a.Findings, f)
@@ -259,12 +259,19 @@ func dependentsOf(p *plan.Plan, cache map[string][]string, addr string) []string
 }
 
 // rankFindings puts the deletes and replaces that matter most first: stateful
-// resources, then those with more resources depending on them. Ties keep the
-// plan's order.
+// resources, then those without deletion protection (a protected delete is one
+// AWS should refuse), then those with more resources depending on them. Ties
+// keep the plan's order.
 func rankFindings(fs []Finding) {
+	protected := func(f Finding) bool {
+		return hasSafeguard(f.Safeguards, SafeguardDeletionProtection, StateOn)
+	}
 	sort.SliceStable(fs, func(i, j int) bool {
 		if fs[i].Stateful != fs[j].Stateful {
 			return fs[i].Stateful
+		}
+		if protected(fs[i]) != protected(fs[j]) {
+			return !protected(fs[i])
 		}
 		return len(fs[i].Dependents) > len(fs[j].Dependents)
 	})
