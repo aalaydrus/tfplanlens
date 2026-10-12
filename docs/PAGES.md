@@ -1,6 +1,6 @@
 # Host the HTML report on GitHub Pages
 
-**Live demo:** the repository publishes its example reports (a made-up AWS stack on an emulator, dummy account IDs) with [`.github/workflows/pages.yml`](../.github/workflows/pages.yml). The index page is [`docs/demo/index.html`](demo/index.html).
+**Live demo:** the repository publishes its example reports (a made-up AWS stack on an emulator, dummy account IDs) with [`.github/workflows/pages.yml`](../.github/workflows/pages.yml). The main page ([`docs/demo/index.html`](demo/index.html)) explains the tool; [`docs/demo/reports.html`](demo/reports.html) lists the example reports.
 
 `tfplanlens report -f html -o index.html` writes one self-contained file (no CDN,
 no external requests), so any static host works, GitHub Pages included.
