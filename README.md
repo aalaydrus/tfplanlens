@@ -25,7 +25,7 @@ tfplanlens report plan.json
 <details>
 <summary><b>What you get</b></summary>
 
-- **Danger first**: every delete and replace with why, a STATEFUL badge, and a warning when a `count`/`for_each` change looks like an accidental shift.
+- **Danger first, ranked**: every delete and replace with why, a STATEFUL badge, what depends on it (a lower bound), deletion protection and final snapshot where the plan says, and a warning when a `count`/`for_each` change looks like an accidental shift. Stateful and unprotected come first, then by dependents.
 - **Which account**: where `terraform apply` runs vs where each resource lands, and how that was decided.
 - **Short**: long values become the lines that changed; unknown values are counted, not printed.
 - **Also**: drift, moves, imports, apply waves, and a diff between two plans.

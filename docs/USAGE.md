@@ -103,8 +103,8 @@ The markdown report is built for PR comments: a summary table, the Danger sectio
 
 | Action | Resource | Why | Target account |
 |---|---|---|---|
-| **REPLACE** | `terraform_data.db` | `Attribute change forces replacement: triggers_replace` | `111111111111` (source: apply_account) |
-| **DELETE** | `terraform_data.subnet["b"]` | `for_each key removed: b`<br>**WARNING:** `for_each key removed while sibling instances change (possible key rename: terraform_data.subnet["d"])` | `111111111111` (source: apply_account) |
+| **REPLACE** | `terraform_data.db` | `Attribute change forces replacement: triggers_replace`<br>`used by 1+ resources in this plan: terraform_data.app` | `111111111111` (source: apply_account) |
+| **DELETE** | `terraform_data.subnet["b"]` | `for_each key removed: b`<br>**WARNING:** `for_each key removed while sibling instances change (possible key rename: terraform_data.subnet["d"])`<br>`used by 1+ resources in this plan: terraform_data.lb` | `111111111111` (source: apply_account) |
 | **DELETE** | `terraform_data.worker[2]` | `count shrank; index 2 no longer exists` | `111111111111` (source: apply_account) |
 | **DELETE** | `terraform_data.worker[3]` | `count shrank; index 3 no longer exists` | `111111111111` (source: apply_account) |
 
