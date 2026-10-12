@@ -18,6 +18,14 @@ updates:
       interval: weekly
     commit-message:
       prefix: "deps"
+    # Newer golang.org/x/* releases require a newer Go, and `go mod tidy` then
+    # raises the `go` line in go.mod (a bump of x/net and x/term took it from
+    # 1.23.0 to 1.26.0), which would stop anyone with an older Go from building
+    # tfplanlens. Only patch releases of x/* are proposed. To move the minimum
+    # Go version on purpose, bump `go` in go.mod yourself and drop this rule.
+    ignore:
+      - dependency-name: "golang.org/x/*"
+        update-types: ["version-update:semver-minor", "version-update:semver-major"]
     groups:
       go-modules:
         patterns: ["*"]

@@ -82,3 +82,32 @@ func TestSmokeWorkflowNeverPushesToTheRepository(t *testing.T) {
 		t.Error("scripts/smoke-refresh.sh is missing")
 	}
 }
+
+// A bump of golang.org/x/net and x/term raised go.mod from "go 1.23.0" to
+// "go 1.26.0". Dependabot must not propose minor or major x/* updates, so the
+// minimum Go version only changes when a person decides it.
+func TestDependabotDoesNotRaiseTheMinimumGoVersion(t *testing.T) {
+	var d struct {
+		Updates []struct {
+			Ecosystem string `yaml:"package-ecosystem"`
+			Ignore    []struct {
+				Name  string   `yaml:"dependency-name"`
+				Types []string `yaml:"update-types"`
+			}
+		}
+	}
+	if err := yaml.Unmarshal([]byte(read(t, repoRoot+"/.github/dependabot.yml")), &d); err != nil {
+		t.Fatal(err)
+	}
+	for _, u := range d.Updates {
+		if u.Ecosystem != "gomod" {
+			continue
+		}
+		for _, ig := range u.Ignore {
+			if ig.Name == "golang.org/x/*" && strings.Join(ig.Types, ",") == "version-update:semver-minor,version-update:semver-major" {
+				return
+			}
+		}
+	}
+	t.Error("dependabot.yml must ignore minor and major updates of golang.org/x/* (see this test's comment)")
+}
