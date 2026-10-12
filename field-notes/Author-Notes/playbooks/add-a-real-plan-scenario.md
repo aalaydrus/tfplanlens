@@ -14,8 +14,10 @@ Use when a Terraform behavior must be proven on a real plan.
 4. Test in `cmd/tfplanlens/real_plans_test.go`: use `realPlans(t, "<name>")`
    and `analyzeReal`; assert addresses/actions/counts, never bytes (ids differ
    each CI run). Skip, do not fail, when the file is absent.
-5. CI regenerates every scenario (`smoke.yml` loops over `testdata/real/*/`)
-   and bot-commits the plan files and `docs/smoke`.
+5. CI regenerates every scenario (`smoke.yml` loops over `testdata/real/*/`),
+   runs the real-plan tests on the fresh plans and uploads the outputs, but
+   commits nothing: commit the plan files yourself (`scripts/smoke-refresh.sh`
+   regenerates `testdata/plans/real`, `docs/smoke` and optionally screenshots).
 6. AWS shapes: floci setup and quirks in
    [../../TERRAFORM_GOTCHAS.md](../../TERRAFORM_GOTCHAS.md); the bigger worked
    example is `simulation/regenerate.sh`.

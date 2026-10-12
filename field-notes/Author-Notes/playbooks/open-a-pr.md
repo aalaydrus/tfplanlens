@@ -13,5 +13,5 @@
 - Generated files: if you changed outputs, regenerate goldens
   (`-update`) and `simulation/demo.sh` and say so.
 - Do not commit real plans or state: they contain secrets in plain text.
-- After merge, `docs/smoke` and the real plans may be updated by a bot commit;
-  pull before you branch.
+- Nothing commits to your branch behind your back: if you changed `testdata/real`,
+  run `scripts/smoke-refresh.sh` and commit the regenerated plans and reports.

@@ -33,8 +33,8 @@ You do not need Terraform, AWS or Docker for the tests.
    and what you did not verify.
 
 CI runs the tests on Linux, macOS and Windows plus `staticcheck`. Pull requests
-from forks run with a read-only token, so some jobs that write results back are
-skipped for them.
+from forks run with a read-only token, so the smoke test's pull request comments
+are skipped for them. No workflow commits to your branch.
 
 ## Where things are
 
