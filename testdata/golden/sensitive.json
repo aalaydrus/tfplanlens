@@ -85,6 +85,7 @@
         }
       ],
       "known_after_apply": 0,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -104,6 +105,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -134,6 +136,7 @@
         }
       ],
       "known_after_apply": 0,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     }

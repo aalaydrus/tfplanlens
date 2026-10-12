@@ -162,6 +162,9 @@ func (r *renderer) danger(a *analyze.Analysis) {
 		r.line("%s %s%s", r.c(red+bold, "! "+strings.ToUpper(f.Action)), f.Address, badge)
 		r.line("    type: %s | target account: %s (source: %s)", f.Type, f.Account, f.AccountSource)
 		r.line("    why: %s", f.ReasonText)
+		if d := analyze.DependentsText(f.Dependents); d != "" {
+			r.line("    %s", d)
+		}
 		if f.IndexShift {
 			r.line("    %s", r.c(red+bold, "WARNING: "+f.Warning))
 		}

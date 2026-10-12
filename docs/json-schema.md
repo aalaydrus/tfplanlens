@@ -32,7 +32,11 @@ changes that do something; `root` is the root module), `known_after_apply`
 `address`, `type`, `action` (`delete` / `replace`), `provider`, `account`,
 `stateful`, `account_source`, `reason` (raw `action_reason`), `reason_text` (plain
 English), `replace_paths`, `index_shift` + `warning` (likely count/for_each shift),
-`drift_also` (the resource also drifted: high risk).
+`drift_also` (the resource also drifted: high risk), `dependents` (resources in
+this plan that depend on this one, directly or through others; always an array;
+a lower bound, because other stacks and dependencies that pass through a local
+value are not in the plan). Findings are ordered stateful first, then by number
+of dependents (most first); ties keep the plan's order.
 
 ## `drift[]`
 `address`, `type`, `action`, `attrs`, `high_risk` (also replaced or deleted by
@@ -52,7 +56,7 @@ Account `source` values: `flag`, `config`, `role_arn`, `role_arn_variable`,
 `account_source`, `cross_account`, `warnings` (`kind`, `path`, `message`;
 currently `arn_account_mismatch`), `stateful`, `reason`, `reason_text`, `replace_paths`,
 `moved_from`, `import`, `import_id`, `removed_from_state_only`, `attrs`,
-`known_after_apply`, `parent` + `key` (count/for_each instances only), `wave` + `wave_phase` (absent when the change is in no wave). `attrs` is filled for `update` and `replace` only, and never lists attributes
+`known_after_apply`, `dependents` (as in `findings[]`), `parent` + `key` (count/for_each instances only), `wave` + `wave_phase` (absent when the change is in no wave). `attrs` is filled for `update` and `replace` only, and never lists attributes
 that are known after apply: those are only counted in `known_after_apply`.
 
 ## `attrs[]`

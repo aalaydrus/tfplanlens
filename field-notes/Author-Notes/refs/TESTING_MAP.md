@@ -28,6 +28,7 @@ Unit tests that build `plan.Plan`/`Analysis` by hand are in each package.
 | `--fail-on` | `TestFailOnDelete`, `TestFailOnScopedAndDrift`, `TestFailOnUnresolved` |
 | CLI surface | `TestCLISurfaceIsLean` (allowed `report` flags), `TestShortFlags`, `TestConfigFileSettingsAndFlagOverrides` |
 | Waves, cycles, instances | `internal/analyze/waves_test.go`, `internal/plan/deps_test.go`, `TestRealWavesFromConfiguration` |
+| Dependents and Danger ranking | `internal/analyze/dependents_test.go` (`TestFindingsCarryWhatDependsOnThem`, `TestDangerIsRankedByStatefulThenDependents`) |
 | diff | `internal/diff/diff_test.go`, `TestRealPlanDiff` |
 | Merge (several plans) | `internal/analyze/merge_test.go`, `cmd/tfplanlens/multi_test.go` |
 | TUI | `internal/tui/tui_test.go` (model, key parser), `cmd/tfplanlens/tui_test.go` |

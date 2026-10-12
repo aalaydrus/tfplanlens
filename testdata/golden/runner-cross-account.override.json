@@ -51,7 +51,8 @@
       "reason": "delete_because_no_resource_config",
       "reason_text": "Removed from config",
       "index_shift": false,
-      "drift_also": false
+      "drift_also": false,
+      "dependents": []
     },
     {
       "address": "aws_instance.web",
@@ -67,7 +68,8 @@
         "ami"
       ],
       "index_shift": false,
-      "drift_also": false
+      "drift_also": false,
+      "dependents": []
     }
   ],
   "drift": [],
@@ -180,6 +182,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 2,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -212,6 +215,7 @@
         }
       ],
       "known_after_apply": 0,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -239,6 +243,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "destroy"
     },
@@ -271,6 +276,7 @@
         }
       ],
       "known_after_apply": 0,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -303,6 +309,7 @@
         }
       ],
       "known_after_apply": 0,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -322,6 +329,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 2,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -347,6 +355,7 @@
         }
       ],
       "known_after_apply": 0,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     }

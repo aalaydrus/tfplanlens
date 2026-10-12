@@ -7,6 +7,15 @@ import (
 )
 
 // Prefix puts a unit label in front of an address in a merged report.
+// prefixAll prefixes every address; it never returns nil (JSON arrays are []).
+func prefixAll(unit string, addrs []string) []string {
+	out := make([]string, len(addrs))
+	for i, a := range addrs {
+		out[i] = Prefix(unit, a)
+	}
+	return out
+}
+
 func Prefix(unit, s string) string {
 	if s == "" {
 		return s
@@ -70,6 +79,7 @@ func Merge(labels []string, as []*Analysis) *Analysis {
 		}
 		for _, f := range a.Findings {
 			f.Address, f.Unit = Prefix(l, f.Address), l
+			f.Dependents = prefixAll(l, f.Dependents)
 			m.Findings = append(m.Findings, f)
 		}
 		for _, d := range a.Drift {
@@ -90,6 +100,7 @@ func Merge(labels []string, as []*Analysis) *Analysis {
 			if c.MovedFrom != "" {
 				c.MovedFrom = Prefix(l, c.MovedFrom)
 			}
+			c.Dependents = prefixAll(l, c.Dependents)
 			m.Changes = append(m.Changes, c)
 		}
 		for _, p := range a.Parents {
@@ -153,6 +164,7 @@ func Merge(labels []string, as []*Analysis) *Analysis {
 	if len(m.Waves) > 0 {
 		m.WaveNotes = append(m.WaveNotes, "Waves are computed inside each plan. Dependencies between plans (for example one root module reading another's outputs) are not in the plan JSON, so a wave can mix plans that really must run one after the other.")
 	}
+	rankFindings(m.Findings)
 	return m
 }
 

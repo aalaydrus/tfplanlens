@@ -84,6 +84,7 @@
         }
       ],
       "known_after_apply": 1,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -110,6 +111,7 @@
         }
       ],
       "known_after_apply": 1,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     }

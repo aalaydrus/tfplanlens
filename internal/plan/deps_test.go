@@ -136,3 +136,27 @@ func TestRealAWSModuleDependencies(t *testing.T) {
 		t.Errorf("module queue deps = %v (var.suffix is a root variable)", deps)
 	}
 }
+
+func TestDependentsAreTransitiveSortedAndSkipDataSources(t *testing.T) {
+	g := &plan.DepGraph{Deps: map[string][]string{
+		"a.x":          {},
+		"b.x":          {"a.x"},
+		"c.x":          {"b.x"},
+		"data.d.y":     {"a.x"},
+		"e.x":          {"data.d.y"}, // reaches a.x only through a data source
+		"unrelated.x":  {},
+		"module.m.f.x": {"a.x"},
+	}}
+	got := g.Dependents("a.x")
+	want := []string{"b.x", "c.x", "e.x", "module.m.f.x"}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("%v, want %v", got, want)
+	}
+	if got := g.Dependents("unrelated.x"); got == nil || len(got) != 0 {
+		t.Errorf("no dependents must be an empty slice, got %#v", got)
+	}
+	var nilGraph *plan.DepGraph
+	if got := nilGraph.Dependents("a.x"); got == nil || len(got) != 0 {
+		t.Errorf("nil graph must give an empty slice, got %#v", got)
+	}
+}

@@ -30,7 +30,8 @@ var tmpl = template.Must(template.New("report").Funcs(template.FuncMap{
 		}
 		return "no"
 	},
-	"upper": strings.ToUpper,
+	"upper":      strings.ToUpper,
+	"dependents": analyze.DependentsText,
 	"sym": func(a string) string {
 		return map[string]string{"create": "+", "update": "~", "replace": "-/+", "delete": "-", "read": "<=", "no-op": "=", "forget": "x"}[a]
 	},

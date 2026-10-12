@@ -49,7 +49,10 @@
         "triggers_replace"
       ],
       "index_shift": false,
-      "drift_also": false
+      "drift_also": false,
+      "dependents": [
+        "terraform_data.app"
+      ]
     },
     {
       "address": "terraform_data.subnet[\"b\"]",
@@ -63,7 +66,10 @@
       "reason_text": "for_each key removed: b",
       "index_shift": true,
       "warning": "for_each key removed while sibling instances change (possible key rename: terraform_data.subnet[\"d\"])",
-      "drift_also": false
+      "drift_also": false,
+      "dependents": [
+        "terraform_data.lb"
+      ]
     },
     {
       "address": "terraform_data.worker[2]",
@@ -76,7 +82,8 @@
       "reason": "delete_because_count_index",
       "reason_text": "count shrank; index 2 no longer exists",
       "index_shift": false,
-      "drift_also": false
+      "drift_also": false,
+      "dependents": []
     },
     {
       "address": "terraform_data.worker[3]",
@@ -89,7 +96,8 @@
       "reason": "delete_because_count_index",
       "reason_text": "count shrank; index 3 no longer exists",
       "index_shift": false,
-      "drift_also": false
+      "drift_also": false,
+      "dependents": []
     }
   ],
   "drift": [],
@@ -148,6 +156,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 2,
+      "dependents": [],
       "wave": 2,
       "wave_phase": "apply"
     },
@@ -172,6 +181,7 @@
         }
       ],
       "known_after_apply": 1,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -204,6 +214,9 @@
         }
       ],
       "known_after_apply": 2,
+      "dependents": [
+        "terraform_data.app"
+      ],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -230,6 +243,7 @@
         }
       ],
       "known_after_apply": 2,
+      "dependents": [],
       "wave": 2,
       "wave_phase": "apply"
     },
@@ -249,7 +263,8 @@
       "import": false,
       "removed_from_state_only": true,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "dependents": []
     },
     {
       "address": "terraform_data.subnet[\"a\"]",
@@ -267,6 +282,9 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [
+        "terraform_data.lb"
+      ],
       "parent": "terraform_data.subnet",
       "key": "a"
     },
@@ -288,6 +306,9 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [
+        "terraform_data.lb"
+      ],
       "parent": "terraform_data.subnet",
       "key": "b",
       "wave": 1,
@@ -309,6 +330,9 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [
+        "terraform_data.lb"
+      ],
       "parent": "terraform_data.subnet",
       "key": "c"
     },
@@ -328,6 +352,9 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 2,
+      "dependents": [
+        "terraform_data.lb"
+      ],
       "parent": "terraform_data.subnet",
       "key": "d",
       "wave": 1,
@@ -371,6 +398,7 @@
         }
       ],
       "known_after_apply": 1,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -390,6 +418,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [],
       "parent": "terraform_data.worker",
       "key": "0"
     },
@@ -409,6 +438,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [],
       "parent": "terraform_data.worker",
       "key": "1"
     },
@@ -430,6 +460,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [],
       "parent": "terraform_data.worker",
       "key": "2",
       "wave": 1,
@@ -453,6 +484,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [],
       "parent": "terraform_data.worker",
       "key": "3",
       "wave": 1,
@@ -474,7 +506,8 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "dependents": []
     },
     {
       "address": "module.network_core.terraform_data.vpc",
@@ -492,7 +525,10 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "dependents": [
+        "module.network_core.terraform_data.route_table"
+      ]
     }
   ],
   "parents": [

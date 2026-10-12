@@ -47,7 +47,8 @@
       "reason": "replace_by_triggers",
       "reason_text": "replace_triggered_by dependency changed",
       "index_shift": false,
-      "drift_also": false
+      "drift_also": false,
+      "dependents": []
     },
     {
       "address": "terraform_data.requested",
@@ -60,7 +61,8 @@
       "reason": "replace_by_request",
       "reason_text": "Replacement requested with -replace",
       "index_shift": false,
-      "drift_also": false
+      "drift_also": false,
+      "dependents": []
     },
     {
       "address": "terraform_data.single",
@@ -74,7 +76,8 @@
       "reason_text": "Resource switched between count/for_each/single",
       "index_shift": true,
       "warning": "count/for_each was added or removed on this resource; instances are being destroyed rather than moved",
-      "drift_also": false
+      "drift_also": false,
+      "dependents": []
     },
     {
       "address": "terraform_data.tainted",
@@ -87,7 +90,8 @@
       "reason": "replace_because_tainted",
       "reason_text": "Resource is tainted",
       "index_shift": false,
-      "drift_also": false
+      "drift_also": false,
+      "dependents": []
     },
     {
       "address": "module.gone.terraform_data.inner",
@@ -100,7 +104,8 @@
       "reason": "delete_because_no_resource_config",
       "reason_text": "Removed from config",
       "index_shift": false,
-      "drift_also": false
+      "drift_also": false,
+      "dependents": []
     },
     {
       "address": "module.mods[\"b\"].terraform_data.inner",
@@ -113,7 +118,8 @@
       "reason": "delete_because_no_module",
       "reason_text": "Whole module removed or its call changed",
       "index_shift": false,
-      "drift_also": false
+      "drift_also": false,
+      "dependents": []
     }
   ],
   "drift": [],
@@ -167,6 +173,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [],
       "parent": "terraform_data.counted",
       "key": "0"
     },
@@ -188,6 +195,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 2,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -209,6 +217,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 2,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -230,6 +239,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -249,6 +259,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 2,
+      "dependents": [],
       "parent": "terraform_data.single",
       "key": "a",
       "wave": 1,
@@ -272,6 +283,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 2,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -298,6 +310,7 @@
         }
       ],
       "known_after_apply": 1,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -319,6 +332,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "destroy"
     },
@@ -337,7 +351,8 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "dependents": []
     },
     {
       "address": "module.mods[\"b\"].terraform_data.inner",
@@ -357,6 +372,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "destroy"
     }

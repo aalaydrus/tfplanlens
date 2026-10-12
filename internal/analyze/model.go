@@ -146,6 +146,10 @@ type Finding struct {
 	Warning    string `json:"warning,omitempty"`
 	// DriftAlso is set when the resource also drifted (high risk).
 	DriftAlso bool `json:"drift_also"`
+	// Dependents are the resources (configuration addresses) in this plan that
+	// depend on this one, directly or through others. A lower bound: other
+	// stacks, and dependencies that pass through a local value, are not seen.
+	Dependents []string `json:"dependents"`
 	// Unit is the plan this finding came from in a merged report.
 	Unit string `json:"unit,omitempty"`
 }
@@ -211,6 +215,8 @@ type Change struct {
 	StateOnly       bool      `json:"removed_from_state_only"`
 	Attrs           []Attr    `json:"attrs"`
 	KnownAfterApply int       `json:"known_after_apply"`
+	// Dependents: see Finding.Dependents.
+	Dependents []string `json:"dependents"`
 	// Parent and Key identify a count/for_each instance: its configuration
 	// address and index key.
 	Parent string `json:"parent,omitempty"`

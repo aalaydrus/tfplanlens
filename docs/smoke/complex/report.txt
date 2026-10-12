@@ -10,9 +10,11 @@ By module: root 10, module.network_core 2
 ! REPLACE terraform_data.db
     type: terraform_data | target account: 111111111111 (source: apply_account)
     why: Attribute change forces replacement: triggers_replace
+    used by 1+ resources in this plan: terraform_data.app
 ! DELETE terraform_data.subnet["b"]
     type: terraform_data | target account: 111111111111 (source: apply_account)
     why: for_each key removed: b
+    used by 1+ resources in this plan: terraform_data.lb
     WARNING: for_each key removed while sibling instances change (possible key rename: terraform_data.subnet["d"])
 ! DELETE terraform_data.worker[2]
     type: terraform_data | target account: 111111111111 (source: apply_account)
