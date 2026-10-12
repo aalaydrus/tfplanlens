@@ -111,3 +111,20 @@ func TestDependabotDoesNotRaiseTheMinimumGoVersion(t *testing.T) {
 	}
 	t.Error("dependabot.yml must ignore minor and major updates of golang.org/x/* (see this test's comment)")
 }
+
+// The minimum Go version is a decision, not a side effect. A merged x/net bump
+// once raised go.mod to "go 1.25.0" and CI stayed green, because CI installs
+// whatever go.mod asks for. This test turns that into a red check. To move the
+// minimum on purpose, change it here, in README.md, SPEC.md, CONTRIBUTING.md
+// and the notes that name it (grep for "1.23").
+func TestGoModKeepsTheMinimumGoVersion(t *testing.T) {
+	const want = "1.23.0"
+	s := read(t, repoRoot+"/go.mod")
+	m := regexp.MustCompile(`(?m)^go (\S+)$`).FindStringSubmatch(s)
+	if m == nil || m[1] != want {
+		t.Errorf("go.mod has go line %v, want %q. A dependency bump probably raised it; see this test's comment", m, want)
+	}
+	if regexp.MustCompile(`(?m)^toolchain `).MatchString(s) {
+		t.Error("go.mod has a toolchain line; remove it so the minimum stays what the go line says")
+	}
+}

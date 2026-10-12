@@ -23,6 +23,9 @@ updates:
     # 1.23.0 to 1.26.0), which would stop anyone with an older Go from building
     # tfplanlens. Only patch releases of x/* are proposed. To move the minimum
     # Go version on purpose, bump `go` in go.mod yourself and drop this rule.
+    # Ignore rules do not apply to Dependabot security updates, and a bump can
+    # still raise `go` in go.mod: TestGoModKeepsTheMinimumGoVersion then fails CI,
+    # so such a PR is red instead of quietly mergeable.
     ignore:
       - dependency-name: "golang.org/x/*"
         update-types: ["version-update:semver-minor", "version-update:semver-major"]
