@@ -1,6 +1,6 @@
 # Wishlist and edge cases to dig into
 
-Status: `open`, `exploring`, `hypothesis` (not yet checked), `done`.
+Status: `open`, `exploring` (being looked at now), `hypothesis` (not yet checked), `done`.
 
 ## From the simulation
 
@@ -54,3 +54,32 @@ Status: `open`, `exploring`, `hypothesis` (not yet checked), `done`.
 14. **Large plans** (`open`). The 5,000-resource test exists but performance
     of waves/merge/diff is not measured.
 15. **TUI polish** (`open`): mouse, live resize is polled every 200ms.
+
+## From user feedback
+
+Both items came from one reader of the public repo, who described a dev
+account where teammates deploy over each other and other teams use different
+IaC to refer to shared resources (an RDS or Redshift cluster).
+
+21. **Link each change to the code change behind it** (`exploring`). A plan has
+    no git data, so this needs input from the user's side. Two levels:
+    - *Run level* (first, small): `--commit <sha>` and `--repo-url <url>` (or
+      config keys; CI can pass `GITHUB_SHA` and `GITHUB_REPOSITORY`). The report
+      header links the commit, and `diff` can link the range between two plans.
+      Stays fully offline.
+    - *Per resource* (later, heuristic): `--source-dir` finds the
+      `resource "type" "name"` block for each address and runs `git log` or
+      `git blame` on its lines. Needs a checkout. Modules and `for_each`
+      instances need mapping. A change can come from a variable, a `.tfvars`
+      file or a provider upgrade rather than the block, and drift has no code
+      cause: say "unknown", never blame a guess.
+22. **Show who would be affected by a change to a shared resource**
+    (`exploring`). A plan cannot see consumers outside the stack (other teams'
+    IaC reading your cluster), so this needs a declared map: config rules
+    matching resource type, address or tag to the teams that use it and who to
+    contact, shown next to the matching Danger and `diff` entries. Fall back
+    to an owner tag in the plan when there is one, otherwise "no owner
+    declared". Plans you pass together could add cross-stack references, but
+    only for the stacks you supply. Concurrent applies in a shared dev account
+    are mostly a state-locking and drift problem; the drift view covers part of
+    it, and a plan does not say when the last apply happened (`hypothesis`).
