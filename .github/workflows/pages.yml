@@ -9,6 +9,7 @@ on:
     branches: [main]
     paths:
       - "docs/demo/**"
+      - "docs/readme/**"
       - "docs/smoke/**"
       - "simulation/output/**"
       - "scripts/build-demo-site.sh"

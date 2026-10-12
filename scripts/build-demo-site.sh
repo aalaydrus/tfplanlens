@@ -25,8 +25,10 @@ reports=(
 )
 
 rm -rf "$out"
-mkdir -p "$out/reports"
+mkdir -p "$out/reports" "$out/assets"
 cp "$root/docs/demo/index.html" "$out/index.html"
+cp "$root/docs/demo/about.html" "$out/about.html"
+cp "$root/docs/readme/html-report.png" "$root/docs/readme/html-drawer-user-data.png" "$out/assets/"
 for r in "${reports[@]}"; do
   dest="${r%%:*}"
   src="$root/${r#*:}"
