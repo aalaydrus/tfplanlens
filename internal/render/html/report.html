@@ -7,7 +7,7 @@
 <title>tfplanlens report</title>
 <style>{{.CSS}}</style>
 </head>
-<body>
+<body class="{{if .A.Findings}}danger-open{{end}}">
 <header>
   <h1>tfplanlens</h1>
   <span class="chip">plan: {{.A.Summary.Mode}}</span>
@@ -16,27 +16,33 @@
   {{if .A.ApplyAccount.Resolved}}<span class="chip" title="Where terraform apply runs">executed from: <span class="mono">{{.A.ApplyAccount.ID}}</span> ({{.A.ApplyAccount.Describe}})</span>
   {{else}}<span class="chip bad" title="Set --tfapply-account-id">executed from: unresolved</span>{{end}}
   <span class="grow"></span>
+  {{if .A.Findings}}<button id="danger-toggle" type="button" aria-controls="danger" aria-expanded="true">Danger: {{len .A.Findings}}</button>{{end}}
   <button id="theme" type="button">Theme: auto</button>
 </header>
 <main>
 {{range .A.Notices}}<p class="panel"><b>Notice:</b> {{.}}</p>{{end}}
 
-<section id="danger" class="panel {{if .A.Findings}}danger{{end}}" aria-labelledby="danger-h">
-  <h2 id="danger-h">Danger: {{len .A.Findings}} delete/replace</h2>
+<aside id="danger" class="panel {{if .A.Findings}}danger docked{{end}}" aria-labelledby="danger-h">
+  <div class="danger-head">
+    <h2 id="danger-h">Danger: {{len .A.Findings}} delete/replace</h2>
+    {{if .A.Findings}}<span class="grow"></span>
+    <button id="danger-all" type="button">Expand all</button>
+    <button id="danger-close" type="button" aria-label="Hide the danger panel">Hide</button>{{end}}
+  </div>
   {{if not .A.Findings}}<p class="empty">No deletes or replacements.</p>{{end}}
   {{range .A.Findings}}
-  <div class="finding">
-    <div><b class="a-{{.Action}}">{{upper .Action}}</b> <span class="mono">{{.Address}}</span>
+  <details class="finding">
+    <summary><b class="a-{{.Action}}">{{upper .Action}}</b> <span class="mono">{{.Address}}</span>
       {{if .Stateful}}<span class="badge stateful">STATEFUL</span>{{end}}
-      {{if .DriftAlso}}<span class="badge hi">HIGH RISK: also drifted</span>{{end}}</div>
+      {{if .DriftAlso}}<span class="badge hi">HIGH RISK: also drifted</span>{{end}}</summary>
     <p class="why">{{.ReasonText}}</p>
     {{with dependents .Dependents}}<p class="why">{{.}}</p>{{end}}
     {{range .Safeguards}}{{with safeguard .}}<p class="why">{{.}}</p>{{end}}{{end}}
     {{if .IndexShift}}<p class="warnline"><b>WARNING:</b> {{.Warning}}</p>{{end}}
     <div class="meta">{{.Type}} &middot; target account <span class="mono">{{.Account}}</span> (source: {{.AccountSource}})</div>
-  </div>
+  </details>
   {{end}}
-</section>
+</aside>
 
 <section aria-label="Summary">
   <div class="tiles">

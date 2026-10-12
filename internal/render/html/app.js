@@ -21,6 +21,26 @@
     });
   }
 
+  // Danger side panel: open by default, each resource collapsed under its name.
+  var danger = $("#danger"), dToggle = $("#danger-toggle"), dClose = $("#danger-close"), dAll = $("#danger-all");
+  if (danger && dToggle && dClose && dAll) {
+    var showDanger = function (on) {
+      danger.hidden = !on;
+      document.body.classList.toggle("danger-open", on);
+      dToggle.setAttribute("aria-expanded", on ? "true" : "false");
+    };
+    var setAll = function (open) {
+      $$("details.finding", danger).forEach(function (d) { d.open = open; });
+      dAll.textContent = open ? "Collapse all" : "Expand all";
+    };
+    dToggle.addEventListener("click", function () { showDanger(danger.hidden); });
+    dClose.addEventListener("click", function () { showDanger(false); dToggle.focus(); });
+    dAll.addEventListener("click", function () {
+      setAll($$("details.finding", danger).some(function (d) { return !d.open; }));
+    });
+    window.addEventListener("beforeprint", function () { setAll(true); });
+  }
+
   // Filter, search and group the changes table.
   var tbody = $("#rows");
   if (!tbody) { return; }

@@ -198,3 +198,43 @@ func TestHostilePlanDataIsEscaped(t *testing.T) {
 		t.Errorf("%d <script> elements, want exactly the page script", n)
 	}
 }
+
+// The Danger section is a side panel that is open when the page loads, with
+// each delete or replace collapsed under its resource name. It stays before
+// the tiles and the table in the document (a test elsewhere checks the order).
+func TestDangerIsASidePanelOpenByDefaultWithCollapsedResources(t *testing.T) {
+	doc := render(t, analysis(t, fixture(t, "runner-cross-account"), &analyze.Options{ApplyAccount: "999999999999", ApplySource: analyze.SourceFlag}))
+	for _, want := range []string{
+		`<body class="danger-open">`, // open by default, also without JavaScript
+		`id="danger" class="panel danger docked"`,
+		`id="danger-toggle"`, `id="danger-close"`, `id="danger-all"`,
+	} {
+		if !strings.Contains(doc, want) {
+			t.Errorf("missing %q", want)
+		}
+	}
+	section := doc[strings.Index(doc, `id="danger"`):strings.Index(doc, `class="tiles"`)]
+	n := strings.Count(section, `<details class="finding">`)
+	if n == 0 {
+		t.Fatal("no collapsible findings in the Danger panel")
+	}
+	if strings.Count(section, `<details class="finding" open`) != 0 || strings.Contains(section, "<details open") {
+		t.Error("findings must be collapsed by default")
+	}
+	// The resource name is the heading (summary); the reason is inside the details.
+	if !strings.Contains(section, `<summary><b class="a-`) || strings.Index(section, "<summary>") > strings.Index(section, `class="why"`) {
+		t.Error("each finding needs the resource name in a summary before its details")
+	}
+}
+
+func TestNoDangerPanelWithoutFindings(t *testing.T) {
+	doc := render(t, analysis(t, fixture(t, "basic-create"), nil))
+	for _, bad := range []string{`<body class="danger-open">`, `id="danger-toggle"`, `class="panel danger docked"`} {
+		if strings.Contains(doc, bad) {
+			t.Errorf("a plan without deletes or replaces must not get %q", bad)
+		}
+	}
+	if !strings.Contains(doc, "No deletes or replacements.") {
+		t.Error("missing the empty message")
+	}
+}

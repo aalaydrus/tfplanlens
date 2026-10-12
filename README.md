@@ -4,7 +4,7 @@ Read a Terraform plan the way a reviewer needs to: deletes and replaces first, w
 
 It works **offline** on the JSON from `terraform show -json`: no AWS credentials, no Terraform binary, no network, no LLM. Output is deterministic. Values Terraform marks sensitive are never printed, and secret-looking values it does not mark are hidden too (best effort: [what is and is not hidden](docs/SECRETS.md)).
 
-![tfplanlens HTML report: Danger panel, summary tiles and a filterable table](docs/readme/html-report.png)
+![tfplanlens HTML report: a Danger side panel next to summary tiles and a filterable table](docs/readme/html-report.png)
 
 **Where to start:** open **Quickstart** below (about 30 seconds), or look at a finished example in [`simulation/`](simulation/rundown/EXAMPLE_RUNDOWN.md) without installing anything.
 

@@ -68,7 +68,7 @@ Unknown keys and invalid values are errors, so a typo cannot silently do nothing
 |---|---|
 | `text` | colored terminal report: Summary, Danger, Drift, Changes by account, Changes by module |
 | `markdown` | for PR comments: summary table, Danger expanded, the rest in `<details>` per account then module; capped at 60,000 characters |
-| `html` | one self-contained file (no CDN, works offline, dark mode): Danger panel, tiles, chart, searchable and groupable table, per-resource detail drawers |
+| `html` | one self-contained file (no CDN, works offline, dark mode): a Danger side panel (open by default, each delete or replace collapsed under its resource name), tiles, chart, searchable and groupable table, per-resource detail drawers |
 | `json` | the analysis as stable JSON, see [docs/json-schema.md](json-schema.md) |
 
 Every format shows the apply account and each resource's target account with the source that decided it.
