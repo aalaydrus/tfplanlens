@@ -63,3 +63,22 @@ func TestDependabotKeepsActionsAndModulesCurrent(t *testing.T) {
 		t.Errorf("dependabot must cover github-actions and gomod, has %v", got)
 	}
 }
+
+// Pushes made with a workflow's own token do not start other workflows, so a
+// bot commit on a pull request has no CI results and would block required
+// status checks. The smoke workflow therefore only reads the repository;
+// scripts/smoke-refresh.sh refreshes the committed plans and reports.
+func TestSmokeWorkflowNeverPushesToTheRepository(t *testing.T) {
+	s := read(t, repoRoot+"/.github/workflows/smoke.yml")
+	for _, bad := range []string{"git push", "git commit", "contents: write"} {
+		if strings.Contains(s, bad) {
+			t.Errorf("smoke.yml contains %q; it must not write to the repository (see scripts/smoke-refresh.sh)", bad)
+		}
+	}
+	if !strings.Contains(s, "contents: read") {
+		t.Error("smoke.yml should declare contents: read")
+	}
+	if !fileExists(repoRoot + "/scripts/smoke-refresh.sh") {
+		t.Error("scripts/smoke-refresh.sh is missing")
+	}
+}

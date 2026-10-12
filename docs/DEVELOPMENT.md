@@ -8,7 +8,7 @@ There are no published releases. `.goreleaser.yaml` and `.github/workflows/relea
 
 ## Smoke tests on real plans
 
-`.github/workflows/smoke.yml` runs tfplanlens against real Terraform plans. For each scenario under `testdata/real/`, `scripts/smoke-plan.sh` applies `v1`, swaps in `v2`, and runs `terraform plan` (optionally with extra flags from `plan-args`, and an out-of-band step from `between.sh`). It then renders every format, takes screenshots (`scripts/screenshot.mjs`), and commits the outputs under `docs/smoke` and `docs/screenshots`.
+`.github/workflows/smoke.yml` runs tfplanlens against real Terraform plans. For each scenario under `testdata/real/`, `scripts/smoke-plan.sh` applies `v1`, swaps in `v2`, and runs `terraform plan` (optionally with extra flags from `plan-args`, and an out-of-band step from `between.sh`). It then renders every format, runs the Go tests against the fresh plans, takes screenshots (`scripts/screenshot.mjs`), posts the reports on the pull request, and uploads everything as the `smoke-outputs` artifact. Nothing is committed back to the branch. To update the committed plans and reports (`testdata/plans/real`, `docs/smoke`, `docs/screenshots`), run `scripts/smoke-refresh.sh` (add `SCREENSHOTS=1` for the screenshots) and commit the result: pushes made with a workflow's own token do not start other workflows, so a bot commit on a pull request would have no CI results and block required checks.
 
 | Scenario | Covers |
 |---|---|

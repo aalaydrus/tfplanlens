@@ -40,5 +40,7 @@ Unit tests that build `plan.Plan`/`Analysis` by hand are in each package.
 ## CI
 
 `ci.yml`: vet + test on Linux/macOS/Windows (Windows is why `.gitattributes`
-pins LF). `smoke.yml`: regenerates every real plan with real Terraform, renders
-every format, screenshots, and bot-commits `docs/smoke` and the plans.
+pins LF). `smoke.yml`: regenerates every real plan with real Terraform, runs the
+real-plan tests on them, renders every format, screenshots, comments on the PR and
+uploads the outputs (it commits nothing; `scripts/smoke-refresh.sh` refreshes the
+committed copies).
