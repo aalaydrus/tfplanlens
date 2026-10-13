@@ -45,8 +45,11 @@ Status: `open`, `exploring` (being looked at now), `hypothesis` (not yet checked
     references to resources about to be replaced or deleted (security group
     attachments, role trust, KMS grants, DNS). Needs a design first; floci may
     not emulate every API.
-11. **Live dogfooding** (`open`). Host our own report of the smoke plans, and
-    run on our own test infrastructure.
+11. **Live dogfooding** (`done` for hosting, `open` for our own
+    infrastructure). The example reports and an About page are published to
+    GitHub Pages (`.github/workflows/pages.yml`, `docs/demo/`,
+    `scripts/build-demo-site.sh`). Running on our own test infrastructure is
+    still open.
 12. **AI skill wrapper** around the local binary (Kiro, Claude) (`open`).
 13. **A real, non-emulated AWS plan** (`open`). Everything so far is either
     `terraform_data` or floci. A scrubbed plan from a real stack would tell
@@ -90,20 +93,26 @@ A second reader suggested running tfplanlens at plan time, using it in code
 review agents (fewer tokens than querying source control), and ranking changes
 by how much they matter.
 
-23. **Rank by how many resources depend on the change** (`exploring`). An SSM
+23. **Rank by how many resources depend on the change** (`done`: each delete or
+    replace names what uses it, and Danger is ordered stateful first, then by
+    dependents; `internal/plan/deps.go` `Dependents`, `TestFindingsCarryWhatDependsOnThem`). An SSM
     parameter that 12 other resources reference matters more than one nothing
     uses. The plan's `configuration` already carries the reference edges used
     for apply waves. Limits: it only sees references inside this plan; `local.*`
     and other stacks are invisible, so the number is a lower bound ("at least
     12") and must never be shown as exact.
 24. **Deletion protection and final snapshot on a delete or replace**
-    (`exploring`). Destroying a DB cluster with deletion protection on is
+    (`done` for `aws_dynamodb_table`, checked in a real plan; `aws_db_instance`
+    and `aws_rds_cluster` are `hypothesis`, names from the provider docs;
+    `internal/analyze/safeguards.go`). Destroying a DB cluster with deletion protection on is
     refused by AWS, without it the data is gone. The flag is in the resource's
     `before` values (for example `deletion_protection` on RDS instances and
     clusters). Needs a per-type table of attribute names; unknown types say
     "unknown". `hypothesis`: attribute names are not yet checked against a real
     plan, and the emulator we use may not produce RDS clusters (see item 13).
-25. **Compact, ranked output for review agents** (`open`). The top N changes
+25. **Compact, ranked output for review agents** (`done`: `-f brief --top N`,
+    `internal/analyze/brief.go`; about 1 KB where the text report is 5 KB on the
+    simulation plan). The top N changes
     with the reason each matters and nothing else, so an agent does not spend
     tokens on the rest. Builds on items 23 and 24; `-f json` and the markdown
     PR comment already put Danger first.

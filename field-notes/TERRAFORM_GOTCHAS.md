@@ -75,6 +75,21 @@ simulation) and `hashicorp/local` 2.9.1, `terraform_data` (the smoke scenarios).
 - It supports the resource types in the simulation (S3, DynamoDB, SQS, SNS,
   SSM, Secrets Manager, IAM); anything else is untested.
 
+## Delete safeguards
+
+- **`deletion_protection_enabled` is in a DynamoDB table's `before` values.**
+  Seen as `false` on `aws_dynamodb_table.orders` in
+  `simulation/assets/input/plan.json` (AWS provider 6.68.0). *verified*
+- **RDS: `deletion_protection`, `skip_final_snapshot`, `final_snapshot_identifier`**
+  on `aws_db_instance` and `aws_rds_cluster` are the names in the provider
+  documentation; no real plan with them yet, so tfplanlens treats them as
+  `hypothesis` and shows "unknown" when a value is missing. Redshift is not
+  covered (names not checked).
+- **What depends on a resource is a lower bound.** The reverse of the reference
+  edges in `configuration` misses other stacks, `replace_triggered_by` and
+  anything that passes through a `local`, so reports say "N+".
+  *verified: `internal/plan/deps_test.go`*
+
 ## Tooling
 
 - **Bubble Tea queries the terminal at import time** (`init()` asks for the

@@ -11,7 +11,10 @@ GOOS=windows go vet ./...        # CI also runs Windows
 go test ./cmd/... -run TestGolden -update   # regenerate goldens, then READ the diff
 ```
 
-Go 1.23 (`go.mod` says `go 1.23.0`; do not let a dependency bump it).
+Go 1.23 (`go.mod` says `go 1.23.0`). CI installs whatever `go.mod` asks for, so
+a dependency bump to `go 1.25.0` once stayed green; `TestGoModKeepsTheMinimumGoVersion`
+now fails it. To move the minimum on purpose, change that test and every doc that
+names "1.23".
 Dependencies are deliberately few: cobra, terraform-json, yaml.v3, go-difflib,
 `x/term`; `x/net` is test-only (HTML tokenizer).
 
@@ -30,12 +33,25 @@ no-ops, Bubble Tea's terminal query, secrets appearing in plan JSON).
 
 ## Pull requests
 
-- One feature per PR; do not open a PR until asked.
+- Branch names start with `feat/` (not `claude/`).
+- One feature per PR; do not open a PR until asked. The user can ask for
+  several features in one PR; say so in the description, by section.
 - In the description, list only what was verified, with the command or CI run;
   paste `go test` output where it matters; say plainly what was **not**
   verified. No check marks for things that were not run.
 - A merged PR is finished: new work goes on a new branch from the default.
 - Never put a model name in commits, code or PR text.
+
+## Generated files: regenerate after a change that affects output
+
+```
+go test ./cmd/... -run TestGolden -update      # goldens, then READ git diff testdata
+simulation/demo.sh                              # simulation/output (also tested)
+for p in testdata/plans/real/*.json; do scripts/smoke-report.sh "$(basename $p | sed 's/-tf.*//')" "$p"; done   # docs/smoke, no Terraform needed
+```
+
+`docs/readme/html-report.png` (README and About page) and `docs/screenshots` are
+taken by hand with Playwright against a built report; they go stale silently.
 
 ## Conventions
 
