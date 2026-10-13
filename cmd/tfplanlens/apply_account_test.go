@@ -204,14 +204,15 @@ func TestShortFlags(t *testing.T) {
 	}
 }
 
-// The CLI stays small: no completion command, and only these flags.
+// The CLI stays small: no completion command, and only these flags. (--top
+// was added for -f brief; adding a flag means changing this list on purpose.)
 func TestCLISurfaceIsLean(t *testing.T) {
 	code, out, _ := runCLI("--help")
 	if code != exitOK || strings.Contains(out, "completion") {
 		t.Errorf("exit %d; completion command present:\n%s", code, out)
 	}
 	_, out, _ = runCLI("report", "--help")
-	want := map[string]bool{"format": true, "out": true, "config": true, "fail-on": true, "tfapply-account-id": true, "account": true, "no-color": true, "help": true}
+	want := map[string]bool{"format": true, "out": true, "config": true, "fail-on": true, "tfapply-account-id": true, "account": true, "no-color": true, "top": true, "help": true}
 	for _, line := range strings.Split(out, "\n") {
 		trimmed := strings.TrimSpace(line)
 		if !strings.HasPrefix(trimmed, "-") {

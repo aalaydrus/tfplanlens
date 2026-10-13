@@ -100,6 +100,9 @@ tfplanlens report plan.json</code></pre>
       <p>Where <code>terraform apply</code> runs versus where each resource lands, and how that was decided.</p></div>
     <div class="card"><h3>Short</h3>
       <p>Long values become the lines that changed. Unknown values are counted, not printed.</p></div>
+    <div class="card"><h3>For review agents</h3>
+      <p><code>-f brief</code> lists only the top N changes that need attention, ranked, with the reasons:
+      about 1 KB where the text report is 5 KB, on the orders-platform example.</p></div>
     <div class="card"><h3>And also</h3>
       <p>Drift, moves, imports, apply waves, a diff between two plans, several plans in one report,
       and an interactive <code>tui</code>.</p></div>
@@ -123,7 +126,8 @@ tfplanlens report plan.json -f markdown -o report.md    <span class="c"># a PR c
 tfplanlens report plan.json --fail-on delete,replace:aws_db_instance   <span class="c"># exit 1 in CI</span>
 tfplanlens report a.json b.json                         <span class="c"># several plans, one report</span>
 tfplanlens diff before.json after.json                  <span class="c"># what the new push changed</span>
-tfplanlens tui plan.json                                <span class="c"># explore interactively</span></code></pre>
+tfplanlens tui plan.json                                <span class="c"># explore interactively</span>
+tfplanlens report plan.json -f brief --top 10          <span class="c"># short and ranked, for a reviewer or an agent</span></code></pre>
   <p>Settings such as the apply account, default formats and <code>--fail-on</code> rules go in an optional
   <a href="https://github.com/aalaydrus/tfplanlens/blob/main/tfplanlens.config.yaml"><code>tfplanlens.config.yaml</code></a>.</p>
 

@@ -29,7 +29,8 @@ tfplanlens version
 Flags of `report` (`tui` takes `--config`, `--tfapply-account-id` and `--account`; `diff` also takes `-f`, `-o` and `--fail-on-new-danger`):
 
 ```
-  -f, --format <text|html|markdown|json>   output format; repeatable (default text)
+  -f, --format <text|html|markdown|json|brief>   output format; repeatable (default text)
+      --top <n>                            with -f brief: how many changes to list (default 10, 0 for all)
   -o, --out <path>                         write to a file instead of stdout
   -c, --config <path>                      config file (default ./tfplanlens.config.yaml if present)
       --fail-on <rules>                    exit 1 on: delete, replace, drift, unresolved, or kind:type
@@ -70,8 +71,17 @@ Unknown keys and invalid values are errors, so a typo cannot silently do nothing
 | `markdown` | for PR comments: summary table, Danger expanded, the rest in `<details>` per account then module; capped at 60,000 characters |
 | `html` | one self-contained file (no CDN, works offline, dark mode): a Danger side panel (open by default, each delete or replace collapsed under its resource name), tiles, chart, searchable and groupable table, per-resource detail drawers |
 | `json` | the analysis as stable JSON, see [docs/json-schema.md](json-schema.md) |
+| `brief` | plain text, no color: the top N (`--top`, default 10, 0 for all) changes that need attention, ranked, one block each with the reasons. For a reviewer in a hurry or a code review agent; see below |
 
 Every format shows the apply account and each resource's target account with the source that decided it.
+
+### `brief`: for code review agents
+
+```
+tfplanlens report plan.json -f brief --top 10
+```
+
+First every delete and replace (stateful first, then without deletion protection, then by how many resources depend on it), then other changes that carry a warning or that other resources depend on (an in-place update of something 12 resources use). Several instances of one resource are one entry. Plain creates and updates nothing depends on are not listed; the first line counts them. On the simulation plan the text report is about 5 KB, the JSON about 22 KB and the brief about 1 KB, and the raw plan JSON is about 80 KB. The header says how many qualified and how many were left out, so an agent knows when to raise `--top`. `--fail-on` still works and the brief is still written. The reasons are the same lines as in the other formats, including "unknown" where the plan cannot tell, and the "used by N+" counts are lower bounds. `--top` with another format is an error. Example: [simulation/output/brief.txt](../simulation/output/brief.txt).
 
 ## What the reports look like
 

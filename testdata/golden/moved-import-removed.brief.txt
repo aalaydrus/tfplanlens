@@ -1,0 +1,3 @@
+tfplanlens brief | plan: normal | update 2, forget 1 | showing 0 of 0 needing attention
+NOTE: Apply account unknown: set tfapply_account_id in tfplanlens.config.yaml (it cannot be read from the plan). Cross-account flags are off.
+Nothing needs attention: no deletes, replaces, warnings, or updates that other resources depend on.

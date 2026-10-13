@@ -42,6 +42,7 @@ tfplanlens report plan.json --fail-on delete,replace:aws_db_instance   # exit 1 
 tfplanlens report a.json b.json                         # several plans, one report
 tfplanlens diff before.json after.json                  # what the new push changed
 tfplanlens tui plan.json                                # explore interactively
+tfplanlens report plan.json -f brief --top 10             # short and ranked, for a reviewer or a code review agent
 ```
 
 Settings (apply account, default formats, `--fail-on` rules) go in an optional [`tfplanlens.config.yaml`](tfplanlens.config.yaml).
