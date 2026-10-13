@@ -49,7 +49,12 @@ h2 { font-size: 15px; margin: 0 0 8px; }
 .tile span { color: var(--muted); font-size: 12px; }
 .a-create { color: var(--create); } .a-update { color: var(--update); } .a-replace { color: var(--replace); }
 .a-delete { color: var(--delete); } .a-read { color: var(--read); } .a-no-op { color: var(--no-op); } .a-forget { color: var(--forget); }
+.danger-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+.danger-head h2 { margin: 0; }
+#danger[hidden] { display: none; }
 .finding { padding: 8px 0; border-top: 1px solid var(--danger-line); }
+.finding summary { cursor: pointer; overflow-wrap: anywhere; }
+.finding[open] summary { margin-bottom: 4px; }
 .finding:first-of-type { border-top: 0; }
 .finding .why { margin: 2px 0 0 0; color: var(--text); }
 .finding .meta { color: var(--muted); font-size: 12px; }
@@ -98,10 +103,18 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
   tr.group { display: block; }
   tr.group td { display: block; }
 }
-@media print { #drawer, .controls, #theme { display: none; } }
+@media (min-width: 1100px) {
+  #danger.docked { position: fixed; top: 0; right: 0; bottom: 0; width: 400px; margin: 0; overflow: auto; z-index: 5; border-width: 0 0 0 1px; border-radius: 0; box-shadow: -8px 0 24px rgba(0, 0, 0, .15); }
+  body.danger-open header { padding-right: 424px; }
+  body.danger-open main { max-width: none; margin: 0; padding-right: 424px; }
+}
+@media print {
+  #danger.docked { position: static; width: auto; box-shadow: none; }
+  body.danger-open header, body.danger-open main { padding-right: 24px; }
+  #danger-toggle, #danger-all, #danger-close { display: none; } #drawer, .controls, #theme { display: none; } }
 </style>
 </head>
-<body>
+<body class="danger-open">
 <header>
   <h1>tfplanlens</h1>
   <span class="chip">plan: normal</span>
@@ -110,25 +123,33 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
   <span class="chip" title="Where terraform apply runs">executed from: <span class="mono">111111111111</span> (source: flag)</span>
   
   <span class="grow"></span>
+  <button id="danger-toggle" type="button" aria-controls="danger" aria-expanded="true">Danger: 1</button>
   <button id="theme" type="button">Theme: auto</button>
 </header>
 <main>
 
 
-<section id="danger" class="panel danger" aria-labelledby="danger-h">
-  <h2 id="danger-h">Danger: 1 delete/replace</h2>
-  
-  
-  <div class="finding">
-    <div><b class="a-delete">DELETE</b> <span class="mono">terraform_data.legacy</span>
-      
-      </div>
-    <p class="why">Removed from config</p>
-    
-    <div class="meta">terraform_data &middot; target account <span class="mono">111111111111</span> (source: apply_account)</div>
+<aside id="danger" class="panel danger docked" aria-labelledby="danger-h">
+  <div class="danger-head">
+    <h2 id="danger-h">Danger: 1 delete/replace</h2>
+    <span class="grow"></span>
+    <button id="danger-all" type="button">Expand all</button>
+    <button id="danger-close" type="button" aria-label="Hide the danger panel">Hide</button>
   </div>
   
-</section>
+  
+  <details class="finding">
+    <summary><b class="a-delete">DELETE</b> <span class="mono">terraform_data.legacy</span>
+      
+      </summary>
+    <p class="why">Removed from config</p>
+    
+    
+    
+    <div class="meta">terraform_data &middot; target account <span class="mono">111111111111</span> (source: apply_account)</div>
+  </details>
+  
+</aside>
 
 <section aria-label="Summary">
   <div class="tiles">
@@ -405,6 +426,26 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
       var cur = root.getAttribute("data-theme") || "";
       setTheme(cur === "" ? "light" : cur === "light" ? "dark" : "");
     });
+  }
+
+  // Danger side panel: open by default, each resource collapsed under its name.
+  var danger = $("#danger"), dToggle = $("#danger-toggle"), dClose = $("#danger-close"), dAll = $("#danger-all");
+  if (danger && dToggle && dClose && dAll) {
+    var showDanger = function (on) {
+      danger.hidden = !on;
+      document.body.classList.toggle("danger-open", on);
+      dToggle.setAttribute("aria-expanded", on ? "true" : "false");
+    };
+    var setAll = function (open) {
+      $$("details.finding", danger).forEach(function (d) { d.open = open; });
+      dAll.textContent = open ? "Collapse all" : "Expand all";
+    };
+    dToggle.addEventListener("click", function () { showDanger(danger.hidden); });
+    dClose.addEventListener("click", function () { showDanger(false); dToggle.focus(); });
+    dAll.addEventListener("click", function () {
+      setAll($$("details.finding", danger).some(function (d) { return !d.open; }));
+    });
+    window.addEventListener("beforeprint", function () { setAll(true); });
   }
 
   // Filter, search and group the changes table.

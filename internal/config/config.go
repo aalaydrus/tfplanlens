@@ -19,7 +19,7 @@ const DefaultPath = "tfplanlens.config.yaml"
 const DefaultMaxLine = 120
 
 // Formats are the valid output formats.
-var Formats = []string{"text", "html", "markdown", "json"}
+var Formats = []string{"text", "html", "markdown", "json", "brief"}
 
 // Config is the contents of tfplanlens.config.yaml (SPEC 5.9). Every key is
 // optional; command-line flags override the file.

@@ -17,7 +17,7 @@
 
 | Action | Resource | Why | Target account |
 |---|---|---|---|
-| **DELETE** | `aws_db_instance.prod` **STATEFUL** | `Removed from config` | `111111111111` (source: role_arn) |
+| **DELETE** | `aws_db_instance.prod` **STATEFUL** | `Removed from config`<br>`deletion protection: unknown (not in the plan)`<br>`final snapshot: unknown (not in the plan)` | `111111111111` (source: role_arn) |
 | **REPLACE** | `aws_instance.web` | `Attribute change forces replacement: ami` | `222222222222` (source: role_arn_variable) |
 
 ### Changes by account

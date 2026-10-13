@@ -47,7 +47,9 @@
       "reason": "",
       "reason_text": "Destroy plan: every resource is being destroyed",
       "index_shift": false,
-      "drift_also": false
+      "drift_also": false,
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "terraform_data.shard[0]",
@@ -60,7 +62,9 @@
       "reason": "",
       "reason_text": "Destroy plan: every resource is being destroyed",
       "index_shift": false,
-      "drift_also": false
+      "drift_also": false,
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "terraform_data.shard[1]",
@@ -73,7 +77,9 @@
       "reason": "",
       "reason_text": "Destroy plan: every resource is being destroyed",
       "index_shift": false,
-      "drift_also": false
+      "drift_also": false,
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "terraform_data.web",
@@ -86,7 +92,9 @@
       "reason": "",
       "reason_text": "Destroy plan: every resource is being destroyed",
       "index_shift": false,
-      "drift_also": false
+      "drift_also": false,
+      "dependents": [],
+      "safeguards": []
     }
   ],
   "drift": [],
@@ -134,6 +142,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "destroy"
     },
@@ -154,6 +163,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [],
       "parent": "terraform_data.shard",
       "key": "0",
       "wave": 1,
@@ -176,6 +186,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [],
       "parent": "terraform_data.shard",
       "key": "1",
       "wave": 1,
@@ -198,6 +209,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "destroy"
     }

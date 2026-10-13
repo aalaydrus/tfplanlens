@@ -38,6 +38,21 @@
   },
   "findings": [
     {
+      "address": "aws_s3_bucket.shards[1]",
+      "type": "aws_s3_bucket",
+      "action": "delete",
+      "provider": "aws",
+      "account": "unresolved (alias: default)",
+      "account_source": "unresolved",
+      "stateful": true,
+      "reason": "delete_because_count_index",
+      "reason_text": "count shrank; index 1 no longer exists",
+      "index_shift": false,
+      "drift_also": false,
+      "dependents": [],
+      "safeguards": []
+    },
+    {
       "address": "aws_iam_user.team[\"carol\"]",
       "type": "aws_iam_user",
       "action": "delete",
@@ -48,7 +63,9 @@
       "reason": "delete_because_each_key",
       "reason_text": "for_each key removed: carol",
       "index_shift": false,
-      "drift_also": false
+      "drift_also": false,
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "aws_instance.fleet[2]",
@@ -62,20 +79,9 @@
       "reason_text": "count shrank; index 2 no longer exists",
       "index_shift": true,
       "warning": "likely count index shift: other instances of this resource are also changing (aws_instance.fleet[1])",
-      "drift_also": false
-    },
-    {
-      "address": "aws_s3_bucket.shards[1]",
-      "type": "aws_s3_bucket",
-      "action": "delete",
-      "provider": "aws",
-      "account": "unresolved (alias: default)",
-      "account_source": "unresolved",
-      "stateful": true,
-      "reason": "delete_because_count_index",
-      "reason_text": "count shrank; index 1 no longer exists",
-      "index_shift": false,
-      "drift_also": false
+      "drift_also": false,
+      "dependents": [],
+      "safeguards": []
     }
   ],
   "drift": [],
@@ -127,6 +133,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [],
       "parent": "aws_iam_user.team",
       "key": "carol",
       "wave": 1,
@@ -148,6 +155,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [],
       "parent": "aws_iam_user.team",
       "key": "alice"
     },
@@ -167,6 +175,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [],
       "parent": "aws_instance.fleet",
       "key": "0"
     },
@@ -193,6 +202,7 @@
         }
       ],
       "known_after_apply": 0,
+      "dependents": [],
       "parent": "aws_instance.fleet",
       "key": "1",
       "wave": 1,
@@ -216,6 +226,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [],
       "parent": "aws_instance.fleet",
       "key": "2",
       "wave": 1,
@@ -239,6 +250,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [],
       "parent": "aws_s3_bucket.shards",
       "key": "1",
       "wave": 1,
@@ -260,6 +272,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [],
       "parent": "aws_s3_bucket.shards",
       "key": "0"
     }

@@ -1,0 +1,9 @@
+tfplanlens brief | plan: normal | update 1, delete 3 | showing 3 of 3 needing attention
+NOTE: Apply account unknown: set tfapply_account_id in tfplanlens.config.yaml (it cannot be read from the plan). Cross-account flags are off.
+1. DELETE aws_s3_bucket.shards[1] [STATEFUL]
+   - count shrank; index 1 no longer exists
+2. DELETE aws_iam_user.team["carol"]
+   - for_each key removed: carol
+3. DELETE aws_instance.fleet[2]
+   - count shrank; index 2 no longer exists
+   - WARNING: likely count index shift: other instances of this resource are also changing (aws_instance.fleet[1])

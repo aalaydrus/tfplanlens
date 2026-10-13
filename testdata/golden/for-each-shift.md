@@ -19,9 +19,9 @@
 
 | Action | Resource | Why | Target account |
 |---|---|---|---|
+| **DELETE** | `aws_s3_bucket.shards[1]` **STATEFUL** | `count shrank; index 1 no longer exists` | `unresolved (alias: default)` (source: unresolved) |
 | **DELETE** | `aws_iam_user.team["carol"]` | `for_each key removed: carol` | `unresolved (alias: default)` (source: unresolved) |
 | **DELETE** | `aws_instance.fleet[2]` | `count shrank; index 2 no longer exists`<br>**WARNING:** `likely count index shift: other instances of this resource are also changing (aws_instance.fleet[1])` | `unresolved (alias: default)` (source: unresolved) |
-| **DELETE** | `aws_s3_bucket.shards[1]` **STATEFUL** | `count shrank; index 1 no longer exists` | `unresolved (alias: default)` (source: unresolved) |
 
 ### Changes by account
 

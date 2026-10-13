@@ -28,6 +28,9 @@ Unit tests that build `plan.Plan`/`Analysis` by hand are in each package.
 | `--fail-on` | `TestFailOnDelete`, `TestFailOnScopedAndDrift`, `TestFailOnUnresolved` |
 | CLI surface | `TestCLISurfaceIsLean` (allowed `report` flags), `TestShortFlags`, `TestConfigFileSettingsAndFlagOverrides` |
 | Waves, cycles, instances | `internal/analyze/waves_test.go`, `internal/plan/deps_test.go`, `TestRealWavesFromConfiguration` |
+| `-f brief` and `--top` | `internal/analyze/brief_test.go`, `TestBriefFormatListsRankedItemsAndHonoursTop`, `TestTopOnlyAppliesToBriefAndMustBeSane`, `TestBriefStillHonoursFailOn`, the `*.brief.txt` goldens, `simulation/output/brief.txt` |
+| Safeguards (deletion protection, final snapshot) | `internal/analyze/safeguards_test.go` (`TestRealPlanDynamoDBTableReplaceShowsProtectionOff`, `TestSafeguardsFromBeforeValues`, `TestUnprotectedDeletesRankBeforeProtectedOnes`) |
+| Dependents and Danger ranking | `internal/analyze/dependents_test.go` (`TestFindingsCarryWhatDependsOnThem`, `TestDangerIsRankedByStatefulThenDependents`) |
 | diff | `internal/diff/diff_test.go`, `TestRealPlanDiff` |
 | Merge (several plans) | `internal/analyze/merge_test.go`, `cmd/tfplanlens/multi_test.go` |
 | TUI | `internal/tui/tui_test.go` (model, key parser), `cmd/tfplanlens/tui_test.go` |

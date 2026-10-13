@@ -48,7 +48,9 @@
         "triggers_replace"
       ],
       "index_shift": false,
-      "drift_also": false
+      "drift_also": false,
+      "dependents": [],
+      "safeguards": []
     }
   ],
   "drift": [],
@@ -104,6 +106,7 @@
         }
       ],
       "known_after_apply": 1,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -123,6 +126,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [],
       "parent": "terraform_data.cache",
       "key": "0"
     },
@@ -142,6 +146,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [],
       "parent": "terraform_data.cache",
       "key": "1"
     },
@@ -174,6 +179,7 @@
         }
       ],
       "known_after_apply": 2,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -192,7 +198,8 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "dependents": []
     },
     {
       "address": "terraform_data.queue",
@@ -210,6 +217,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 2,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     }

@@ -23,6 +23,7 @@ func TestSimulationOutputsAreCurrent(t *testing.T) {
 		{"report.md", []string{"report", plan, "-f", "markdown"}},
 		{"report.html", []string{"report", plan, "-f", "html"}},
 		{"report.json", []string{"report", plan, "-f", "json"}},
+		{"brief.txt", []string{"report", plan, "-f", "brief"}},
 		{"report-revised.txt", []string{"report", revised, "--no-color"}},
 		{"diff.txt", []string{"diff", plan, revised}},
 		{"diff.md", []string{"diff", plan, revised, "-f", "markdown"}},

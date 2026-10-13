@@ -46,59 +46,6 @@
   },
   "findings": [
     {
-      "address": "aws_sqs_queue.removed",
-      "type": "aws_sqs_queue",
-      "action": "delete",
-      "provider": "aws",
-      "account": "unresolved (alias: default)",
-      "account_source": "unresolved",
-      "stateful": false,
-      "reason": "delete_because_no_resource_config",
-      "reason_text": "Removed from config",
-      "index_shift": false,
-      "drift_also": false
-    },
-    {
-      "address": "aws_sns_topic.switched",
-      "type": "aws_sns_topic",
-      "action": "delete",
-      "provider": "aws",
-      "account": "unresolved (alias: default)",
-      "account_source": "unresolved",
-      "stateful": false,
-      "reason": "delete_because_wrong_repetition",
-      "reason_text": "Resource switched between count/for_each/single",
-      "index_shift": true,
-      "warning": "count/for_each was added or removed on this resource; instances are being destroyed rather than moved",
-      "drift_also": false
-    },
-    {
-      "address": "aws_instance.counted[2]",
-      "type": "aws_instance",
-      "action": "delete",
-      "provider": "aws",
-      "account": "unresolved (alias: default)",
-      "account_source": "unresolved",
-      "stateful": false,
-      "reason": "delete_because_count_index",
-      "reason_text": "count shrank; index 2 no longer exists",
-      "index_shift": false,
-      "drift_also": false
-    },
-    {
-      "address": "aws_iam_user.keyed[\"bob\"]",
-      "type": "aws_iam_user",
-      "action": "delete",
-      "provider": "aws",
-      "account": "unresolved (alias: default)",
-      "account_source": "unresolved",
-      "stateful": false,
-      "reason": "delete_because_each_key",
-      "reason_text": "for_each key removed: bob",
-      "index_shift": false,
-      "drift_also": false
-    },
-    {
       "address": "module.gone.aws_s3_bucket.data",
       "type": "aws_s3_bucket",
       "action": "delete",
@@ -109,20 +56,9 @@
       "reason": "delete_because_no_module",
       "reason_text": "Whole module removed or its call changed",
       "index_shift": false,
-      "drift_also": false
-    },
-    {
-      "address": "aws_lambda_function.orphan",
-      "type": "aws_lambda_function",
-      "action": "delete",
-      "provider": "aws",
-      "account": "unresolved (alias: default)",
-      "account_source": "unresolved",
-      "stateful": false,
-      "reason": "delete_because_no_move_target",
-      "reason_text": "Moved to an address that no longer exists",
-      "index_shift": false,
-      "drift_also": false
+      "drift_also": false,
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "aws_db_instance.main",
@@ -138,20 +74,18 @@
         "storage_encrypted"
       ],
       "index_shift": false,
-      "drift_also": false
-    },
-    {
-      "address": "aws_instance.tainted",
-      "type": "aws_instance",
-      "action": "replace",
-      "provider": "aws",
-      "account": "unresolved (alias: default)",
-      "account_source": "unresolved",
-      "stateful": false,
-      "reason": "replace_because_tainted",
-      "reason_text": "Resource is tainted",
-      "index_shift": false,
-      "drift_also": false
+      "drift_also": false,
+      "dependents": [],
+      "safeguards": [
+        {
+          "name": "deletion_protection",
+          "state": "unknown"
+        },
+        {
+          "name": "final_snapshot",
+          "state": "unknown"
+        }
+      ]
     },
     {
       "address": "aws_ebs_volume.requested",
@@ -164,7 +98,100 @@
       "reason": "replace_by_request",
       "reason_text": "Replacement requested with -replace",
       "index_shift": false,
-      "drift_also": false
+      "drift_also": false,
+      "dependents": [],
+      "safeguards": []
+    },
+    {
+      "address": "aws_sqs_queue.removed",
+      "type": "aws_sqs_queue",
+      "action": "delete",
+      "provider": "aws",
+      "account": "unresolved (alias: default)",
+      "account_source": "unresolved",
+      "stateful": false,
+      "reason": "delete_because_no_resource_config",
+      "reason_text": "Removed from config",
+      "index_shift": false,
+      "drift_also": false,
+      "dependents": [],
+      "safeguards": []
+    },
+    {
+      "address": "aws_sns_topic.switched",
+      "type": "aws_sns_topic",
+      "action": "delete",
+      "provider": "aws",
+      "account": "unresolved (alias: default)",
+      "account_source": "unresolved",
+      "stateful": false,
+      "reason": "delete_because_wrong_repetition",
+      "reason_text": "Resource switched between count/for_each/single",
+      "index_shift": true,
+      "warning": "count/for_each was added or removed on this resource; instances are being destroyed rather than moved",
+      "drift_also": false,
+      "dependents": [],
+      "safeguards": []
+    },
+    {
+      "address": "aws_instance.counted[2]",
+      "type": "aws_instance",
+      "action": "delete",
+      "provider": "aws",
+      "account": "unresolved (alias: default)",
+      "account_source": "unresolved",
+      "stateful": false,
+      "reason": "delete_because_count_index",
+      "reason_text": "count shrank; index 2 no longer exists",
+      "index_shift": false,
+      "drift_also": false,
+      "dependents": [],
+      "safeguards": []
+    },
+    {
+      "address": "aws_iam_user.keyed[\"bob\"]",
+      "type": "aws_iam_user",
+      "action": "delete",
+      "provider": "aws",
+      "account": "unresolved (alias: default)",
+      "account_source": "unresolved",
+      "stateful": false,
+      "reason": "delete_because_each_key",
+      "reason_text": "for_each key removed: bob",
+      "index_shift": false,
+      "drift_also": false,
+      "dependents": [],
+      "safeguards": []
+    },
+    {
+      "address": "aws_lambda_function.orphan",
+      "type": "aws_lambda_function",
+      "action": "delete",
+      "provider": "aws",
+      "account": "unresolved (alias: default)",
+      "account_source": "unresolved",
+      "stateful": false,
+      "reason": "delete_because_no_move_target",
+      "reason_text": "Moved to an address that no longer exists",
+      "index_shift": false,
+      "drift_also": false,
+      "dependents": [],
+      "safeguards": []
+    },
+    {
+      "address": "aws_instance.tainted",
+      "type": "aws_instance",
+      "action": "replace",
+      "provider": "aws",
+      "account": "unresolved (alias: default)",
+      "account_source": "unresolved",
+      "stateful": false,
+      "reason": "replace_because_tainted",
+      "reason_text": "Resource is tainted",
+      "index_shift": false,
+      "drift_also": false,
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "aws_lb.triggered",
@@ -177,7 +204,9 @@
       "reason": "replace_by_triggers",
       "reason_text": "replace_triggered_by dependency changed",
       "index_shift": false,
-      "drift_also": false
+      "drift_also": false,
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "aws_eip.mystery",
@@ -190,7 +219,9 @@
       "reason": "some_future_reason",
       "reason_text": "some_future_reason",
       "index_shift": false,
-      "drift_also": false
+      "drift_also": false,
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "aws_instance.create_before_destroy",
@@ -206,7 +237,9 @@
         "ami"
       ],
       "index_shift": false,
-      "drift_also": false
+      "drift_also": false,
+      "dependents": [],
+      "safeguards": []
     }
   ],
   "drift": [],
@@ -263,6 +296,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "destroy"
     },
@@ -284,6 +318,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "destroy"
     },
@@ -305,6 +340,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [],
       "parent": "aws_instance.counted",
       "key": "2",
       "wave": 1,
@@ -328,6 +364,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [],
       "parent": "aws_iam_user.keyed",
       "key": "bob",
       "wave": 1,
@@ -351,6 +388,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "destroy"
     },
@@ -372,6 +410,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "destroy"
     },
@@ -403,6 +442,7 @@
         }
       ],
       "known_after_apply": 0,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -431,6 +471,7 @@
         }
       ],
       "known_after_apply": 0,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -459,6 +500,7 @@
         }
       ],
       "known_after_apply": 0,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -487,6 +529,7 @@
         }
       ],
       "known_after_apply": 0,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -515,6 +558,7 @@
         }
       ],
       "known_after_apply": 0,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -547,6 +591,7 @@
         }
       ],
       "known_after_apply": 0,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     }

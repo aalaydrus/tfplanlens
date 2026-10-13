@@ -115,6 +115,9 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 7,
+      "dependents": [
+        "terraform_data.app"
+      ],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -134,6 +137,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 7,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -160,6 +164,7 @@
         }
       ],
       "known_after_apply": 1,
+      "dependents": [],
       "wave": 2,
       "wave_phase": "apply"
     }

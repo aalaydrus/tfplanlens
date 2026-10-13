@@ -49,7 +49,9 @@
         "content"
       ],
       "index_shift": false,
-      "drift_also": false
+      "drift_also": false,
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "local_file.root",
@@ -65,7 +67,9 @@
         "content"
       ],
       "index_shift": false,
-      "drift_also": false
+      "drift_also": false,
+      "dependents": [],
+      "safeguards": []
     },
     {
       "address": "module.net.local_file.inner",
@@ -81,7 +85,9 @@
         "content"
       ],
       "index_shift": false,
-      "drift_also": false
+      "drift_also": false,
+      "dependents": [],
+      "safeguards": []
     }
   ],
   "drift": [],
@@ -161,6 +167,7 @@
         }
       ],
       "known_after_apply": 7,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -193,6 +200,7 @@
         }
       ],
       "known_after_apply": 7,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -225,6 +233,7 @@
         }
       ],
       "known_after_apply": 7,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     }

@@ -45,7 +45,13 @@ Add `--tfapply-account-id <12 digits>` when you know which account
 tfplanlens report plan.json -f markdown -o report.md   # for a PR comment
 tfplanlens report plan.json -f html -o report.html     # one self-contained file
 tfplanlens report plan.json -f json                    # for further processing
+tfplanlens report plan.json -f brief --top 10          # short and ranked: start here if tokens matter
 ```
+
+`-f brief` is the cheapest way to review: only the changes that need attention,
+most important first, each with the reasons. The first line says how many
+qualified; raise `--top` (or `--top 0`) if some were left out. Use the full
+`text` report when you need drift, accounts and waves too.
 
 ## 4. Read it in this order
 

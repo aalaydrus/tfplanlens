@@ -23,6 +23,50 @@ type DepGraph struct {
 	// not expand locals, so a dependency that is only reachable through one is
 	// not in Deps.
 	LocalRefs int
+
+	rev map[string][]string // reverse of Deps, built on first use by Dependents
+}
+
+// Dependents returns the managed resources (configuration addresses, no
+// instance keys) that depend on addr, directly or through other resources,
+// sorted. Data sources are not listed. It only knows the references in this
+// plan's configuration: other stacks and dependencies that pass through a
+// local value are not seen, so the result is a lower bound.
+func (g *DepGraph) Dependents(addr string) []string {
+	if g == nil {
+		return []string{}
+	}
+	if g.rev == nil {
+		g.rev = map[string][]string{}
+		for node, deps := range g.Deps {
+			for _, d := range deps {
+				g.rev[d] = append(g.rev[d], node)
+			}
+		}
+	}
+	seen := map[string]bool{addr: true}
+	queue := []string{addr}
+	out := []string{}
+	for len(queue) > 0 {
+		n := queue[0]
+		queue = queue[1:]
+		for _, d := range g.rev[n] {
+			if seen[d] {
+				continue
+			}
+			seen[d] = true
+			queue = append(queue, d) // a data source passes the dependency on
+			if !isDataNode(d) {
+				out = append(out, d)
+			}
+		}
+	}
+	sort.Strings(out)
+	return out
+}
+
+func isDataNode(node string) bool {
+	return strings.HasPrefix(node, "data.") || strings.Contains(node, ".data.")
 }
 
 type builder struct {

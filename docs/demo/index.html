@@ -59,8 +59,8 @@
   <p><a class="btn" href="https://github.com/aalaydrus/tfplanlens">View the repository on GitHub</a> &nbsp; <a href="reports.html">Browse the demo reports</a></p>
 
   <figure>
-    <img src="assets/html-report.png" alt="tfplanlens HTML report: Danger panel, summary tiles and a filterable table">
-    <figcaption>The HTML report: Danger panel, summary tiles, a filterable table. One self-contained file.</figcaption>
+    <img src="assets/html-report.png" alt="tfplanlens HTML report for an AWS example: a Danger side panel listing each delete or replace with what depends on it and deletion protection, beside summary tiles">
+    <figcaption>The HTML report for the orders-platform example: the Danger side panel (open by default, each resource expands from its name) beside the summary tiles and a filterable table. One self-contained file.</figcaption>
   </figure>
 
   <h2>try it in 30 seconds</h2>
@@ -77,22 +77,32 @@ tfplanlens report plan.json</code></pre>
 <span class="d">! REPLACE aws_dynamodb_table.orders [STATEFUL]</span>
     type: aws_dynamodb_table | target account: 123456789012 (source: allowed_account_ids)
     why: Attribute change forces replacement: range_key, hash_key
-<span class="d">! REPLACE aws_secretsmanager_secret_version.db</span>
-    why: Attribute change forces replacement: secret_string
+    used by 1+ resources in this plan: aws_iam_role_policy.worker
+    deletion protection is off
 <span class="d">! DELETE aws_sqs_queue.orders["bulk"]</span>
     why: for_each key removed: bulk
-    WARNING: for_each key removed while sibling instances change (possible key rename: …)</code></pre>
+    used by 3+ resources in this plan: aws_iam_role_policy.worker, aws_sns_topic_subscription.audit, +1 more
+    WARNING: for_each key removed while sibling instances change (possible key rename: …)
+<span class="d">! REPLACE aws_secretsmanager_secret_version.db</span>
+    why: Attribute change forces replacement: secret_string</code></pre>
   <p>That is real output from the <a href="reports/orders-platform.html">orders-platform example</a>
   (a made-up stack on an AWS emulator, with dummy account IDs).</p>
 
   <div class="grid">
-    <div class="card"><h3>Danger first</h3>
-      <p>Every delete and replace with the reason, a STATEFUL badge, and a warning when a
+    <div class="card"><h3>Danger first, ranked</h3>
+      <p>Every delete and replace with the reason and a STATEFUL badge, ranked: stateful and
+      unprotected first, then by how many resources depend on it. A warning when a
       <code>count</code> or <code>for_each</code> change looks like an accidental shift.</p></div>
+    <div class="card"><h3>Safeguards</h3>
+      <p>Whether deletion protection is on and whether a final snapshot is taken, for the types where
+      the plan says. Otherwise "unknown", never a guess.</p></div>
     <div class="card"><h3>Which account</h3>
       <p>Where <code>terraform apply</code> runs versus where each resource lands, and how that was decided.</p></div>
     <div class="card"><h3>Short</h3>
       <p>Long values become the lines that changed. Unknown values are counted, not printed.</p></div>
+    <div class="card"><h3>For review agents</h3>
+      <p><code>-f brief</code> lists only the top N changes that need attention, ranked, with the reasons:
+      about 1 KB where the text report is 5 KB, on the orders-platform example.</p></div>
     <div class="card"><h3>And also</h3>
       <p>Drift, moves, imports, apply waves, a diff between two plans, several plans in one report,
       and an interactive <code>tui</code>.</p></div>
@@ -116,7 +126,8 @@ tfplanlens report plan.json -f markdown -o report.md    <span class="c"># a PR c
 tfplanlens report plan.json --fail-on delete,replace:aws_db_instance   <span class="c"># exit 1 in CI</span>
 tfplanlens report a.json b.json                         <span class="c"># several plans, one report</span>
 tfplanlens diff before.json after.json                  <span class="c"># what the new push changed</span>
-tfplanlens tui plan.json                                <span class="c"># explore interactively</span></code></pre>
+tfplanlens tui plan.json                                <span class="c"># explore interactively</span>
+tfplanlens report plan.json -f brief --top 10          <span class="c"># short and ranked, for a reviewer or an agent</span></code></pre>
   <p>Settings such as the apply account, default formats and <code>--fail-on</code> rules go in an optional
   <a href="https://github.com/aalaydrus/tfplanlens/blob/main/tfplanlens.config.yaml"><code>tfplanlens.config.yaml</code></a>.</p>
 
@@ -138,6 +149,9 @@ tfplanlens tui plan.json                                <span class="c"># explor
       <a href="https://github.com/aalaydrus/tfplanlens/blob/main/docs/SECRETS.md">the docs list what is and is not hidden</a>.
       Plan files themselves contain secrets in plain text: never commit one.</li>
     <li>The tool reads one plan (or several you give it). It cannot see who else uses a resource, or which commit caused a change.</li>
+    <li>"Used by N+" is a lower bound: other stacks, and references that pass through a local value,
+      are not in the plan. The deletion protection and final snapshot lines exist only for DynamoDB tables and RDS
+      instances and clusters, and the RDS attribute names have not yet been checked against a real plan.</li>
     <li>Apply waves are a lower bound: <code>replace_triggered_by</code> and <code>local.*</code> references are not in the plan JSON.</li>
     <li>It has been tested on real Terraform plans, but the AWS examples come from an emulator, not a real account.</li>
     <li>No releases yet; install from a clone.</li>

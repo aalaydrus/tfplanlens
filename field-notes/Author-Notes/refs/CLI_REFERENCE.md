@@ -1,7 +1,7 @@
 # CLI reference
 
 ```
-tfplanlens report <plan.json|-> [more plans...]   [-f text|html|markdown|json]... [-o file]
+tfplanlens report <plan.json|-> [more plans...]   [-f text|html|markdown|json|brief]... [--top N] [-o file]
               [-c config] [--fail-on rules] [--tfapply-account-id ID] [--account alias=id]... [--no-color]
 tfplanlens diff <old.json> <new.json>   [-f text|markdown|json] [-o file] [-c config]
               [--fail-on-new-danger] [--tfapply-account-id ID] [--account alias=id]...

@@ -17,9 +17,9 @@
 
 | Action | Resource | Why | Target account |
 |---|---|---|---|
-| **REPLACE** | `aws_dynamodb_table.orders` **STATEFUL** | `Attribute change forces replacement: range_key, hash_key` | `123456789012` (source: allowed_account_ids) |
+| **REPLACE** | `aws_dynamodb_table.orders` **STATEFUL** | `Attribute change forces replacement: range_key, hash_key`<br>`used by 1+ resources in this plan: aws_iam_role_policy.worker`<br>`deletion protection is off` | `123456789012` (source: allowed_account_ids) |
+| **DELETE** | `aws_sqs_queue.orders["bulk"]` | `for_each key removed: bulk`<br>**WARNING:** `for_each key removed while sibling instances change (possible key rename: aws_sqs_queue.orders["audit"], aws_sqs_queue.orders["standard"])`<br>`used by 3+ resources in this plan: aws_iam_role_policy.worker, aws_sns_topic_subscription.audit, +1 more` | `123456789012` (source: allowed_account_ids) |
 | **REPLACE** | `aws_secretsmanager_secret_version.db` | `Attribute change forces replacement: secret_string` | `123456789012` (source: allowed_account_ids) |
-| **DELETE** | `aws_sqs_queue.orders["bulk"]` | `for_each key removed: bulk`<br>**WARNING:** `for_each key removed while sibling instances change (possible key rename: aws_sqs_queue.orders["audit"], aws_sqs_queue.orders["standard"])` | `123456789012` (source: allowed_account_ids) |
 
 <details><summary><b>Drift</b>: 2 changed outside Terraform (0 high risk)</summary>
 

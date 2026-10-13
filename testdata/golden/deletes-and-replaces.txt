@@ -8,6 +8,17 @@ By type: aws_instance 3, aws_db_instance 1, aws_ebs_volume 1, aws_eip 1, aws_iam
 By module: root 11, module.gone 1
 
 == Danger ==
+! DELETE module.gone.aws_s3_bucket.data [STATEFUL]
+    type: aws_s3_bucket | target account: unresolved (alias: default) (source: unresolved)
+    why: Whole module removed or its call changed
+! REPLACE aws_db_instance.main [STATEFUL]
+    type: aws_db_instance | target account: unresolved (alias: default) (source: unresolved)
+    why: Attribute change forces replacement: storage_encrypted
+    deletion protection: unknown (not in the plan)
+    final snapshot: unknown (not in the plan)
+! REPLACE aws_ebs_volume.requested [STATEFUL]
+    type: aws_ebs_volume | target account: unresolved (alias: default) (source: unresolved)
+    why: Replacement requested with -replace
 ! DELETE aws_sqs_queue.removed
     type: aws_sqs_queue | target account: unresolved (alias: default) (source: unresolved)
     why: Removed from config
@@ -21,21 +32,12 @@ By module: root 11, module.gone 1
 ! DELETE aws_iam_user.keyed["bob"]
     type: aws_iam_user | target account: unresolved (alias: default) (source: unresolved)
     why: for_each key removed: bob
-! DELETE module.gone.aws_s3_bucket.data [STATEFUL]
-    type: aws_s3_bucket | target account: unresolved (alias: default) (source: unresolved)
-    why: Whole module removed or its call changed
 ! DELETE aws_lambda_function.orphan
     type: aws_lambda_function | target account: unresolved (alias: default) (source: unresolved)
     why: Moved to an address that no longer exists
-! REPLACE aws_db_instance.main [STATEFUL]
-    type: aws_db_instance | target account: unresolved (alias: default) (source: unresolved)
-    why: Attribute change forces replacement: storage_encrypted
 ! REPLACE aws_instance.tainted
     type: aws_instance | target account: unresolved (alias: default) (source: unresolved)
     why: Resource is tainted
-! REPLACE aws_ebs_volume.requested [STATEFUL]
-    type: aws_ebs_volume | target account: unresolved (alias: default) (source: unresolved)
-    why: Replacement requested with -replace
 ! REPLACE aws_lb.triggered
     type: aws_lb | target account: unresolved (alias: default) (source: unresolved)
     why: replace_triggered_by dependency changed

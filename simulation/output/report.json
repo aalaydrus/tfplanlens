@@ -56,7 +56,36 @@
         "hash_key"
       ],
       "index_shift": false,
-      "drift_also": false
+      "drift_also": false,
+      "dependents": [
+        "aws_iam_role_policy.worker"
+      ],
+      "safeguards": [
+        {
+          "name": "deletion_protection",
+          "state": "off"
+        }
+      ]
+    },
+    {
+      "address": "aws_sqs_queue.orders[\"bulk\"]",
+      "type": "aws_sqs_queue",
+      "action": "delete",
+      "provider": "aws",
+      "account": "123456789012",
+      "account_source": "allowed_account_ids",
+      "stateful": false,
+      "reason": "delete_because_each_key",
+      "reason_text": "for_each key removed: bulk",
+      "index_shift": true,
+      "warning": "for_each key removed while sibling instances change (possible key rename: aws_sqs_queue.orders[\"audit\"], aws_sqs_queue.orders[\"standard\"])",
+      "drift_also": false,
+      "dependents": [
+        "aws_iam_role_policy.worker",
+        "aws_sns_topic_subscription.audit",
+        "aws_sns_topic_subscription.standard"
+      ],
+      "safeguards": []
     },
     {
       "address": "aws_secretsmanager_secret_version.db",
@@ -72,21 +101,9 @@
         "secret_string"
       ],
       "index_shift": false,
-      "drift_also": false
-    },
-    {
-      "address": "aws_sqs_queue.orders[\"bulk\"]",
-      "type": "aws_sqs_queue",
-      "action": "delete",
-      "provider": "aws",
-      "account": "123456789012",
-      "account_source": "allowed_account_ids",
-      "stateful": false,
-      "reason": "delete_because_each_key",
-      "reason_text": "for_each key removed: bulk",
-      "index_shift": true,
-      "warning": "for_each key removed while sibling instances change (possible key rename: aws_sqs_queue.orders[\"audit\"], aws_sqs_queue.orders[\"standard\"])",
-      "drift_also": false
+      "drift_also": false,
+      "dependents": [],
+      "safeguards": []
     }
   ],
   "drift": [
@@ -284,6 +301,9 @@
         }
       ],
       "known_after_apply": 13,
+      "dependents": [
+        "aws_iam_role_policy.worker"
+      ],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -302,7 +322,10 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "dependents": [
+        "aws_iam_role_policy.worker"
+      ]
     },
     {
       "address": "aws_iam_role_policy.worker",
@@ -320,6 +343,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 1,
+      "dependents": [],
       "wave": 2,
       "wave_phase": "apply"
     },
@@ -338,7 +362,11 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "dependents": [
+        "aws_s3_bucket_lifecycle_configuration.receipts",
+        "aws_s3_bucket_versioning.receipts"
+      ]
     },
     {
       "address": "aws_s3_bucket_lifecycle_configuration.receipts",
@@ -356,6 +384,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 2,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -374,7 +403,8 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "dependents": []
     },
     {
       "address": "aws_secretsmanager_secret.db",
@@ -399,6 +429,10 @@
         }
       ],
       "known_after_apply": 0,
+      "dependents": [
+        "aws_iam_role_policy.worker",
+        "aws_secretsmanager_secret_version.db"
+      ],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -433,6 +467,7 @@
         }
       ],
       "known_after_apply": 6,
+      "dependents": [],
       "wave": 2,
       "wave_phase": "apply"
     },
@@ -451,7 +486,11 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "dependents": [
+        "aws_sns_topic_subscription.audit",
+        "aws_sns_topic_subscription.standard"
+      ]
     },
     {
       "address": "aws_sns_topic_subscription.audit",
@@ -469,6 +508,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 7,
+      "dependents": [],
       "wave": 2,
       "wave_phase": "apply"
     },
@@ -487,7 +527,8 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "dependents": []
     },
     {
       "address": "aws_sqs_queue.dlq",
@@ -504,7 +545,13 @@
       "import": false,
       "removed_from_state_only": false,
       "attrs": [],
-      "known_after_apply": 0
+      "known_after_apply": 0,
+      "dependents": [
+        "aws_iam_role_policy.worker",
+        "aws_sns_topic_subscription.audit",
+        "aws_sns_topic_subscription.standard",
+        "aws_sqs_queue.orders"
+      ]
     },
     {
       "address": "aws_sqs_queue.orders[\"audit\"]",
@@ -522,6 +569,11 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 10,
+      "dependents": [
+        "aws_iam_role_policy.worker",
+        "aws_sns_topic_subscription.audit",
+        "aws_sns_topic_subscription.standard"
+      ],
       "parent": "aws_sqs_queue.orders",
       "key": "audit",
       "wave": 1,
@@ -545,6 +597,11 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [
+        "aws_iam_role_policy.worker",
+        "aws_sns_topic_subscription.audit",
+        "aws_sns_topic_subscription.standard"
+      ],
       "parent": "aws_sqs_queue.orders",
       "key": "bulk",
       "wave": 1,
@@ -566,6 +623,11 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 0,
+      "dependents": [
+        "aws_iam_role_policy.worker",
+        "aws_sns_topic_subscription.audit",
+        "aws_sns_topic_subscription.standard"
+      ],
       "parent": "aws_sqs_queue.orders",
       "key": "priority"
     },
@@ -592,6 +654,11 @@
         }
       ],
       "known_after_apply": 0,
+      "dependents": [
+        "aws_iam_role_policy.worker",
+        "aws_sns_topic_subscription.audit",
+        "aws_sns_topic_subscription.standard"
+      ],
       "parent": "aws_sqs_queue.orders",
       "key": "standard",
       "wave": 1,
@@ -618,6 +685,7 @@
         }
       ],
       "known_after_apply": 1,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     }

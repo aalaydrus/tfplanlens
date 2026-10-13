@@ -15,7 +15,7 @@ import (
 var update = flag.Bool("update", false, "rewrite golden files in testdata/golden")
 
 // Formats covered by golden files (SPEC section 7); html has its own checks.
-var goldenFormats = map[string]string{"text": "txt", "markdown": "md", "json": "json"}
+var goldenFormats = map[string]string{"text": "txt", "markdown": "md", "json": "json", "brief": "brief.txt"}
 
 type goldenCase struct {
 	name string   // golden file stem
@@ -301,5 +301,48 @@ func TestDangerBeforeAnyChangeListing(t *testing.T) {
 	}
 	if checked < 8 {
 		t.Errorf("only %d plans with findings checked", checked)
+	}
+}
+
+func TestBriefFormatListsRankedItemsAndHonoursTop(t *testing.T) {
+	const dir = "../../simulation/"
+	plan := dir + "assets/input/plan.json"
+	cfg := "--config=" + dir + "tfplanlens.config.yaml"
+	t.Setenv(envApplyAccount, "")
+
+	code, out, errs := runCLI("report", plan, "-f", "brief", "--top", "2", cfg)
+	if code != exitOK {
+		t.Fatalf("exit %d: %s", code, errs)
+	}
+	for _, want := range []string{"showing 2 of 5 needing attention", "1. REPLACE aws_dynamodb_table.orders [STATEFUL]", `2. DELETE aws_sqs_queue.orders["bulk"]`, "3 more not shown"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("missing %q in:\n%s", want, out)
+		}
+	}
+	if strings.Contains(out, "3. ") {
+		t.Errorf("--top 2 printed a third item:\n%s", out)
+	}
+	if _, all, _ := runCLI("report", plan, "-f", "brief", "--top", "0", cfg); !strings.Contains(all, "5. UPDATE aws_secretsmanager_secret.db") {
+		t.Errorf("--top 0 must list everything:\n%s", all)
+	}
+}
+
+func TestTopOnlyAppliesToBriefAndMustBeSane(t *testing.T) {
+	plan := plans + "basic-create.json"
+	if code, _, errs := runCLI("report", plan, "--top", "3"); code != exitError || !strings.Contains(errs, "--top only applies to -f brief") {
+		t.Errorf("--top with the default format: exit %d, %q", code, errs)
+	}
+	if code, _, errs := runCLI("report", plan, "-f", "brief", "--top", "-1"); code != exitError || !strings.Contains(errs, "--top must be") {
+		t.Errorf("--top -1: exit %d, %q", code, errs)
+	}
+	if code, out, _ := runCLI("report", plan, "-f", "brief"); code != exitOK || !strings.Contains(out, "Nothing needs attention") {
+		t.Errorf("a plan with nothing to flag: exit %d\n%s", code, out)
+	}
+}
+
+func TestBriefStillHonoursFailOn(t *testing.T) {
+	code, out, _ := runCLI("report", plans+"deletes-and-replaces.json", "-f", "brief", "--fail-on", "delete")
+	if code != exitFailOn || !strings.Contains(out, "tfplanlens brief") {
+		t.Errorf("exit %d, brief written: %v", code, strings.Contains(out, "tfplanlens brief"))
 	}
 }

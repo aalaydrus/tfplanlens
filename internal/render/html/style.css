@@ -42,7 +42,12 @@ h2 { font-size: 15px; margin: 0 0 8px; }
 .tile span { color: var(--muted); font-size: 12px; }
 .a-create { color: var(--create); } .a-update { color: var(--update); } .a-replace { color: var(--replace); }
 .a-delete { color: var(--delete); } .a-read { color: var(--read); } .a-no-op { color: var(--no-op); } .a-forget { color: var(--forget); }
+.danger-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+.danger-head h2 { margin: 0; }
+#danger[hidden] { display: none; }
 .finding { padding: 8px 0; border-top: 1px solid var(--danger-line); }
+.finding summary { cursor: pointer; overflow-wrap: anywhere; }
+.finding[open] summary { margin-bottom: 4px; }
 .finding:first-of-type { border-top: 0; }
 .finding .why { margin: 2px 0 0 0; color: var(--text); }
 .finding .meta { color: var(--muted); font-size: 12px; }
@@ -91,4 +96,12 @@ details.full > pre { max-height: 360px; overflow: auto; border: 1px solid var(--
   tr.group { display: block; }
   tr.group td { display: block; }
 }
-@media print { #drawer, .controls, #theme { display: none; } }
+@media (min-width: 1100px) {
+  #danger.docked { position: fixed; top: 0; right: 0; bottom: 0; width: 400px; margin: 0; overflow: auto; z-index: 5; border-width: 0 0 0 1px; border-radius: 0; box-shadow: -8px 0 24px rgba(0, 0, 0, .15); }
+  body.danger-open header { padding-right: 424px; }
+  body.danger-open main { max-width: none; margin: 0; padding-right: 424px; }
+}
+@media print {
+  #danger.docked { position: static; width: auto; box-shadow: none; }
+  body.danger-open header, body.danger-open main { padding-right: 24px; }
+  #danger-toggle, #danger-all, #danger-close { display: none; } #drawer, .controls, #theme { display: none; } }

@@ -10,13 +10,16 @@ By module: root 10
 ! REPLACE aws_dynamodb_table.orders [STATEFUL]
     type: aws_dynamodb_table | target account: 123456789012 (source: allowed_account_ids)
     why: Attribute change forces replacement: range_key, hash_key
-! REPLACE aws_secretsmanager_secret_version.db
-    type: aws_secretsmanager_secret_version | target account: 123456789012 (source: allowed_account_ids)
-    why: Attribute change forces replacement: secret_string
+    used by 1+ resources in this plan: aws_iam_role_policy.worker
+    deletion protection is off
 ! DELETE aws_sqs_queue.orders["bulk"]
     type: aws_sqs_queue | target account: 123456789012 (source: allowed_account_ids)
     why: for_each key removed: bulk
+    used by 3+ resources in this plan: aws_iam_role_policy.worker, aws_sns_topic_subscription.audit, +1 more
     WARNING: for_each key removed while sibling instances change (possible key rename: aws_sqs_queue.orders["audit"], a…
+! REPLACE aws_secretsmanager_secret_version.db
+    type: aws_secretsmanager_secret_version | target account: 123456789012 (source: allowed_account_ids)
+    why: Attribute change forces replacement: secret_string
 
 == Drift ==
 ~ aws_iam_role.worker

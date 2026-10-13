@@ -173,6 +173,14 @@ func danger(w *writer, a *analyze.Analysis) {
 		if f.IndexShift {
 			why += "<br>**WARNING:** " + cell(code(f.Warning))
 		}
+		if d := analyze.DependentsText(f.Dependents); d != "" {
+			why += "<br>" + cell(code(d))
+		}
+		for _, sg := range f.Safeguards {
+			if t := analyze.SafeguardText(sg); t != "" {
+				why += "<br>" + cell(code(t))
+			}
+		}
 		if f.DriftAlso {
 			why += "<br>**HIGH RISK:** also drifted outside Terraform"
 		}

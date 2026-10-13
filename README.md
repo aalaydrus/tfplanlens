@@ -4,7 +4,7 @@ Read a Terraform plan the way a reviewer needs to: deletes and replaces first, w
 
 It works **offline** on the JSON from `terraform show -json`: no AWS credentials, no Terraform binary, no network, no LLM. Output is deterministic. Values Terraform marks sensitive are never printed, and secret-looking values it does not mark are hidden too (best effort: [what is and is not hidden](docs/SECRETS.md)).
 
-![tfplanlens HTML report: Danger panel, summary tiles and a filterable table](docs/readme/html-report.png)
+![tfplanlens HTML report: a Danger side panel next to summary tiles and a filterable table](docs/readme/html-report.png)
 
 **Where to start:** open **Quickstart** below (about 30 seconds), or look at a finished example in [`simulation/`](simulation/rundown/EXAMPLE_RUNDOWN.md) without installing anything.
 
@@ -25,7 +25,7 @@ tfplanlens report plan.json
 <details>
 <summary><b>What you get</b></summary>
 
-- **Danger first**: every delete and replace with why, a STATEFUL badge, and a warning when a `count`/`for_each` change looks like an accidental shift.
+- **Danger first, ranked**: every delete and replace with why, a STATEFUL badge, what depends on it (a lower bound), deletion protection and final snapshot where the plan says, and a warning when a `count`/`for_each` change looks like an accidental shift. Stateful and unprotected come first, then by dependents.
 - **Which account**: where `terraform apply` runs vs where each resource lands, and how that was decided.
 - **Short**: long values become the lines that changed; unknown values are counted, not printed.
 - **Also**: drift, moves, imports, apply waves, and a diff between two plans.
@@ -42,6 +42,7 @@ tfplanlens report plan.json --fail-on delete,replace:aws_db_instance   # exit 1 
 tfplanlens report a.json b.json                         # several plans, one report
 tfplanlens diff before.json after.json                  # what the new push changed
 tfplanlens tui plan.json                                # explore interactively
+tfplanlens report plan.json -f brief --top 10             # short and ranked, for a reviewer or a code review agent
 ```
 
 Settings (apply account, default formats, `--fail-on` rules) go in an optional [`tfplanlens.config.yaml`](tfplanlens.config.yaml).

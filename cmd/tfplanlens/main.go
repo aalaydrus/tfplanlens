@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"runtime/debug"
+	"slices"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -15,6 +16,7 @@ import (
 	"github.com/aalaydrus/tfplanlens/internal/config"
 	"github.com/aalaydrus/tfplanlens/internal/diff"
 	"github.com/aalaydrus/tfplanlens/internal/plan"
+	"github.com/aalaydrus/tfplanlens/internal/render/brief"
 	htmlrender "github.com/aalaydrus/tfplanlens/internal/render/html"
 	"github.com/aalaydrus/tfplanlens/internal/render/jsonout"
 	"github.com/aalaydrus/tfplanlens/internal/render/markdown"
@@ -35,6 +37,7 @@ const (
 
 type reportOptions struct {
 	formats      []string
+	top          int
 	out          string
 	config       string
 	failOn       string
@@ -151,7 +154,8 @@ tfapply_account_id and accounts: in the config file to fill in the rest.`,
 		},
 	}
 	f := cmd.Flags()
-	f.StringSliceVarP(&o.formats, "format", "f", nil, "text, html, markdown or json; repeatable (default text)")
+	f.StringSliceVarP(&o.formats, "format", "f", nil, "text, html, markdown, json or brief; repeatable (default text)")
+	f.IntVar(&o.top, "top", 10, "with -f brief: how many changes to list, most important first (0 for all)")
 	f.StringVarP(&o.out, "out", "o", "", "write to this file instead of stdout")
 	f.StringVarP(&o.config, "config", "c", "", "config file (default ./"+config.DefaultPath+" if present)")
 	f.StringVar(&o.failOn, "fail-on", "", "exit 1 when a rule matches: delete, replace, drift, unresolved, or kind:type, comma-separated")
@@ -200,10 +204,16 @@ func runReport(cmd *cobra.Command, paths []string, o *reportOptions) error {
 	}
 	for _, f := range formats {
 		switch f {
-		case "text", "json", "markdown", "html":
+		case "text", "json", "markdown", "html", "brief":
 		default:
-			return fmt.Errorf("unsupported --format %q (want text, html, markdown or json)", f)
+			return fmt.Errorf("unsupported --format %q (want text, html, markdown, json or brief)", f)
 		}
+	}
+	if o.top < 0 {
+		return errors.New("--top must be 0 (all) or more")
+	}
+	if cmd.Flags().Changed("top") && !slices.Contains(formats, "brief") {
+		return errors.New("--top only applies to -f brief")
 	}
 	if len(formats) > 1 && o.out != "" {
 		return errors.New("--out cannot be combined with several --format values yet")
@@ -246,6 +256,8 @@ func runReport(cmd *cobra.Command, paths []string, o *reportOptions) error {
 			err = markdown.Render(w, a)
 		case "html":
 			err = htmlrender.Render(w, a)
+		case "brief":
+			err = brief.Render(w, a, o.top)
 		}
 		if file != nil {
 			if cerr := file.Close(); err == nil {

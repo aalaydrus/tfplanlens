@@ -94,6 +94,7 @@ func Analyze(p *plan.Plan, cfg *config.Config, opts *Options) *Analysis {
 		visible = append(visible, c)
 	}
 	waves, cycles, waveNotes, assigned := computeWaves(p)
+	dependents := map[string][]string{}
 	waves, renumber := hideIgnoredWaves(waves, ignored)
 	a.Waves, a.Cycles = waves, cycles
 	if len(cycles) == 0 {
@@ -155,6 +156,7 @@ func Analyze(p *plan.Plan, cfg *config.Config, opts *Options) *Analysis {
 			ImportID:      c.ImportID,
 			StateOnly:     c.Action == plan.ActionForget,
 			Attrs:         []Attr{},
+			Dependents:    dependentsOf(p, dependents, c.ConfigAddress),
 		}
 		if c.Action == plan.ActionDelete || c.Action == plan.ActionReplace {
 			ch.ReasonText = ReasonText(c.Reason, c.Index, c.HasIndex, c.ReplacePaths)
@@ -210,12 +212,13 @@ func Analyze(p *plan.Plan, cfg *config.Config, opts *Options) *Analysis {
 				Address: c.Address, Type: c.Type, Action: string(c.Action),
 				Provider: c.ProviderKey, Account: acct.label, AccountSource: acct.source, Stateful: ch.Stateful,
 				Reason: c.Reason, ReasonText: ch.ReasonText, ReplacePaths: c.ReplacePaths,
-				DriftAlso: driftAddr[c.Address],
+				DriftAlso: driftAddr[c.Address], Dependents: ch.Dependents, Safeguards: safeguardsFor(c),
 			}
 			f.IndexShift, f.Warning = indexShift(c, siblings)
 			a.Findings = append(a.Findings, f)
 		}
 	}
+	rankFindings(a.Findings)
 	for _, k := range sortedKeys(groups) {
 		a.Groups = append(a.Groups, *groups[k])
 	}
@@ -243,6 +246,35 @@ func Analyze(p *plan.Plan, cfg *config.Config, opts *Options) *Analysis {
 		a.Notices = append(a.Notices, fmt.Sprintf("Hid secret-looking values in %d place(s): they are not marked sensitive by Terraform, but have secret-like names, key material, tokens or NAME=value lines. Set redact_secrets: false in tfplanlens.config.yaml to show them.", a.Summary.Redacted))
 	}
 	return a
+}
+
+// dependentsOf returns the cached dependents of a configuration address.
+func dependentsOf(p *plan.Plan, cache map[string][]string, addr string) []string {
+	if d, ok := cache[addr]; ok {
+		return d
+	}
+	d := p.Graph.Dependents(addr) // never nil: JSON arrays are [] not null
+	cache[addr] = d
+	return d
+}
+
+// rankFindings puts the deletes and replaces that matter most first: stateful
+// resources, then those without deletion protection (a protected delete is one
+// AWS should refuse), then those with more resources depending on them. Ties
+// keep the plan's order.
+func rankFindings(fs []Finding) {
+	protected := func(f Finding) bool {
+		return hasSafeguard(f.Safeguards, SafeguardDeletionProtection, StateOn)
+	}
+	sort.SliceStable(fs, func(i, j int) bool {
+		if fs[i].Stateful != fs[j].Stateful {
+			return fs[i].Stateful
+		}
+		if protected(fs[i]) != protected(fs[j]) {
+			return !protected(fs[i])
+		}
+		return len(fs[i].Dependents) > len(fs[j].Dependents)
+	})
 }
 
 // active reports whether a change does something worth listing.

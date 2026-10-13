@@ -52,7 +52,9 @@
         "name"
       ],
       "index_shift": false,
-      "drift_also": false
+      "drift_also": false,
+      "dependents": [],
+      "safeguards": []
     }
   ],
   "drift": [],
@@ -193,6 +195,9 @@
         }
       ],
       "known_after_apply": 0,
+      "dependents": [
+        "aws_sns_topic_subscription.cross"
+      ],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -218,6 +223,7 @@
       "removed_from_state_only": false,
       "attrs": [],
       "known_after_apply": 6,
+      "dependents": [],
       "wave": 2,
       "wave_phase": "apply"
     },
@@ -244,6 +250,7 @@
         }
       ],
       "known_after_apply": 0,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -274,6 +281,9 @@
         }
       ],
       "known_after_apply": 0,
+      "dependents": [
+        "aws_sns_topic_subscription.cross"
+      ],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -304,6 +314,7 @@
         }
       ],
       "known_after_apply": 0,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -334,6 +345,7 @@
         }
       ],
       "known_after_apply": 1,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     },
@@ -378,6 +390,7 @@
         }
       ],
       "known_after_apply": 12,
+      "dependents": [],
       "wave": 1,
       "wave_phase": "apply"
     }

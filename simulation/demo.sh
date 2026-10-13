@@ -25,6 +25,9 @@ for spec in text:txt markdown:md html:html json:json; do
   "$bin" report "$plan" --format "${spec%%:*}" --no-color --out "output/report.${spec##*:}"
 done
 
+# The short, ranked list for a reviewer or a code review agent.
+"$bin" report "$plan" --format brief --out output/brief.txt
+
 # The revised change, and what changed between the two.
 "$bin" report "$revised" --no-color --out output/report-revised.txt
 "$bin" diff "$plan" "$revised" --out output/diff.txt
