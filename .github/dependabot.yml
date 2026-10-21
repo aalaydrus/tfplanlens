@@ -20,7 +20,7 @@ updates:
       prefix: "deps"
     # Newer golang.org/x/* releases require a newer Go, and `go mod tidy` then
     # raises the `go` line in go.mod (a bump of x/net and x/term took it from
-    # 1.23.0 to 1.26.0), which would stop anyone with an older Go from building
+    # 1.23.0 to 1.26.0, the minimum is now 1.25.0), which would stop anyone with an older Go from building
     # tfplanlens. Only patch releases of x/* are proposed. To move the minimum
     # Go version on purpose, bump `go` in go.mod yourself and drop this rule.
     # Ignore rules do not apply to Dependabot security updates, and a bump can

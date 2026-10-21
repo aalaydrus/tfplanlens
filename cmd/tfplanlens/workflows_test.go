@@ -83,8 +83,8 @@ func TestSmokeWorkflowNeverPushesToTheRepository(t *testing.T) {
 	}
 }
 
-// A bump of golang.org/x/net and x/term raised go.mod from "go 1.23.0" to
-// "go 1.26.0". Dependabot must not propose minor or major x/* updates, so the
+// Bumps of golang.org/x/net and x/term raised the go line in go.mod without anyone
+// deciding it. Dependabot must not propose minor or major x/* updates, so the
 // minimum Go version only changes when a person decides it.
 func TestDependabotDoesNotRaiseTheMinimumGoVersion(t *testing.T) {
 	var d struct {
@@ -116,9 +116,9 @@ func TestDependabotDoesNotRaiseTheMinimumGoVersion(t *testing.T) {
 // once raised go.mod to "go 1.25.0" and CI stayed green, because CI installs
 // whatever go.mod asks for. This test turns that into a red check. To move the
 // minimum on purpose, change it here, in README.md, SPEC.md, CONTRIBUTING.md
-// and the notes that name it (grep for "1.23").
+// and the notes that name it (grep for "1.25").
 func TestGoModKeepsTheMinimumGoVersion(t *testing.T) {
-	const want = "1.23.0"
+	const want = "1.25.0"
 	s := read(t, repoRoot+"/go.mod")
 	m := regexp.MustCompile(`(?m)^go (\S+)$`).FindStringSubmatch(s)
 	if m == nil || m[1] != want {

@@ -11,9 +11,12 @@ GOOS=windows go vet ./...        # CI also runs Windows
 go test ./cmd/... -run TestGolden -update   # regenerate goldens, then READ the diff
 ```
 
-Go 1.23 is the oldest Go we build with (`go.mod` says `go 1.23.0`), not the one we
-ship with: that Go is out of support. CI and releases use `go-version: stable`,
-and a `minimum Go` job proves 1.23 still builds (`GOTOOLCHAIN: local`). A dependency
+Go 1.25 is the oldest Go we build with (`go.mod` says `go 1.25.0`), not the one we
+ship with. CI and releases use `go-version: stable`, and a `minimum Go` job proves
+1.25 still builds (`GOTOOLCHAIN: local`). The minimum moved from 1.23 to 1.25 because
+`govulncheck` found GO-2026-5970 (an infinite loop on invalid input in
+`golang.org/x/text`, reachable through terraform-json and go-cty), fixed only in
+x/text v0.39.0, which needs Go 1.25. A dependency
 bump to `go 1.25.0` once stayed green; `TestGoModKeepsTheMinimumGoVersion`
 now fails it. To move the minimum on purpose, change that test and every doc that
 names "1.23".

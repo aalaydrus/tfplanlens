@@ -15,7 +15,7 @@ tfplanlens version
 ```
 
 If it is not installed, build it from a clone of the repo and put it on PATH:
-`go build -o tfplanlens ./cmd/tfplanlens` (Go 1.23+). There are no published
+`go build -o tfplanlens ./cmd/tfplanlens` (Go 1.25+). There are no published
 releases yet.
 
 ## 2. Get the plan as JSON

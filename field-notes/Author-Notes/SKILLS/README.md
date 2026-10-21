@@ -20,7 +20,7 @@ its tool's format. Point the agent at the file for its tool.
 
 The skills **call the `tfplanlens` binary**, which must be on the PATH of the
 agent's shell: build it from a clone (`go build -o tfplanlens ./cmd/tfplanlens`,
-Go 1.23+) or `go install ./cmd/tfplanlens`. There are no published releases.
+Go 1.25+) or `go install ./cmd/tfplanlens`. There are no published releases.
 
 - **Claude Code**: copy the three folders into `~/.claude/skills/` (all
   projects) or `<project>/.claude/skills/` (one project). Claude then loads a
