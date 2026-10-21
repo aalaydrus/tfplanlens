@@ -128,3 +128,29 @@ func TestGoModKeepsTheMinimumGoVersion(t *testing.T) {
 		t.Error("go.mod has a toolchain line; remove it so the minimum stays what the go line says")
 	}
 }
+
+// go.mod's go line is the oldest Go we support, not the one we build releases
+// with: that Go is out of support and gets no security fixes (an eMudhra CA
+// distrust fix, for one, only went into the two newest Go releases). Releases
+// are built with the current stable Go, and one CI job proves the minimum
+// still builds, without being allowed to download a newer Go.
+func TestReleasesAreBuiltWithASupportedGoAndTheMinimumStillBuilds(t *testing.T) {
+	rel := read(t, repoRoot+"/.github/workflows/release.yml")
+	if !strings.Contains(rel, "go-version: stable") || strings.Contains(rel, "go-version-file") {
+		t.Error("release.yml must build with go-version: stable, not the go line in go.mod")
+	}
+	ci := read(t, repoRoot+"/.github/workflows/ci.yml")
+	i := strings.Index(ci, "minimum-go:")
+	if i < 0 {
+		t.Fatal("ci.yml has no minimum-go job")
+	}
+	job := ci[i:]
+	if j := strings.Index(job, "\n  govulncheck:"); j > 0 {
+		job = job[:j]
+	}
+	for _, want := range []string{"GOTOOLCHAIN: local", "go-version-file: go.mod"} {
+		if !strings.Contains(job, want) {
+			t.Errorf("the minimum-go job must contain %q", want)
+		}
+	}
+}

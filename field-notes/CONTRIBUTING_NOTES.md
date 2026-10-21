@@ -11,8 +11,10 @@ GOOS=windows go vet ./...        # CI also runs Windows
 go test ./cmd/... -run TestGolden -update   # regenerate goldens, then READ the diff
 ```
 
-Go 1.23 (`go.mod` says `go 1.23.0`). CI installs whatever `go.mod` asks for, so
-a dependency bump to `go 1.25.0` once stayed green; `TestGoModKeepsTheMinimumGoVersion`
+Go 1.23 is the oldest Go we build with (`go.mod` says `go 1.23.0`), not the one we
+ship with: that Go is out of support. CI and releases use `go-version: stable`,
+and a `minimum Go` job proves 1.23 still builds (`GOTOOLCHAIN: local`). A dependency
+bump to `go 1.25.0` once stayed green; `TestGoModKeepsTheMinimumGoVersion`
 now fails it. To move the minimum on purpose, change that test and every doc that
 names "1.23".
 Dependencies are deliberately few: cobra, terraform-json, yaml.v3, go-difflib,
