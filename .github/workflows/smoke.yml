@@ -89,9 +89,11 @@ jobs:
       - name: Plan diff of the rereview pair
         run: |
           set -eu
-          # Two real plans of the same state (see scripts/smoke-plan.sh, v3).
-          before=$(ls testdata/plans/real/rereview-tf*.json)
-          after=$(ls testdata/plans/real/rereview-after-tf*.json)
+          # Two real plans of the same state (see scripts/smoke-plan.sh, v3). Each
+          # run writes plans named after the newest Terraform next to the committed
+          # ones, so take the newest of each: two names would be two arguments.
+          before=$(ls testdata/plans/real/rereview-tf*.json | sort -V | tail -1)
+          after=$(ls testdata/plans/real/rereview-after-tf*.json | sort -V | tail -1)
           mkdir -p docs/smoke/rereview-diff
           for spec in text:txt markdown:md json:json; do
             ./tfplanlens diff "$before" "$after" --format "${spec%%:*}" \

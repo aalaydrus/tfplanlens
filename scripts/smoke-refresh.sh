@@ -33,8 +33,8 @@ for plan in testdata/plans/real/*.json; do
 done
 
 # Two real plans of the same state (see scripts/smoke-plan.sh, v3).
-before=$(ls testdata/plans/real/rereview-tf*.json)
-after=$(ls testdata/plans/real/rereview-after-tf*.json)
+before=$(ls testdata/plans/real/rereview-tf*.json | sort -V | tail -1)
+after=$(ls testdata/plans/real/rereview-after-tf*.json | sort -V | tail -1)
 mkdir -p docs/smoke/rereview-diff
 for spec in text:txt markdown:md json:json; do
   ./tfplanlens diff "$before" "$after" --format "${spec%%:*}" \

@@ -154,3 +154,24 @@ func TestReleasesAreBuiltWithASupportedGoAndTheMinimumStillBuilds(t *testing.T) 
 		}
 	}
 }
+
+// The smoke workflow installs the newest Terraform, so every new patch release
+// writes plans such as rereview-tf1.16.6.json next to the committed
+// rereview-tf1.16.5.json. A bare glob then expands to two arguments and `diff`
+// fails (it did, on the first pull request after Terraform 1.16.6).
+func TestSmokeDiffPicksOneRereviewPlanPerSide(t *testing.T) {
+	for _, f := range []string{"/.github/workflows/smoke.yml", "/scripts/smoke-refresh.sh"} {
+		s := read(t, repoRoot+f)
+		for _, side := range []string{"rereview-tf*.json", "rereview-after-tf*.json"} {
+			line := ""
+			for _, l := range strings.Split(s, "\n") {
+				if strings.Contains(l, "ls testdata/plans/real/"+side) {
+					line = l
+				}
+			}
+			if line == "" || !strings.Contains(line, "| sort -V | tail -1") {
+				t.Errorf("%s: the %s glob must pick the newest single file (| sort -V | tail -1), got %q", f, side, line)
+			}
+		}
+	}
+}
