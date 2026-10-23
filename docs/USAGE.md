@@ -4,16 +4,14 @@ Install, every command, flag and setting. For the short version see the [README]
 
 ## Install
 
-tfplanlens is installed from a local clone; there are no published releases and no Homebrew formula.
+Download a binary for linux, macOS or Windows (amd64 or arm64) from the [Releases page](https://github.com/aalaydrus/tfplanlens/releases) and check it against `checksums.txt` (`sha256sum -c checksums.txt`), or install with Go 1.25 or newer:
 
 ```sh
-git clone https://github.com/aalaydrus/tfplanlens
-cd tfplanlens
-go install ./cmd/tfplanlens        # installs to $(go env GOPATH)/bin (or $GOBIN)
-tfplanlens version                 # e.g. "dev (8814cf7)": the git revision it was built from
+go install github.com/aalaydrus/tfplanlens/cmd/tfplanlens@v0.1.0   # installs to $(go env GOPATH)/bin (or $GOBIN)
+tfplanlens version                                                  # 0.1.0
 ```
 
-Make sure `$(go env GOPATH)/bin` is on your `PATH`. To update, `git pull` and run `go install ./cmd/tfplanlens` again. To build a binary in place instead: `go build -o tfplanlens ./cmd/tfplanlens`.
+Make sure `$(go env GOPATH)/bin` is on your `PATH`. There is no Homebrew formula yet. To work on tfplanlens, build from a clone: `git clone https://github.com/aalaydrus/tfplanlens && cd tfplanlens && go build -o tfplanlens ./cmd/tfplanlens` (`version` then prints `dev (8814cf7)`, the git revision).
 
 ## Commands and flags
 

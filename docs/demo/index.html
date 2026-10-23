@@ -64,9 +64,8 @@
   </figure>
 
   <h2>try it in 30 seconds</h2>
-<pre><code><span class="c"># Go 1.25+. There are no releases yet, so install from a clone.</span>
-git clone https://github.com/aalaydrus/tfplanlens &amp;&amp; cd tfplanlens
-go install ./cmd/tfplanlens
+<pre><code><span class="c"># Go 1.25+, or download a binary from the Releases page and check checksums.txt</span>
+go install github.com/aalaydrus/tfplanlens/cmd/tfplanlens@v0.1.0
 
 terraform plan -out plan.bin
 terraform show -json plan.bin &gt; plan.json
@@ -154,7 +153,7 @@ tfplanlens report plan.json -f brief --top 10          <span class="c"># short a
       instances and clusters, and the RDS attribute names have not yet been checked against a real plan.</li>
     <li>Apply waves are a lower bound: <code>replace_triggered_by</code> and <code>local.*</code> references are not in the plan JSON.</li>
     <li>It has been tested on real Terraform plans, but the AWS examples come from an emulator, not a real account.</li>
-    <li>No releases yet; install from a clone.</li>
+    <li>Early: v0.1.0 is the first release, so flags and output may still change.</li>
   </ul>
 
   <h2>learn more</h2>

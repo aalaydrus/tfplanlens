@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
 	"runtime/debug"
 	"slices"
 	"strings"
@@ -90,9 +91,17 @@ func versionString() string {
 	return formatVersion(version, info)
 }
 
+// pseudoVersion matches the version Go gives a commit that is not a tag, for
+// example v0.0.0-20261013125501-f9cb4cace98a.
+var pseudoVersion = regexp.MustCompile(`-\d{14}-[0-9a-f]{12}$`)
+
 func formatVersion(v string, info *debug.BuildInfo) string {
 	if v != "dev" || info == nil {
 		return v
+	}
+	// `go install ...@v0.1.0` stamps the module version, not the ldflag.
+	if mv := info.Main.Version; mv != "" && mv != "(devel)" && !pseudoVersion.MatchString(mv) && !strings.HasSuffix(mv, "+dirty") {
+		return strings.TrimPrefix(mv, "v")
 	}
 	var rev string
 	modified := false

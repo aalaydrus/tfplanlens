@@ -55,5 +55,6 @@ Start with what is irreversible: `delete`, and `replace:<type>` for each
 stateful type the team cares about. Tell the user a replace of a secret
 version (a password rotation) is routine and would trip a bare `replace` rule:
 scope replace rules by type. Do not add rules the user did not ask for.
-The tool has no published releases yet: the pipeline must build or provide the
-binary itself.
+The tool is released as binaries (Releases page, with `checksums.txt`) and via
+`go install github.com/aalaydrus/tfplanlens/cmd/tfplanlens@v0.1.0`: the pipeline
+must download and verify one, or build it.
