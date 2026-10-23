@@ -83,8 +83,8 @@ func TestSmokeWorkflowNeverPushesToTheRepository(t *testing.T) {
 	}
 }
 
-// A bump of golang.org/x/net and x/term raised go.mod from "go 1.23.0" to
-// "go 1.26.0". Dependabot must not propose minor or major x/* updates, so the
+// Bumps of golang.org/x/net and x/term raised the go line in go.mod without anyone
+// deciding it. Dependabot must not propose minor or major x/* updates, so the
 // minimum Go version only changes when a person decides it.
 func TestDependabotDoesNotRaiseTheMinimumGoVersion(t *testing.T) {
 	var d struct {
@@ -116,9 +116,9 @@ func TestDependabotDoesNotRaiseTheMinimumGoVersion(t *testing.T) {
 // once raised go.mod to "go 1.25.0" and CI stayed green, because CI installs
 // whatever go.mod asks for. This test turns that into a red check. To move the
 // minimum on purpose, change it here, in README.md, SPEC.md, CONTRIBUTING.md
-// and the notes that name it (grep for "1.23").
+// and the notes that name it (grep for "1.25").
 func TestGoModKeepsTheMinimumGoVersion(t *testing.T) {
-	const want = "1.23.0"
+	const want = "1.25.0"
 	s := read(t, repoRoot+"/go.mod")
 	m := regexp.MustCompile(`(?m)^go (\S+)$`).FindStringSubmatch(s)
 	if m == nil || m[1] != want {
@@ -126,5 +126,52 @@ func TestGoModKeepsTheMinimumGoVersion(t *testing.T) {
 	}
 	if regexp.MustCompile(`(?m)^toolchain `).MatchString(s) {
 		t.Error("go.mod has a toolchain line; remove it so the minimum stays what the go line says")
+	}
+}
+
+// go.mod's go line is the oldest Go we support, not the one we build releases
+// with: that Go is out of support and gets no security fixes (an eMudhra CA
+// distrust fix, for one, only went into the two newest Go releases). Releases
+// are built with the current stable Go, and one CI job proves the minimum
+// still builds, without being allowed to download a newer Go.
+func TestReleasesAreBuiltWithASupportedGoAndTheMinimumStillBuilds(t *testing.T) {
+	rel := read(t, repoRoot+"/.github/workflows/release.yml")
+	if !strings.Contains(rel, "go-version: stable") || strings.Contains(rel, "go-version-file") {
+		t.Error("release.yml must build with go-version: stable, not the go line in go.mod")
+	}
+	ci := read(t, repoRoot+"/.github/workflows/ci.yml")
+	i := strings.Index(ci, "minimum-go:")
+	if i < 0 {
+		t.Fatal("ci.yml has no minimum-go job")
+	}
+	job := ci[i:]
+	if j := strings.Index(job, "\n  govulncheck:"); j > 0 {
+		job = job[:j]
+	}
+	for _, want := range []string{"GOTOOLCHAIN: local", "go-version-file: go.mod"} {
+		if !strings.Contains(job, want) {
+			t.Errorf("the minimum-go job must contain %q", want)
+		}
+	}
+}
+
+// The smoke workflow installs the newest Terraform, so every new patch release
+// writes plans such as rereview-tf1.16.6.json next to the committed
+// rereview-tf1.16.5.json. A bare glob then expands to two arguments and `diff`
+// fails (it did, on the first pull request after Terraform 1.16.6).
+func TestSmokeDiffPicksOneRereviewPlanPerSide(t *testing.T) {
+	for _, f := range []string{"/.github/workflows/smoke.yml", "/scripts/smoke-refresh.sh"} {
+		s := read(t, repoRoot+f)
+		for _, side := range []string{"rereview-tf*.json", "rereview-after-tf*.json"} {
+			line := ""
+			for _, l := range strings.Split(s, "\n") {
+				if strings.Contains(l, "ls testdata/plans/real/"+side) {
+					line = l
+				}
+			}
+			if line == "" || !strings.Contains(line, "| sort -V | tail -1") {
+				t.Errorf("%s: the %s glob must pick the newest single file (| sort -V | tail -1), got %q", f, side, line)
+			}
+		}
 	}
 }

@@ -1,7 +1,6 @@
 package config
 
 import (
-	"os"
 	"path/filepath"
 	"testing"
 )
@@ -25,12 +24,7 @@ func TestParseRejectsUnknownKeys(t *testing.T) {
 }
 
 func TestLoadDefaultMissingIsEmptyButExplicitMissingFails(t *testing.T) {
-	// t.Chdir needs Go 1.24; go.mod targets 1.23.
-	old, _ := os.Getwd()
-	if err := os.Chdir(t.TempDir()); err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { os.Chdir(old) })
+	t.Chdir(t.TempDir())
 	if c, err := Load(""); err != nil || c == nil {
 		t.Errorf("default missing: %v", err)
 	}

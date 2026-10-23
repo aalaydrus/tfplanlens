@@ -29,8 +29,10 @@ Newest first. Details are in the PR descriptions and the files named.
   unverified.
 - **Dependents and ranking**: each delete or replace names what uses it; Danger
   is ordered stateful first, then by dependents.
-- **Go 1.23 kept on purpose** after a Dependabot bump raised `go.mod` to 1.25.0;
-  a test now guards it.
+- **Go minimum is 1.25.0, on purpose**: a vulnerability in `golang.org/x/text`
+  (GO-2026-5970) is fixed only in a release that needs it. CI and releases use
+  the current stable Go, a `minimum Go` job and a test guard the floor, and a
+  `govulncheck` job watches for new findings.
 - **Release dry run**: `goreleaser check` and a local snapshot build pass
   (6 targets, checksums, Homebrew formula generated). The tag-triggered release
   workflow has not run, and there is no release yet.

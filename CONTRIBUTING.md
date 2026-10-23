@@ -19,7 +19,7 @@ maintainer **before** pushing: it must be removed from history, not just deleted
 ```sh
 git clone https://github.com/aalaydrus/tfplanlens && cd tfplanlens
 go build -o tfplanlens ./cmd/tfplanlens
-go vet ./... && go test ./... -count=1        # about 3 seconds; Go 1.23+
+go vet ./... && go test ./... -count=1        # about 3 seconds; Go 1.25+
 ```
 
 You do not need Terraform, AWS or Docker for the tests.

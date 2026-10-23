@@ -13,7 +13,7 @@ It works **offline** on the JSON from `terraform show -json`: no AWS credentials
 
 ```sh
 git clone https://github.com/aalaydrus/tfplanlens && cd tfplanlens
-go install ./cmd/tfplanlens            # Go 1.23+, no releases yet; put $(go env GOPATH)/bin on PATH
+go install ./cmd/tfplanlens            # Go 1.25+, no releases yet; put $(go env GOPATH)/bin on PATH
 
 terraform plan -out plan.bin
 terraform show -json plan.bin > plan.json

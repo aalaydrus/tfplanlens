@@ -29,7 +29,7 @@
 
 ## 3. Language and stack
 
-- **Go 1.23+**
+- **Go 1.25+**
 - `github.com/hashicorp/terraform-json` for plan types. If a field is missing from the library (for example `action_reason`), fall back to parsing the raw JSON for that field.
 - `github.com/spf13/cobra` for the CLI
 - `github.com/pmezard/go-difflib` (or `sergi/go-diff`) for text diffs

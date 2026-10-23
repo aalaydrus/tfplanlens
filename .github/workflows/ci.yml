@@ -20,9 +20,38 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
+          go-version: stable # a supported Go; go.mod only sets the minimum
+      - run: go vet ./...
+      - run: go test ./...
+
+  # The oldest Go we promise to build with (the go line in go.mod). Not stable:
+  # an unsupported Go gets no security fixes, so it is only used to prove the
+  # source still builds there.
+  minimum-go:
+    name: minimum Go (go.mod)
+    runs-on: ubuntu-latest
+    env:
+      GOTOOLCHAIN: local # fail instead of downloading a newer Go
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
           go-version-file: go.mod
       - run: go vet ./...
       - run: go test ./...
+
+  # Known vulnerabilities in the Go standard library and the modules we use,
+  # reachable from our code. Not run locally yet (vuln.go.dev is blocked in the
+  # sandbox it was written in).
+  govulncheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: stable
+      - run: go install golang.org/x/vuln/cmd/govulncheck@v1.9.0
+      - run: govulncheck ./...
 
   staticcheck:
     runs-on: ubuntu-latest
@@ -30,8 +59,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version-file: go.mod
-      - run: go install honnef.co/go/tools/cmd/staticcheck@2025.1.1
+          go-version: stable
+      - run: go install honnef.co/go/tools/cmd/staticcheck@2026.2.2
       - run: staticcheck ./...
 
   goreleaser:
@@ -43,7 +72,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version-file: go.mod
+          go-version: stable
       - uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
         with:
           distribution: goreleaser

@@ -44,7 +44,7 @@ GOOS=windows go vet ./...                      # CI also runs Windows
 go test ./internal/analyze -run TestWaves -v   # one package/test is fast
 ```
 
-Go 1.23 (`go 1.23.0` in `go.mod`): do not let a dependency bump it. Few
+Go 1.25 (`go 1.25.0` in `go.mod`): do not let a dependency bump it. Few
 dependencies on purpose (cobra, terraform-json, yaml.v3, go-difflib, x/term).
 
 ## Invariants (tests enforce these; do not break them)
