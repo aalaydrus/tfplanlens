@@ -4,7 +4,9 @@ Other working notes: [`field-notes/`](../field-notes/README.md).
 
 ## Releases
 
-There are no published releases. `.goreleaser.yaml` and `.github/workflows/release.yml` are in place (binaries for linux, darwin and windows, checksums, and an optional Homebrew formula if a tap and token are ever configured), but nothing is tagged. A tag `v*` would run them; CI already runs `goreleaser check` and a snapshot build on every pull request.
+A tag `v*` runs `.github/workflows/release.yml`: GoReleaser builds linux, darwin and windows binaries (amd64 and arm64) with the current stable Go, writes `checksums.txt` and creates the GitHub release. The Homebrew formula is generated but only uploaded when `HOMEBREW_TAP_GITHUB_TOKEN` is set and the `aalaydrus/homebrew-tap` repository exists; until then it is skipped. CI runs `goreleaser check` and a snapshot build on every pull request.
+
+To cut a release: merge to `main`, wait for CI, then `git tag -a vX.Y.Z -m "vX.Y.Z" && git push origin vX.Y.Z`. Then check the run, the release's six archives and checksums, and that `tfplanlens version` prints `X.Y.Z`. The generated changelog lists commit subjects; the hand-written notes for a release live in `docs/releases/`. The first release is v0.1.0.
 
 ## Smoke tests on real plans
 

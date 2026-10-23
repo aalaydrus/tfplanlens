@@ -99,6 +99,9 @@ func TestFormatVersion(t *testing.T) {
 		{"release build keeps its version", "0.1.0", stamped("8814cf78ccac", "false"), "0.1.0"},
 		{"local clean build shows the revision", "dev", stamped("8814cf78ccacf67c4ed02c2b12918c8d066b0d90", "false"), "dev (8814cf7)"},
 		{"local dirty build says so", "dev", stamped("8814cf78ccac", "true"), "dev (8814cf7, modified)"},
+		{"go install of a tag", "dev", &debug.BuildInfo{Main: debug.Module{Version: "v0.1.0"}}, "0.1.0"},
+		{"go install of a commit has a pseudo-version", "dev", &debug.BuildInfo{Main: debug.Module{Version: "v0.0.0-20261013125501-f9cb4cace98a"}}, "dev"},
+		{"local build is (devel)", "dev", &debug.BuildInfo{Main: debug.Module{Version: "(devel)"}}, "dev"},
 		{"no VCS info", "dev", &debug.BuildInfo{}, "dev"},
 		{"no build info", "dev", nil, "dev"},
 	}

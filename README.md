@@ -12,8 +12,8 @@ It works **offline** on the JSON from `terraform show -json`: no AWS credentials
 <summary><b>Quickstart</b>: install and read your first plan</summary>
 
 ```sh
-git clone https://github.com/aalaydrus/tfplanlens && cd tfplanlens
-go install ./cmd/tfplanlens            # Go 1.25+, no releases yet; put $(go env GOPATH)/bin on PATH
+go install github.com/aalaydrus/tfplanlens/cmd/tfplanlens@v0.1.0   # Go 1.25+; put $(go env GOPATH)/bin on PATH
+# or download a binary (linux, macOS, Windows) from the Releases page and check it against checksums.txt
 
 terraform plan -out plan.bin
 terraform show -json plan.bin > plan.json

@@ -40,4 +40,4 @@ the report being wrong about a resource (open a normal issue).
 
 ## Supported versions
 
-There are no published releases yet. Only the `main` branch is supported.
+Only the latest release and the `main` branch are supported. Fixes go into `main` first and into a new release.
